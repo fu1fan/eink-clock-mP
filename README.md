@@ -1,23 +1,25 @@
 # PiZeroW-eink-Clock
 
 #### 介绍
-一个基于树莓派Zero W的水墨屏天气时钟。
+一个基于树莓派Zero W的水墨屏天气时钟。本仓库是该项目中树莓派部分的程序，是本项目中最重要的部分
 
 #### 软件架构
-软件架构说明
-
+├── main.py                 主程序
+├── modules                 模块
+│   ├── common              通用模块
+│   │   ├── sdk_beta.py     SDK
+│   │   └── updater.py      更新程序
+│   └── custom              用户自定义模块
+└── resources               资源文件夹
+>详细说明待软件成熟后放出
 
 #### 安装教程
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+1.  暂未发布
 
 #### 使用说明
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+1.  需要树莓派Zero Wh与微雪触摸水墨屏
 
 #### 参与贡献
 
@@ -25,13 +27,3 @@
 2.  新建 Feat_xxx 分支
 3.  提交代码
 4.  新建 Pull Request
-
-
-#### 特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
