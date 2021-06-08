@@ -4,13 +4,13 @@
 一个基于树莓派Zero W的水墨屏天气时钟。本仓库是该项目中树莓派部分的程序，是本项目中最重要的部分
 
 #### 软件架构
-├── main.py                 主程序
-├── modules                 模块
-│   ├── common              通用模块
-│   │   ├── sdk_beta.py     SDK
-│   │   └── updater.py      更新程序
-│   └── custom              用户自定义模块
-└── resources               资源文件夹
+├── main.py                 主程序<br>
+├── modules                 模块<br>
+│   ├── common              通用模块<br>
+│   │   ├── sdk_beta.py     SDK<br>
+│   │   └── updater.py      更新程序<br>
+│   └── custom              用户自定义模块<br>
+└── resources               资源文件夹<br>
 >详细说明待软件成熟后放出
 
 #### 安装教程
