@@ -65,6 +65,7 @@ class Logger(LoggerError):
 defaultLogger = Logger("logs", 2)
 
 ##########配置模块##########
+#TODO:解决不能自动创建目录的问题
 class Configuration:
     '''
     #ConfigParser 常用方法
