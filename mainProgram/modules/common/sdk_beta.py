@@ -22,18 +22,18 @@ class Logger(LoggerError):
     ERROR = 3
 
     def __init__(self, folder, level) -> None:
-        if folder[-1] != "/":
-            folder += "/"
-        self.folder = folder
         if level<0 or level>3:
             raise LevelNotExist
+        if folder[-1] != "/":   #防止文件名直接加到文件夹名后😂
+            folder += "/"
+        self.folder = folder
         self.__level = level
-        self.__levelDic = {0:"[DBUG]", 1:"[INFO]", 2:"[WARN]", 3:"[ERRO]"}
+        self.__levelDic = {0:"[DBUG]", 1:"[INFO]", 2:"[WARN]", 3:"[ERRO]"}  #单纯只是为了给__write函数用
         self.created = False
         self.name = time.strftime("%Y%m%d-%H:%M:%S", time.localtime())
         if not os.path.exists(folder):
             os.mkdir(folder)
-        self.file = None
+        self.file = None    #可以避免出现一大堆空的日志文件
 
     def __del__(self) -> None:
         if self.created:
@@ -42,9 +42,11 @@ class Logger(LoggerError):
     def __write(self, level, text, theName):
         if level >= self.__level:
             if not self.created:
-                self.file = open(self.folder+self.name, "a+", encoding="utf-8")
+                self.file = open(self.folder + self.name, "a+", encoding="utf-8")
                 self.created = True
-            self.file.write(self.__levelDic[level] + time.strftime("[%Y%m%d-%H:%M:%S]", time.localtime()) + "["+ theName +"]" + text + '\n')
+            self.file.write(self.__levelDic[level] +    #格式[level][time][name]--event--
+                time.strftime("[%Y%m%d-%H:%M:%S]", time.localtime()) +
+                "["+ theName +"]" + text + '\n')
 
     def info(self, text) -> None:
         self.__write(self.INFO, text, getName())
@@ -56,7 +58,7 @@ class Logger(LoggerError):
         self.__write(self.ERROR, text, getName())
 
     def setLevel(self, level) -> None:
-        if getName() == "__main__":
+        if getName() == "__main__": #只有主进程才有权限设置日志级别
             self.__level = level
         else:
             print(getName())
