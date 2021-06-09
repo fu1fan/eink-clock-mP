@@ -25,7 +25,10 @@ def getName(index=1) -> str:  # 获取上上级调用者的__name__
     a = inspect.stack()
     frm = inspect.stack()[index]  # 0是本函数，1是上级调用，2是上上级，以此类推
     mod = inspect.getmodule(frm[0])
-    return mod.__name__
+    try:
+        return mod.__name__
+    except AttributeError:
+        return None
 
 class Logger():
     DEBUG = 0
