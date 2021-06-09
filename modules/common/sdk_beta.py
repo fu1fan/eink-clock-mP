@@ -1,19 +1,30 @@
-import time, os, configparser, inspect
+import time
+import os
+import configparser
+import inspect
+import threading
+
 
 ##########日志模块##########
+
 class LoggerError(Exception):
     pass
+
 
 class LevelNotExist(LoggerError):
     pass
 
+
 class permissionDenied(LoggerError):
     pass
 
-def getName() -> str:    #获取上上级调用者的__name__
-    frm = inspect.stack()[2]    #0是本函数，1是上级调用，2是上上级，以此类推
+
+def getName(index=1) -> str:  # 获取上上级调用者的__name__
+    a = inspect.stack()
+    frm = inspect.stack()[index]  # 0是本函数，1是上级调用，2是上上级，以此类推
     mod = inspect.getmodule(frm[0])
     return mod.__name__
+
 
 class Logger(LoggerError):
     DEBUG = 0
@@ -22,18 +33,19 @@ class Logger(LoggerError):
     ERROR = 3
 
     def __init__(self, folder, level) -> None:
-        if level<0 or level>3:
+        if level < 0 or level > 3:
             raise LevelNotExist
-        if folder[-1] != "/":   #防止文件名直接加到文件夹名后😂
+        if folder[-1] != "/":  # 防止文件名直接加到文件夹名后😂
             folder += "/"
         self.folder = folder
         self.__level = level
-        self.__levelDic = {0:"[DBUG]", 1:"[INFO]", 2:"[WARN]", 3:"[ERRO]"}  #单纯只是为了给__write函数用
+        self.__levelDic = {0: "[DBUG]", 1: "[INFO]",
+                           2: "[WARN]", 3: "[ERRO]"}  # 单纯只是为了给__write函数用
         self.created = False
         self.name = time.strftime("%Y%m%d-%H:%M:%S", time.localtime())
         if not os.path.exists(folder):
             os.mkdir(folder)
-        self.file = None    #可以避免出现一大堆空的日志文件
+        self.file = None  # 可以避免出现一大堆空的日志文件
 
     def __del__(self) -> None:
         if self.created:
@@ -42,32 +54,36 @@ class Logger(LoggerError):
     def __write(self, level, text, theName):
         if level >= self.__level:
             if not self.created:
-                self.file = open(self.folder + self.name, "a+", encoding="utf-8")
+                self.file = open(self.folder + self.name,
+                                 "a+", encoding="utf-8")
                 self.created = True
-            self.file.write(self.__levelDic[level] +    #格式[level][time][name]--event--
-                time.strftime("[%Y%m%d-%H:%M:%S]", time.localtime()) +
-                "["+ theName +"]" + text + '\n')
+            self.file.write(self.__levelDic[level] +  # 格式[level][time][name]--event--
+                            time.strftime("[%Y%m%d-%H:%M:%S]", time.localtime()) +
+                            "[" + theName + "]" + text + '\n')
 
     def info(self, text) -> None:
-        self.__write(self.INFO, text, getName())
+        self.__write(self.INFO, text, getName(2))
 
     def warn(self, text) -> None:
-        self.__write(self.WARNING, text, getName())
+        self.__write(self.WARNING, text, getName(2))
 
     def error(self, text) -> None:
-        self.__write(self.ERROR, text, getName())
+        self.__write(self.ERROR, text, getName(2))
 
     def setLevel(self, level) -> None:
-        if getName() == "__main__": #只有主进程才有权限设置日志级别
+        if getName(2) == "__main__":  # 只有主进程才有权限设置日志级别
             self.__level = level
         else:
-            print(getName())
+            print(getName(2))
             raise permissionDenied
+
 
 defaultLogger = Logger("logs", 2)
 
+
 ##########配置模块##########
-#TODO:解决不能自动创建目录的问题
+# TODO:解决不能自动创建目录的问题
+
 class Configuration:
     '''
     #ConfigParser 常用方法
@@ -157,22 +173,33 @@ class Configuration:
         config.read("ini", encoding="utf-8")
         写回文件的方式如下：（使用configparser的write方法）
         config.write(open("ini", "w"))
-    
+
     引用自：https://www.cnblogs.com/zhou2019/p/10599953.html
     '''
+
     def __init__(self, path) -> None:
         self.path = path
         self.config = configparser.ConfigParser()
         if not os.path.exists(path):
             open(path, "w", encoding="utf-8").close()
-    
+
     def getConf(self) -> configparser.ConfigParser:
         return self.config
-    
+
     def saveConf(self) -> None:
         self.config.write(open(self.path, "w", encoding="utf-8"))
 
+
 ##########显示模块##########
+
 class Display:
     def __init__(self) -> None:
         pass
+
+
+##########多线程管理##########
+
+threadLock = threading.Lock()
+
+def getLock() -> threading.Lock:
+    return threadLock
