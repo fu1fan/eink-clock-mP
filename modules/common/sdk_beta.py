@@ -4,20 +4,22 @@ import configparser
 import inspect
 import threading
 
+from requests.api import request
+
+class exceptions(Exception):
+    pass
+
 
 ##########日志模块##########
 
-class LoggerError(Exception):
+class loggerError(exceptions):
     pass
 
-
-class LevelNotExist(LoggerError):
+class levelNotExist(loggerError):
     pass
 
-
-class permissionDenied(LoggerError):
+class permissionDenied(loggerError):
     pass
-
 
 def getName(index=1) -> str:  # 获取上上级调用者的__name__
     a = inspect.stack()
@@ -25,8 +27,7 @@ def getName(index=1) -> str:  # 获取上上级调用者的__name__
     mod = inspect.getmodule(frm[0])
     return mod.__name__
 
-
-class Logger(LoggerError):
+class Logger():
     DEBUG = 0
     INFO = 1
     WARNING = 2
@@ -34,7 +35,7 @@ class Logger(LoggerError):
 
     def __init__(self, folder, level) -> None:
         if level < 0 or level > 3:
-            raise LevelNotExist
+            raise levelNotExist
         if folder[-1] != "/":  # 防止文件名直接加到文件夹名后😂
             folder += "/"
         self.folder = folder
@@ -76,7 +77,6 @@ class Logger(LoggerError):
         else:
             print(getName(2))
             raise permissionDenied
-
 
 defaultLogger = Logger("logs", 2)
 
