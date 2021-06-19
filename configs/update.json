@@ -1,0 +1,22 @@
+{
+    "system":{
+        "main":{
+            "version":1,
+            "version_name":"beta0.0.1"
+        },
+        "logger":{
+            "version":1,
+            "version_name":"beta0.0.1"
+        },
+        "master":{
+            "version":1,
+            "version_name":"beta0.0.1"
+        }
+    },
+    "plugin":{
+
+    },
+    "theme":{
+
+    }
+}

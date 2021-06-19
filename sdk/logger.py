@@ -1,15 +1,13 @@
-from sdk.master import exceptions
 import inspect
 import time
 import os
+import sdk.master as master
+import traceback
 
-class loggerError(exceptions.exceptions):
+class loggerError(master.exceptions):
     pass
 
 class levelNotExist(loggerError):
-    pass
-
-class permissionDenied(loggerError):
     pass
 
 def getName(index=1) -> str:  # 获取上上级调用者的__name__
@@ -21,13 +19,16 @@ def getName(index=1) -> str:  # 获取上上级调用者的__name__
     except AttributeError:
         return None
 
+def defaultHandler(name, text, info):
+    pass
+
 class Logger():
     DEBUG = 0
     INFO = 1
     WARNING = 2
     ERROR = 3
 
-    def __init__(self, folder, level) -> None:
+    def __init__(self, level, folder = "logs", update = False, infoHandler = defaultHandler, warnHandler = defaultHandler, errorHandler = defaultHandler) -> None:
         if level < 0 or level > 3:
             raise levelNotExist
         if folder[-1] != "/":  # 防止文件名直接加到文件夹名后😂
@@ -37,7 +38,13 @@ class Logger():
         self.__levelDic = {0: "[DBUG]", 1: "[INFO]",
                            2: "[WARN]", 3: "[ERRO]"}  # 单纯只是为了给__write函数用
         self.created = False
-        self.name = time.strftime("%Y%m%d-%H:%M:%S", time.localtime())
+        self.infoHandler = infoHandler
+        self.warnHandler = warnHandler
+        self.errorHandler = errorHandler
+        if update:
+            self.name = "[update]" + time.strftime("%Y%m%d-%H:%M:%S", time.localtime())
+        else:
+            self.name = time.strftime("%Y%m%d-%H:%M:%S", time.localtime())
         if not os.path.exists(folder):
             os.mkdir(folder)
         self.file = None  # 可以避免出现一大堆空的日志文件
@@ -56,20 +63,31 @@ class Logger():
                             time.strftime("[%Y%m%d-%H:%M:%S]", time.localtime()) +
                             "[" + theName + "]" + text + '\n')
 
-    def info(self, text) -> None:
-        self.__write(self.INFO, text, getName(2))
+    def info(self, text, runHandler = True, info = None) -> None:   #text为写入日志的内容，info为为用户显示的内容，只有当启用Handler时info才会被使用
+        name = getName(2)
+        self.__write(self.INFO, text, name)
+        if runHandler:
+            if info == None:
+                info = name + ":" + text
+            self.infoHandler(info)
 
-    def warn(self, text) -> None:
-        self.__write(self.WARNING, text, getName(2))
+    def warn(self, text, runHandler = True, info = None) -> None:
+        name = getName(2)
+        self.__write(self.WARNING, text, name)
+        if runHandler:
+            if info == None:
+                info = name + ":" + text
+            self.warnHandler(info)
 
-    def error(self, text) -> None:
-        self.__write(self.ERROR, text, getName(2))
+    def error(self, text, runHandler = True, info = None) -> None:
+        name = getName(2)
+        self.__write(self.ERROR, text, name)
+        if runHandler:
+            if info == None:
+                info = name + ":" + text
+            self.errorHandler(info)
 
     def setLevel(self, level) -> None:
-        if getName(2) == "__main__":  # 只有主进程才有权限设置日志级别
-            self.__level = level
-        else:
-            print(getName(2))
-            raise permissionDenied
+        self.__level = level
 
-defaultLogger = Logger("logs", 2)
+defaultLogger = Logger(2)
