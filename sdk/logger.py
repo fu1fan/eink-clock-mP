@@ -11,7 +11,6 @@ class levelNotExist(loggerError):
     pass
 
 def getName(index=1) -> str:  # 获取上上级调用者的__name__
-    a = inspect.stack()
     frm = inspect.stack()[index]  # 0是本函数，1是上级调用，2是上上级，以此类推
     mod = inspect.getmodule(frm[0])
     try:
@@ -19,7 +18,7 @@ def getName(index=1) -> str:  # 获取上上级调用者的__name__
     except AttributeError:
         return None
 
-def defaultHandler(name, text, info):
+def defaultHandler(info):
     pass
 
 class Logger():
@@ -59,32 +58,27 @@ class Logger():
                 self.file = open(self.folder + self.name,
                                  "a+", encoding="utf-8")
                 self.created = True
-            self.file.write(self.__levelDic[level] +  # 格式[level][time][name]--event--
-                            time.strftime("[%Y%m%d-%H:%M:%S]", time.localtime()) +
-                            "[" + theName + "]" + text + '\n')
+            if "\n" in text:
+                text = "\n" + text
+            content = "%s%s[%s]%s" % (self.__levelDic[level], time.strftime("[%Y%m%d-%H:%M:%S]", time.localtime()), theName, text)  #格式[level][time][name]--event--
+            self.file.write(content)
 
-    def info(self, text, runHandler = True, info = None) -> None:   #text为写入日志的内容，info为为用户显示的内容，只有当启用Handler时info才会被使用
+    def info(self, text, info = None) -> None:   #text为写入日志的内容，info为为用户显示的内容，只有当启用Handler时info才会被使用
         name = getName(2)
         self.__write(self.INFO, text, name)
-        if runHandler:
-            if info == None:
-                info = name + ":" + text
+        if info != None:
             self.infoHandler(info)
 
-    def warn(self, text, runHandler = True, info = None) -> None:
+    def warn(self, text, info = None) -> None:
         name = getName(2)
         self.__write(self.WARNING, text, name)
-        if runHandler:
-            if info == None:
-                info = name + ":" + text
+        if info != None:
             self.warnHandler(info)
 
-    def error(self, text, runHandler = True, info = None) -> None:
+    def error(self, text, info = None) -> None:
         name = getName(2)
         self.__write(self.ERROR, text, name)
-        if runHandler:
-            if info == None:
-                info = name + ":" + text
+        if info != None:
             self.errorHandler(info)
 
     def setLevel(self, level) -> None:
