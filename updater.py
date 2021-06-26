@@ -31,7 +31,7 @@ class VersionCtrl:
                 if version >= self.data[branch]["version"]:
                     return True
                 elif version < self.data[branch]["version"]:
-                    return self.data
+                    return self.data[branch]
             except:
                 self.logger.error(traceback.format_exc(), "无法解析版本信息")
                 return False
@@ -48,7 +48,7 @@ class VersionCtrl:
         if self.__refresh():
             try:
                 if targetBranch == branch:
-                    self.logger.info('用户所选分支("")与目标分支相同' % targetBranch, "目标分支与当前分支相同")
+                    self.logger.info('用户所选分支("%s")与目标分支相同' % targetBranch, "目标分支与当前分支相同")
                     return False
                 elif self.data[targetBranch] == None:
                     self.logger.warn('"%s"分支为空' % targetBranch,  "分支无内容")
@@ -56,7 +56,7 @@ class VersionCtrl:
                 else:
                     file = open("chageBranch", "w", encoding="utf-8")
                     file.write(targetBranch)
-                    self.logger.info('准备从"%s"切换到"%s"' % (branch, targetBranch))
+                    self.logger.debug('准备从"%s"切换到"%s"' % (branch, targetBranch))
                     return self.data[targetBranch]["version_name"]
             except:
                 self.logger.error(traceback.format_exc(), "获取分支信息失败")

@@ -26,7 +26,7 @@ class Logger():
     WARNING = 2
     ERROR = 3
 
-    def __init__(self, level, folder = "logs", tag = None, infoHandler = defaultHandler, warnHandler = defaultHandler, errorHandler = defaultHandler) -> None:
+    def __init__(self, level, folder = "logs", tag = None, debugHandler = defaultHandler, infoHandler = defaultHandler, warnHandler = defaultHandler, errorHandler = defaultHandler) -> None:
         if level < 0 or level > 3:
             raise levelNotExist
         if folder[-1] != "/":  # 防止文件名直接加到文件夹名后😂
@@ -36,6 +36,7 @@ class Logger():
         self.__levelDic = {0: "[DBUG]", 1: "[INFO]",
                            2: "[WARN]", 3: "[ERRO]"}  # 单纯只是为了给__write函数用
         self.created = False
+        self.debugHandler = debugHandler
         self.infoHandler = infoHandler
         self.warnHandler = warnHandler
         self.errorHandler = errorHandler
@@ -61,6 +62,12 @@ class Logger():
                 text = "\n" + text
             content = "%s%s[%s]%s" % (self.__levelDic[level], time.strftime("[%Y%m%d-%H:%M:%S]", time.localtime()), theName, text)  #格式[level][time][name]--event--
             self.file.write(content)
+
+    def debug(self, text, info = None) -> None:   #text为写入日志的内容，info为为用户显示的内容，只有当启用Handler时info才会被使用
+        name = getName(2)
+        self.__write(self.DEBUG, text, name)
+        if info != None:
+            self.debugHandler(info)
 
     def info(self, text, info = None) -> None:   #text为写入日志的内容，info为为用户显示的内容，只有当启用Handler时info才会被使用
         name = getName(2)

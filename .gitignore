@@ -30,3 +30,4 @@ Temporary Items
 test.py
 sdk/__pycache__/
 logs
+__pycache__/
