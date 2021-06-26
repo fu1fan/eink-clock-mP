@@ -1,6 +1,7 @@
 import inspect
 import time
 import os
+import threading
 import sdk.master as master
 
 class loggerError(master.exceptions):
@@ -35,33 +36,30 @@ class Logger():
         self.__level = level
         self.__levelDic = {0: "[DBUG]", 1: "[INFO]",
                            2: "[WARN]", 3: "[ERRO]"}  # 单纯只是为了给__write函数用
-        self.created = False
         self.debugHandler = debugHandler
         self.infoHandler = infoHandler
         self.warnHandler = warnHandler
         self.errorHandler = errorHandler
+        self.lock = threading.Lock()
         if tag == None:
             self.name = time.strftime("%Y%m%d-%H:%M:%S", time.localtime())
         else:
             self.name = "[%s]%s" % (tag, time.strftime("%Y%m%d-%H:%M:%S", time.localtime()))
         if not os.path.exists(folder):
             os.mkdir(folder)
-        self.file = None  # 可以避免出现一大堆空的日志文件
-
-    def __del__(self) -> None:
-        if self.created:
-            self.file.close()
 
     def __write(self, level, text, theName):
         if level >= self.__level:
-            if not self.created:
-                self.file = open(self.folder + self.name,
+            self.lock.acquire()
+            self.lock.locked()
+            file = open(self.folder + self.name,
                                  "a+", encoding="utf-8")
-                self.created = True
             if "\n" in text:
                 text = "\n" + text
             content = "%s%s[%s]%s" % (self.__levelDic[level], time.strftime("[%Y%m%d-%H:%M:%S]", time.localtime()), theName, text)  #格式[level][time][name]--event--
-            self.file.write(content)
+            file.write(content)
+            file.close()
+            self.lock.release()
 
     def debug(self, text, info = None) -> None:   #text为写入日志的内容，info为为用户显示的内容，只有当启用Handler时info才会被使用
         name = getName(2)
