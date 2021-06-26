@@ -26,4 +26,7 @@ Network Trash Folder
 Temporary Items
 .apdisk
 .vscode
+
 test.py
+sdk/__pycache__/
+logs
