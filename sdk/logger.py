@@ -2,7 +2,6 @@ import inspect
 import time
 import os
 import sdk.master as master
-import traceback
 
 class loggerError(master.exceptions):
     pass
@@ -27,7 +26,7 @@ class Logger():
     WARNING = 2
     ERROR = 3
 
-    def __init__(self, level, folder = "logs", update = False, infoHandler = defaultHandler, warnHandler = defaultHandler, errorHandler = defaultHandler) -> None:
+    def __init__(self, level, folder = "logs", tag = None, infoHandler = defaultHandler, warnHandler = defaultHandler, errorHandler = defaultHandler) -> None:
         if level < 0 or level > 3:
             raise levelNotExist
         if folder[-1] != "/":  # 防止文件名直接加到文件夹名后😂
@@ -40,10 +39,10 @@ class Logger():
         self.infoHandler = infoHandler
         self.warnHandler = warnHandler
         self.errorHandler = errorHandler
-        if update:
-            self.name = "[update]" + time.strftime("%Y%m%d-%H:%M:%S", time.localtime())
-        else:
+        if tag == None:
             self.name = time.strftime("%Y%m%d-%H:%M:%S", time.localtime())
+        else:
+            self.name = "[%s]%s" % (tag, time.strftime("%Y%m%d-%H:%M:%S", time.localtime()))
         if not os.path.exists(folder):
             os.mkdir(folder)
         self.file = None  # 可以避免出现一大堆空的日志文件
@@ -83,5 +82,3 @@ class Logger():
 
     def setLevel(self, level) -> None:
         self.__level = level
-
-defaultLogger = Logger(2)
