@@ -62,12 +62,22 @@ class VersionCtrl:
                 self.logger.error(traceback.format_exc(), "获取分支信息失败")
                 return False
 
-if __name__ == "__main__":
-    logger = Logger(0, tag="update")
-    if os.path.exists("chageBranch"):
-    #TODO:切换分支功能
-        os.remove("chageBranch")
-    else:
+if __name__ == "__main__":  #TODO:添加显示功能
+    logger = Logger(0, tag="updater")
+    if os.path.exists("update"):
         result = os.popen("git pull")
-        logger.info(result.read())  #TODO:添加显示功能
+        logger.info(result.read())
+    elif os.path.exists("reset"):
+        result = os.popen("git checkout .")
+        os.remove("reset")
+    elif os.path.exists("chageBranch"):
+        file = open("changeBranch", encoding="utf-8")
+        targetBranch = file.read()
+        result = os.popen("git pull")
+        logger.info(result.read())
+        result = os.popen("git checkout .")
+        logger.info(result.read())
+        result = os.popen("git checkout " + targetBranch)
+        logger.info(result.read())
+
     os.system("python3 main.py &")
