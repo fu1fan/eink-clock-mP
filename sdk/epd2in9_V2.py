@@ -201,7 +201,7 @@ class EPD_2IN9_V2:
         # EPD hardware init end
         return 0
 
-    def getbuffer(self, image):  # 不建议进行操作
+    def getbuffer(self, image):  # 将图片转换为buffer
         # logging.debug("bufsiz = ",int(self.width/8) * self.height)
         buf = [0xFF] * (int(self.width/8) * self.height)
         image_monocolor = image.convert('1')
