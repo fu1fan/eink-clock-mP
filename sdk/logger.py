@@ -48,7 +48,6 @@ class Logger:
     def __write(self, level, text, thename):
         if level >= self.__level:
             self.lock.acquire()
-            self.lock.locked()
             file = open(self.folder + self.name,
                         "a+", encoding="utf-8")
             if "\n" in text:
