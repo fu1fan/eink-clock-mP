@@ -1,4 +1,8 @@
-import os, requests, json, traceback
+import json
+import os
+import requests
+import traceback
+
 from sdk.logger import Logger
 
 os.chdir(os.path.dirname(__file__))
@@ -25,7 +29,7 @@ class VersionCtrl:
             return False
         return True
 
-    def ifupdate(self):
+    def if_update(self):
         if self.__refresh():
             try:
                 if version >= self.data[branch]["version"]:
@@ -37,27 +41,27 @@ class VersionCtrl:
                 return False
         return False
 
-    def getbranchs(self):  # 若返回为空，则错误
+    def get_branches(self):  # 若返回为空，则错误
         branches = []
         if self.__refresh():
             for i in self.data:
                 branches.append(i)
         return branches
 
-    def chagebranch(self, targetbranch: str):
+    def change_branch(self, target_branch: str):
         if self.__refresh():
             try:
-                if targetbranch == branch:
-                    self.logger.info('用户所选分支("%s")与目标分支相同' % targetbranch, "目标分支与当前分支相同")
+                if target_branch == branch:
+                    self.logger.info('用户所选分支("%s")与目标分支相同' % target_branch, "目标分支与当前分支相同")
                     return False
-                elif self.data[targetbranch] is None:
-                    self.logger.warn('"%s"分支为空' % targetbranch, "分支无内容")
+                elif self.data[target_branch] is None:
+                    self.logger.warn('"%s"分支为空' % target_branch, "分支无内容")
                     return False
                 else:
-                    file = open("changeBranch", "w", encoding="utf-8")
-                    file.write(targetbranch)
-                    self.logger.debug('准备从"%s"切换到"%s"' % (branch, targetbranch))
-                    return self.data[targetbranch]["version_name"]
+                    __file = open("changeBranch", "w", encoding="utf-8")
+                    __file.write(target_branch)
+                    self.logger.debug('准备从"%s"切换到"%s"' % (branch, target_branch))
+                    return self.data[target_branch]["version_name"]
             except:
                 self.logger.error(traceback.format_exc(), "获取分支信息失败")
                 return False
