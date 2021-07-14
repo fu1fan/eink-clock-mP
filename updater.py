@@ -1,4 +1,3 @@
-from logging import log
 import os, requests, json, traceback
 from sdk.logger import Logger
 
@@ -9,9 +8,10 @@ version = 1
 version_name = "beta_0_1"
 repository = "https://gitee.com/fu1fan/eink-clock-mP"
 
+
 class VersionCtrl:
-    def __init__(self, logger:Logger) -> None:
-        self.logger = logger
+    def __init__(self, __logger: Logger) -> None:
+        self.logger = __logger
         self.data = None
         pass
 
@@ -25,7 +25,7 @@ class VersionCtrl:
             return False
         return True
 
-    def ifUpdate(self):
+    def ifupdate(self):
         if self.__refresh():
             try:
                 if version >= self.data[branch]["version"]:
@@ -37,32 +37,33 @@ class VersionCtrl:
                 return False
         return False
 
-    def getBranchs(self):   #若返回为空，则错误
-        branchs = []
+    def getbranchs(self):  # 若返回为空，则错误
+        branches = []
         if self.__refresh():
             for i in self.data:
-                branchs.append(i)
-        return branchs
+                branches.append(i)
+        return branches
 
-    def chageBranch(self, targetBranch:str):
+    def chagebranch(self, targetbranch: str):
         if self.__refresh():
             try:
-                if targetBranch == branch:
-                    self.logger.info('用户所选分支("%s")与目标分支相同' % targetBranch, "目标分支与当前分支相同")
+                if targetbranch == branch:
+                    self.logger.info('用户所选分支("%s")与目标分支相同' % targetbranch, "目标分支与当前分支相同")
                     return False
-                elif self.data[targetBranch] == None:
-                    self.logger.warn('"%s"分支为空' % targetBranch,  "分支无内容")
+                elif self.data[targetbranch] is None:
+                    self.logger.warn('"%s"分支为空' % targetbranch, "分支无内容")
                     return False
                 else:
-                    file = open("chageBranch", "w", encoding="utf-8")
-                    file.write(targetBranch)
-                    self.logger.debug('准备从"%s"切换到"%s"' % (branch, targetBranch))
-                    return self.data[targetBranch]["version_name"]
+                    file = open("changeBranch", "w", encoding="utf-8")
+                    file.write(targetbranch)
+                    self.logger.debug('准备从"%s"切换到"%s"' % (branch, targetbranch))
+                    return self.data[targetbranch]["version_name"]
             except:
                 self.logger.error(traceback.format_exc(), "获取分支信息失败")
                 return False
 
-if __name__ == "__main__":  #TODO:添加显示功能
+
+if __name__ == "__main__":  # TODO:添加显示功能
     logger = Logger(0, tag="updater")
     if os.path.exists("update"):
         result = os.popen("git pull")
@@ -70,7 +71,7 @@ if __name__ == "__main__":  #TODO:添加显示功能
     elif os.path.exists("reset"):
         result = os.popen("git checkout .")
         os.remove("reset")
-    elif os.path.exists("chageBranch"):
+    elif os.path.exists("changeBranch"):
         file = open("changeBranch", encoding="utf-8")
         targetBranch = file.read()
         result = os.popen("git pull")

@@ -1,6 +1,4 @@
-import os, time
-import requests
-from sdk import master
+import os
 
 os.chdir(os.path.dirname(__file__))
 

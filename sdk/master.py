@@ -1,13 +1,5 @@
-import threading
 import requests
 
-class exceptions(Exception):
-    pass
-
-threadLock = threading.Lock()
-
-def getLock() -> threading.Lock:
-    return threadLock
 
 def ifonline() -> bool:
     try:
