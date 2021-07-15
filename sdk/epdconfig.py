@@ -27,56 +27,65 @@
 # THE SOFTWARE.
 #
 
-import RPi.GPIO as GPIO
-import time
-from smbus import SMBus
-import spidev
-import ctypes
 import logging
+import time
+
+import RPi.GPIO as GPIO
+import spidev
+from smbus import SMBus
 
 # e-Paper
-EPD_RST_PIN     = 17
-EPD_DC_PIN      = 25
-EPD_CS_PIN      = 8
-EPD_BUSY_PIN    = 24
+EPD_RST_PIN = 17
+EPD_DC_PIN = 25
+EPD_CS_PIN = 8
+EPD_BUSY_PIN = 24
 
 # TP
-TRST    = 22
-INT     = 27
+TRST = 22
+INT = 27
 
-spi     = spidev.SpiDev(0, 0)
+spi = spidev.SpiDev(0, 0)
 address = 0x0
 # address = 0x14
 # address = 0x48
-bus     = SMBus(1)
+bus = SMBus(1)
+
 
 def digital_write(pin, value):
     GPIO.output(pin, value)
 
+
 def digital_read(pin):
     return GPIO.input(pin)
+
 
 def delay_ms(delaytime):
     time.sleep(delaytime / 1000.0)
 
+
 def spi_writebyte(data):
     spi.writebytes(data)
+
 
 def spi_writebyte2(data):
     spi.writebytes2(data)
 
+
 def i2c_writebyte(reg, value):
-    bus.write_word_data(address, (reg>>8) & 0xff, (reg & 0xff) | ((value & 0xff) << 8))
+    bus.write_word_data(address, (reg >> 8) & 0xff, (reg & 0xff) | ((value & 0xff) << 8))
+
 
 def i2c_write(reg):
-    bus.write_byte_data(address, (reg>>8) & 0xff, reg & 0xff)
+    bus.write_byte_data(address, (reg >> 8) & 0xff, reg & 0xff)
 
-def i2c_readbyte(reg, len):
+
+def i2c_readbyte(reg, __len):
     i2c_write(reg)
     rbuf = []
-    for i in range(len):
+    for i in range(__len):
         rbuf.append(int(bus.read_byte(address)))
     return rbuf
+
 
 def module_init():
     GPIO.setmode(GPIO.BCM)
@@ -88,25 +97,25 @@ def module_init():
 
     GPIO.setup(TRST, GPIO.OUT)
     GPIO.setup(INT, GPIO.IN)
-    
+
     spi.max_speed_hz = 10000000
     spi.mode = 0b00
-    
+
     return 0
+
 
 def module_exit():
     logging.debug("spi end")
     spi.close()
     bus.close()
-        
+
     logging.debug("close 5V, Module enters 0 power consumption ...")
     GPIO.output(EPD_RST_PIN, 0)
     GPIO.output(EPD_DC_PIN, 0)
     GPIO.output(EPD_CS_PIN, 0)
-    
-    GPIO.output(TRST, 0)
-    
-    GPIO.cleanup()
 
+    GPIO.output(TRST, 0)
+
+    GPIO.cleanup()
 
 ### END OF FILE ###

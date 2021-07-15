@@ -118,7 +118,7 @@ class EPD_2IN9_V2:
 
     def ReadBusy(self):  # 等待直到屏幕结束忙
         # logging.debug("e-Paper busy")
-        while(epdconfig.digital_read(self.busy_pin) == 1):  # 0: idle, 1: busy
+        while epdconfig.digital_read(self.busy_pin) == 1:  # 0: idle, 1: busy
             epdconfig.delay_ms(0.1)
         # logging.debug("e-Paper busy release")
 
@@ -144,7 +144,7 @@ class EPD_2IN9_V2:
         self.send_command(0x32)
         # for i in range(0, 153):
         # self.send_data(self.WF_PARTIAL_2IN9[i])
-        if(lut):
+        if lut:
             self.send_data2(self.WF_PARTIAL_2IN9)
         else:
             self.send_data2(self.WF_PARTIAL_2IN9_Wait)
@@ -172,7 +172,7 @@ class EPD_2IN9_V2:
         self.ReadBusy()
 
     def init(self):  # 初始化
-        if (epdconfig.module_init() != 0):
+        if epdconfig.module_init() != 0:
             return -1
         # EPD hardware init start
         self.reset()
@@ -189,7 +189,7 @@ class EPD_2IN9_V2:
         self.send_command(0x11)  # data entry mode
         self.send_data(0x03)
 
-        self.SetWindow(0, 0, self.width-1, self.height-1)
+        self.SetWindow(0, 0, self.width - 1, self.height - 1)
 
         self.send_command(0x21)  # Display update control
         self.send_data(0x00)
@@ -200,62 +200,60 @@ class EPD_2IN9_V2:
         # EPD hardware init end
         return 0
 
-    def getbuffer(self, image):  # 将图片转换为buffer
+    def get_buffer(self, image):  # 将图片转换为buffer
         # logging.debug("bufsiz = ",int(self.width/8) * self.height)
-        buf = [0xFF] * (int(self.width/8) * self.height)
+        buf = [0xFF] * (int(self.width / 8) * self.height)
         image_monocolor = image.convert('1')
         imwidth, imheight = image_monocolor.size
         pixels = image_monocolor.load()
         # logging.debug("imwidth = %d, imheight = %d",imwidth,imheight)
-        if(imwidth == self.width and imheight == self.height):
+        if imwidth == self.width and imheight == self.height:
             # logging.debug("Vertical")
             for y in range(imheight):
                 for x in range(imwidth):
                     # Set the bits for the column of pixels at the current position.
                     if pixels[x, y] == 0:
-                        buf[int((x + y * self.width) / 8)
-                            ] &= ~(0x80 >> (x % 8))
-        elif(imwidth == self.height and imheight == self.width):
+                        buf[int((x + y * self.width) / 8)] &= ~(0x80 >> (x % 8))
+        elif imwidth == self.height and imheight == self.width:
             # logging.debug("Horizontal")
             for y in range(imheight):
                 for x in range(imwidth):
                     newx = y
                     newy = self.height - x - 1
                     if pixels[x, y] == 0:
-                        buf[int((newx + newy*self.width) / 8)
-                            ] &= ~(0x80 >> (y % 8))
+                        buf[int((newx + newy * self.width) / 8)] &= ~(0x80 >> (y % 8))
         return buf
 
     def display(self, image):  # 显示图片
-        if (image == None):
+        if image is None:
             return
         self.send_command(0x24)  # WRITE_RAM
         # for j in range(0, self.height):
         # for i in range(0, int(self.width / 8)):
-        # self.send_data(image[i + j * int(self.width / 8)])
+        # self.send_data(images[i + j * int(self.width / 8)])
         self.send_data2(image)
         self.TurnOnDisplay()
 
     def display_Base(self, image):  # 显示静态底图
-        if (image == None):
+        if image is None:
             return
 
         self.send_command(0x24)  # WRITE_RAM
         # for j in range(0, self.height):
         # for i in range(0, int(self.width / 8)):
-        # self.send_data(image[i + j * int(self.width / 8)])
+        # self.send_data(images[i + j * int(self.width / 8)])
         self.send_data2(image)
 
         self.send_command(0x26)  # WRITE_RAM
         # for j in range(0, self.height):
         # for i in range(0, int(self.width / 8)):
-        # self.send_data(image[i + j * int(self.width / 8)])
+        # self.send_data(images[i + j * int(self.width / 8)])
         self.send_data2(image)
 
         self.TurnOnDisplay()
 
     def display_Partial(self, image):  # 局部显示
-        if (image == None):
+        if image is None:
             return
 
         # epdconfig.digital_write(self.reset_pin, 0)
@@ -290,13 +288,13 @@ class EPD_2IN9_V2:
         self.send_command(0x24)  # WRITE_RAM
         # for j in range(0, self.height):
         # for i in range(0, int(self.width / 8)):
-        # self.send_data(image[i + j * int(self.width / 8)])
+        # self.send_data(images[i + j * int(self.width / 8)])
         self.send_data2(image)
 
         self.TurnOnDisplay_Partial()
 
     def display_Partial_Wait(self, image):  # 局部显示并等待显示完成
-        if (image == None):
+        if image is None:
             return
 
         epdconfig.digital_write(self.reset_pin, 0)
@@ -331,12 +329,12 @@ class EPD_2IN9_V2:
         self.send_command(0x24)  # WRITE_RAM
         # for j in range(0, self.height):
         # for i in range(0, int(self.width / 8)):
-        # self.send_data(image[i + j * int(self.width / 8)])
+        # self.send_data(images[i + j * int(self.width / 8)])
         self.send_data2(image)
 
         self.TurnOnDisplay_Partial_Wait()
 
-    def Clear(self, color):  # 清屏
+    def clear(self, color):  # 清屏
         self.send_command(0x24)  # WRITE_RAM
         for j in range(0, self.height):
             for i in range(0, int(self.width / 8)):
@@ -347,6 +345,7 @@ class EPD_2IN9_V2:
         self.send_command(0x10)  # DEEP_SLEEP_MODE
         self.send_data(0x01)
 
-    def Dev_exit(self):  # 退出模块
+    @staticmethod
+    def exit():  # 退出模块
         epdconfig.module_exit()
 ### END OF FILE ###

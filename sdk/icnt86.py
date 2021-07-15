@@ -1,19 +1,18 @@
 # 已被fu1fan修改，勿直接应用于生产环境
 
-import logging
 from . import epdconfig as config
 
 class ICNT_Development:
     def __init__(self):
         self.Touch = 0
-        self.TouchGestureid = 0
+        self.TouchGestureId = 0
         self.TouchCount = 0
         
-        self.TouchEvenid = [0, 1, 2, 3, 4]
+        self.TouchEvenId = [0, 1, 2, 3, 4]
         self.X = [0, 1, 2, 3, 4]
         self.Y = [0, 1, 2, 3, 4]
         self.P = [0, 1, 2, 3, 4]
-    
+
 class INCT86:
     def __init__(self):
         # e-Paper
@@ -25,9 +24,10 @@ class INCT86:
         self.TRST = config.TRST
         self.INT = config.INT
 
-    def digital_read(self, pin):
+    @staticmethod
+    def digital_read(pin):
         return config.digital_read(pin)
-    
+
     def ICNT_Reset(self):
         config.digital_write(self.TRST, 1)
         config.delay_ms(100)
@@ -36,12 +36,14 @@ class INCT86:
         config.digital_write(self.TRST, 1)
         config.delay_ms(100)
 
-    def ICNT_Write(self, Reg, Data):
-        config.i2c_writebyte(Reg, Data)
+    @staticmethod
+    def ICNT_Write(reg, data):
+        config.i2c_writebyte(reg, data)
 
-    def ICNT_Read(self, Reg, len):
-        return config.i2c_readbyte(Reg, len)
-        
+    @staticmethod
+    def ICNT_Read(reg, __len):
+        return config.i2c_readbyte(reg, __len)
+
     def ICNT_ReadVersion(self):
         buf = self.ICNT_Read(0x000a, 4)
         print(buf)
@@ -54,11 +56,11 @@ class INCT86:
         buf = []
         mask = 0x00
         
-        if(ICNT_Dev.Touch == 1):
+        if ICNT_Dev.Touch == 1:
             # ICNT_Dev.Touch = 0
             buf = self.ICNT_Read(0x1001, 1)
             
-            if(buf[0] == 0x00):
+            if buf[0] == 0x00:
                 self.ICNT_Write(0x1001, mask)
                 config.delay_ms(1)
                 # print("buffers status is 0")
@@ -66,21 +68,21 @@ class INCT86:
             else:
                 ICNT_Dev.TouchCount = buf[0]
                 
-                if(ICNT_Dev.TouchCount > 5 or ICNT_Dev.TouchCount < 1):
+                if ICNT_Dev.TouchCount > 5 or ICNT_Dev.TouchCount < 1:
                     self.ICNT_Write(0x1001, mask)
                     ICNT_Dev.TouchCount = 0
                     # print("TouchCount number is wrong")
                     return
-                    
+
                 buf = self.ICNT_Read(0x1002, ICNT_Dev.TouchCount*7)
                 self.ICNT_Write(0x1001, mask)
                 
-                ICNT_Old.X[0] = ICNT_Dev.X[0];
-                ICNT_Old.Y[0] = ICNT_Dev.Y[0];
-                ICNT_Old.P[0] = ICNT_Dev.P[0];
+                ICNT_Old.X[0] = ICNT_Dev.X[0]
+                ICNT_Old.Y[0] = ICNT_Dev.Y[0]
+                ICNT_Old.P[0] = ICNT_Dev.P[0]
                 
                 for i in range(0, ICNT_Dev.TouchCount, 1):
-                    ICNT_Dev.TouchEvenid[i] = buf[6 + 7*i] 
+                    ICNT_Dev.TouchEvenId[i] = buf[6 + 7 * i]
                     ICNT_Dev.X[i] = 295 - ((buf[2 + 7*i] << 8) + buf[1 + 7*i])
                     ICNT_Dev.Y[i] = 127 - ((buf[4 + 7*i] << 8) + buf[3 + 7*i])
                     ICNT_Dev.P[i] = buf[5 + 7*i]
@@ -88,4 +90,3 @@ class INCT86:
                 print(ICNT_Dev.X[0], ICNT_Dev.Y[0], ICNT_Dev.P[0])
                 return
         return
-                
