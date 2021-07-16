@@ -3,6 +3,11 @@ import time
 import os
 import threading
 
+DEBUG = 0
+INFO = 1
+WARNING = 2
+ERROR = 3
+
 
 def get_name(index=1):  # 获取上上级调用者的__name__
     frm = inspect.stack()[index]  # 0是本函数，1是上级调用，2是上上级，以此类推
@@ -13,16 +18,11 @@ def get_name(index=1):  # 获取上上级调用者的__name__
         return None
 
 
-def default_handler(info):
+def default_handler(_):
     pass
 
 
 class Logger:
-    DEBUG = 0
-    INFO = 1
-    WARNING = 2
-    ERROR = 3
-
     def __init__(self, level, folder="logs", tag=None, debug_handler=default_handler, info_handler=default_handler,
                  warn_handler=default_handler, error_handler=default_handler) -> None:
         if level < 0 or level > 3:
@@ -63,25 +63,25 @@ class Logger:
 
     def debug(self, text, info=None) -> None:  # text为写入日志的内容，info为为用户显示的内容，只有当启用Handler时info才会被使用
         name = get_name(2)
-        self.__write(self.DEBUG, text, name)
+        self.__write(DEBUG, text, name)
         if info is not None:
             self.debugHandler(info)
 
     def info(self, text, info=None) -> None:  # text为写入日志的内容，info为为用户显示的内容，只有当启用Handler时info才会被使用
         name = get_name(2)
-        self.__write(self.INFO, text, name)
+        self.__write(INFO, text, name)
         if info is not None:
             self.infoHandler(info)
 
     def warn(self, text, info=None) -> None:
         name = get_name(2)
-        self.__write(self.WARNING, text, name)
+        self.__write(WARNING, text, name)
         if info is not None:
             self.warnHandler(info)
 
     def error(self, text, info=None) -> None:
         name = get_name(2)
-        self.__write(self.ERROR, text, name)
+        self.__write(ERROR, text, name)
         if info is not None:
             self.errorHandler(info)
 
