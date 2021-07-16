@@ -51,7 +51,9 @@ class Logger:
             file = open(self.folder + self.name,
                         "a+", encoding="utf-8")
             if "\n" in text:
-                text = "\n" + text
+                text = "\n%s" % text
+            if text[-1] != "\n":
+                text = text + "\n"
             content = "%s%s[%s]%s" % (
                 self.__levelDic[level], time.strftime("[%Y%m%d-%H:%M:%S]", time.localtime()), thename,
                 text)  # 格式[level][time][name]--event--
