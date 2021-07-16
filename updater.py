@@ -68,15 +68,15 @@ class VersionCtrl:
 
 
 if __name__ == "__main__":  # TODO:添加显示功能
-    if os.path.exists("update"):
-        logger = Logger(0, tag="updater")
-        result = os.popen("git pull")
-        logger.info(result.read())
-    elif os.path.exists("reset"):
+    if os.path.exists("reset"):
         logger = Logger(0, tag="reset")
         result = os.popen("git checkout .")
         os.remove("reset")
         logger.info("已重置")
+    elif os.path.exists("update"):
+        logger = Logger(0, tag="updater")
+        result = os.popen("git pull")
+        logger.info(result.read())
     elif os.path.exists("changeBranch"):
         logger = Logger(0, tag="changerannch")
         file = open("changeBranch", encoding="utf-8")
