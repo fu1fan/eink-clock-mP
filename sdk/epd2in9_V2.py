@@ -116,7 +116,7 @@ class EPD_2IN9_V2:
         epdconfig.spi_writebyte2(data)
         epdconfig.digital_write(self.cs_pin, 1)
 
-    def ReadBusy(self):  # 等待直到屏幕结束忙
+    def ReadBusy(self):  # 等待直到屏幕结束忙碌
         # logging.debug("e-Paper busy")
         while epdconfig.digital_read(self.busy_pin) == 1:  # 0: idle, 1: busy
             epdconfig.delay_ms(0.1)
