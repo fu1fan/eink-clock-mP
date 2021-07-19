@@ -24,8 +24,11 @@ class VersionCtrl:
             response = requests.get("https://gitee.com/fu1fan/pi-zero-w-eink-clock.web/raw/master/update/newest.json")
             response.raise_for_status()
             self.data = json.loads(response.text)
-        except:
+        except requests.RequestException:
             self.logger.error(traceback.format_exc(), "无法获取最新版本信息")
+            return False
+        except json.JSONDecodeError:
+            self.logger.error(traceback.format_exc(), "无法解析最新版本信息")
             return False
         return True
 
@@ -36,7 +39,7 @@ class VersionCtrl:
                     return True
                 elif version < self.data[branch]["version"]:
                     return self.data[branch]
-            except:
+            except json.JSONDecodeError:
                 self.logger.error(traceback.format_exc(), "无法解析版本信息")
                 return False
         return False

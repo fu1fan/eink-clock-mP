@@ -18,13 +18,9 @@ def get_name(index=1):  # 获取上上级调用者的__name__
         return None
 
 
-def default_handler(_):
-    pass
-
-
 class Logger:
-    def __init__(self, level, folder="logs", tag=None, debug_handler=default_handler, info_handler=default_handler,
-                 warn_handler=default_handler, error_handler=default_handler) -> None:
+    def __init__(self, level, folder="logs", tag=None, debug_handler=None, info_handler=None,
+                 warn_handler=None, error_handler=None) -> None:
         if level < 0 or level > 3:
             raise
         if folder[-1] != "/":  # 防止文件名直接加到文件夹名后😂
@@ -33,10 +29,25 @@ class Logger:
         self.__level = level
         self.__levelDic = {0: "[DBUG]", 1: "[INFO]",
                            2: "[WARN]", 3: "[ERRO]"}  # 单纯只是为了给__write函数用
-        self.debugHandler = debug_handler
-        self.infoHandler = info_handler
-        self.warnHandler = warn_handler
-        self.errorHandler = error_handler
+
+        # 在线表演💩山代码，但我是在不知道相关的语法🍬
+        if debug_handler is None:
+            self.debugHandler = self.__defaultHandler
+        else:
+            self.debugHandler = debug_handler
+        if debug_handler is None:
+            self.infoHandler = self.__defaultHandler
+        else:
+            self.infoHandler = info_handler
+        if debug_handler is None:
+            self.warnHandler = self.__defaultHandler
+        else:
+            self.warnHandler = warn_handler
+        if debug_handler is None:
+            self.errorHandler = self.__defaultHandler
+        else:
+            self.errorHandler = error_handler
+
         self.lock = threading.Lock()
         if tag is None:
             self.name = time.strftime("%Y%m%d-%H:%M:%S", time.localtime())
@@ -45,7 +56,11 @@ class Logger:
         if not os.path.exists(folder):
             os.mkdir(folder)
 
-    def __write(self, level, text, thename):
+    @staticmethod
+    def __defaultHandler(_):
+        pass
+
+    def __write(self, level, text, the_name):
         if level >= self.__level:
             self.lock.acquire()
             file = open(self.folder + self.name,
@@ -55,7 +70,7 @@ class Logger:
             if text[-1] != "\n":
                 text = text + "\n"
             content = "%s%s[%s]%s" % (
-                self.__levelDic[level], time.strftime("[%Y%m%d-%H:%M:%S]", time.localtime()), thename,
+                self.__levelDic[level], time.strftime("[%Y%m%d-%H:%M:%S]", time.localtime()), the_name,
                 text)  # 格式[level][time][name]--event--
             file.write(content)
             file.close()
@@ -67,7 +82,7 @@ class Logger:
         if info is not None:
             self.debugHandler(info)
 
-    def info(self, text, info=None) -> None:  # text为写入日志的内容，info为为用户显示的内容，只有当启用Handler时info才会被使用
+    def info(self, text, info=None) -> None:
         name = get_name(2)
         self.__write(INFO, text, name)
         if info is not None:

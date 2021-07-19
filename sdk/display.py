@@ -6,10 +6,10 @@ from PIL import Image
 
 
 class Page:
-    def __init__(self, epd: epdDriver.EPD_2IN9_V2, lock: threading.Lock, x=296, y=128, image=None):
+    def __init__(self, epd: epdDriver.EPD_2IN9_V2, lock: threading.Lock, image=None):
         self.inited = False
         if image is None:
-            self.image = Image.new(1, (x, y), 1)
+            self.image = Image.new(1, 296, 128, 1)
         else:
             self.image = image
         self.lock = lock
@@ -17,7 +17,6 @@ class Page:
 
     def __del__(self):
         if self.inited:
-            self.epd.sleep()
             self.lock.release()
 
     def init(self):
@@ -33,8 +32,8 @@ class Page:
         if not self.inited:
             return
         self.epd.display_Base(self.image)
-        return True
         self.epd.sleep()
+        return True
 
     def update(self, image, refresh=False):
         if not self.inited:
@@ -48,7 +47,26 @@ class Page:
 
 
 class PageDynamic(Page):
-    pass
+    def __init__(self, epd: epdDriver.EPD_2IN9_V2, lock: threading.Lock, image=None):
+        super.__init__(PageDynamic, self).__init__(epd, lock, image)
+
+    def __build(self):
+        pass
+
+    def register(self):
+        pass
+
+    def init(self):
+        pass
+
+    def infoHandler(self):
+        pass
+
+    def warnHandler(self):
+        pass
+
+    def errorHandler(self):
+        pass
 
 
 class PageHome(PageDynamic):
