@@ -44,7 +44,7 @@ class ThreadPool:
         self.__running_num = 0
         self.__thread_num = thread_num
         for _ in range(thread_num):
-            self.threads.append(Worker(self.is_running, self.handler, self.__thread_monitor()))
+            self.threads.append(Worker(self.tasks, self.is_running, self.handler, self.__thread_monitor))
 
     @staticmethod
     def __errorHandler(_):
@@ -56,14 +56,14 @@ class ThreadPool:
             self.__running_num += 1
         else:
             self.__running_num -= 1
-        self.__lock.acquire()
+        self.__lock.release()
         if self.__running_num == 0:
             try:
                 self.__lock_wait.release()
             except RuntimeError:
                 pass
         else:
-            self.__lock_wait.acquire()
+            self.__lock_wait.acquire(blocking=False)
 
     def is_running(self):
         return self.running
@@ -103,6 +103,7 @@ class ThreadPool:
 
     def wait_and_stop(self, timeout=0):
         self.__lock_wait.acquire(timeout=timeout)
+        self.stop()
 
 
 class Worker(threading.Thread):
