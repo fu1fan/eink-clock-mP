@@ -44,7 +44,11 @@ class ThreadPool:
         self.__running_num = 0
         self.__thread_num = thread_num
         for _ in range(thread_num):
-            self.threads.append(Worker(self.tasks, self.is_running, self.handler, self.__thread_start_work(), self.__thread_finish_work()))
+            self.threads.append(Worker(self.tasks,
+                                       self.is_running,
+                                       self.handler,
+                                       self.__thread_start_work(),
+                                       self.__thread_finish_work()))
         self.succeed = 0
         self.fail = 0
 
@@ -199,8 +203,8 @@ def set_timeout(time: int, callback):
         return wrap
 
 
-class TimingTask:  # TODO: 改用timer
-    def __init__(self, cycle: int, func, limit=None, timeoutHandler=None, daemonic=True):
+class TimingTask:
+    def __init__(self, cycle: int, func, limit=None, timeoutHandler=None, daemonic=True, *args, **kwargs):
         """
         cycle:\n
         -int：每隔cycle秒执行一次func\n
@@ -215,6 +219,9 @@ class TimingTask:  # TODO: 改用timer
         self.func = func
         self.daemonic = daemonic
         self.__timer = None
+        self.__running = False
+        self.args = args
+        self.kwargs = kwargs
         if limit is None:
             self.limit = cycle
         else:
@@ -225,46 +232,79 @@ class TimingTask:  # TODO: 改用timer
             self.handler = timeoutHandler
 
     def __del__(self):  # 不知道有没有效果，以后再调试
-        self.__timer.cancel()
+        self.stop()
+
+    def is_running(self):
+        return self.__running
 
     def stop(self):
         self.__timer.cancel()
+        self.__running = False
 
     @staticmethod
     def __timeoutHandler(_):
         pass
 
-    def __run(self, *args, **kwargs):
-        self.__timer = threading.Timer(self.cycle, self.__run, args, kwargs)  # 这能正常运行，别管他！
+    def __run(self):
+        if not self.__running:  # TODO:测试实例被删除后执行这段语句的结果
+            return
+        self.__timer = threading.Timer(self.cycle, self.__run)
         self.__timer.setDaemon(self.daemonic)
         self.__timer.start()
-        self.func(*args, **kwargs)
+        self.func(*self.args, **self.kwargs)
 
-    def start(self, *args, **kwargs):
-        self.__timer = threading.Timer(self.cycle, self.__run, args, kwargs)
+    def start(self):
+        self.__running = True
+        self.__timer = threading.Timer(self.cycle, self.__run)
         self.__timer.setDaemon(self.daemonic)
         self.__timer.start()
 
 
 class TimingTasks(TimingTask):
-    def __init__(self, cycle: int, funcs: list, limit=None, timeoutHandler=None, daemonic=True):
+    def __init__(self, cycle: int, funcs=None, limit=None, timeoutHandler=None, daemonic=True):
         super().__init__(cycle, self.__do_tasks(), limit, timeoutHandler, daemonic)
+        if funcs is None:
+            funcs = dict()
         self.funcs = funcs
+        self.lock = threading.Lock()    # 不知道为啥，用单下划线子类无法访问到，这里只好这样了
 
     def __do_tasks(self):
-        for func in self.funcs:
-            func()
+        self.lock.acquire()
+        for func, arguments in self.funcs:
+            func(*arguments[0], **arguments[1])
+        self.lock.release()
 
-    def add(self, func):
-        self.funcs.append(func)
+    def add(self, func, timeout=0, *args, **kwargs):
+        """
+        建议使用线程池进行此操作（异步执行）
+        """
+        self.lock.acquire(timeout=timeout)
+        self.funcs[func] = (args, kwargs)
+        self.lock.release()
 
-    def remove(self, func):
-        self.funcs.remove(func)
+    def remove(self, func, timeout=0):
+        """
+        建议使用线程池进行此操作（异步执行）
+        """
+        self.lock.acquire(timeout=timeout)
+        del self.funcs[func]
+        self.lock.release()
+
+    def clear(self, timeout=0):
+        self.lock.acquire(timeout=timeout)
+        self.funcs = {}
+        self.lock.release()
 
 
 class TimingTasksAsyn(TimingTasks):
-    def __init__(self, cycle: int, funcs: list, limit=None, timeoutHandler=None, daemonic=True):
+    def __init__(self, cycle: int, pool: ThreadPool, funcs=None, limit=None, timeoutHandler=None, daemonic=True):
         super().__init__(cycle, funcs, limit, timeoutHandler, daemonic)
+        if funcs is None:
+            funcs = {}
+        self.pool = pool
 
-    def __do_tasks(self):  # TODO:添加对线程池的支持
-        pass
+    def __do_tasks(self):
+        self.lock.acquire()
+        for func, arguments in self.funcs:
+            self.pool.add(func, *arguments[0], **arguments[1])  # TODO:这里可能会出现一些问题
+        self.lock.release()
