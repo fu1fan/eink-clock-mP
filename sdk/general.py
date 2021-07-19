@@ -44,7 +44,9 @@ class ThreadPool:
         self.__running_num = 0
         self.__thread_num = thread_num
         for _ in range(thread_num):
-            self.threads.append(Worker(self.tasks, self.is_running, self.handler, self.__thread_monitor))
+            self.threads.append(Worker(self.tasks, self.is_running, self.handler, self.__thread_start_work(), self.__thread_finish_work()))
+        self.succeed = 0
+        self.fail = 0
 
     @staticmethod
     def __errorHandler(_):
@@ -64,6 +66,26 @@ class ThreadPool:
                 pass
         else:
             self.__lock_wait.acquire(blocking=False)
+
+    def __thread_start_work(self):
+        self.__lock.acquire()
+        self.__running_num += 1
+        self.__lock.release()
+        self.__lock_wait.acquire(blocking=False)
+
+    def __thread_finish_work(self, succeed=True):
+        self.__lock.acquire()
+        self.__running_num -= 1
+        if succeed:
+            self.succeed += 1
+        else:
+            self.fail += 1
+        if self.__running_num == 0:
+            try:
+                self.__lock_wait.release()
+            except RuntimeError:
+                pass
+        self.__lock.release()
 
     def is_running(self):
         return self.running
@@ -101,32 +123,43 @@ class ThreadPool:
     def clear(self):
         self.tasks.queue.clear()    # TODO:未测试
 
-    def wait_and_stop(self, timeout=0):
+    def wait(self, timeout=0):
         self.__lock_wait.acquire(timeout=timeout)
-        self.stop()
+
+    def full(self):
+        if self.__running_num == self.__thread_num:
+            return True
+        else:
+            return False
+
+    def empty(self):
+        if self.__running_num == 0:
+            return False
 
 
 class Worker(threading.Thread):
-    def __init__(self, tasks: Queue, is_running, handler, monitor):
+    def __init__(self, tasks: Queue, is_running, handler, start, finish):
         super().__init__()
         self.setDaemon(True)
         self.tasks = tasks
         self.is_running = is_running
         self.handler = handler
-        self.monitor = monitor
+        self.start = start
+        self.finish = finish
 
     def run(self):
         while True:
-            self.monitor()
+            self.start()
             try:
                 task = self.tasks.get(block=True, timeout=2)
                 task[0](*task[1], **task[2])
+                self.finish()
             except queue.Empty:
                 pass
             except:
                 self.handler(traceback.format_exc())
+                self.finish(False)
             else:
-                self.monitor(False)
                 if not self.is_running():
                     break
 
