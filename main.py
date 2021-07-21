@@ -17,7 +17,7 @@ if __name__ == "__main__":  # 主线程：UI管理
         logger_main.error("The screen is busy!")
         raise RuntimeError("The screen is busy!")
     paperLock = threading.Lock()
-    openingImages = (Image.open(open("resources/images/Raspberry.jpg", mode="rb")),)
+    openingImages = (Image.open(open("resources/images/raspberry.jpg", mode="rb")),)
     paperNow = display.Paper(epd, paperLock, background_image=openingImages[0])
     try:
         # 显示开屏动画

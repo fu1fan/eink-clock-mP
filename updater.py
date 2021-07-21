@@ -72,7 +72,7 @@ class VersionCtrl:
                 return False
 
 
-if __name__ == "__main__":  # TODO:添加显示功能
+if __name__ == "__main__":
     epd_lock = threading.RLock()
     epd = display.EpdController(0, epd_lock, True)
     paper = display.Paper(epd, threading.Lock())
@@ -81,17 +81,21 @@ if __name__ == "__main__":  # TODO:添加显示功能
         os.system("python3 main.py &")
         raise RuntimeError("The screen is busy!")
     if os.path.exists("reset"):
+        paper.background_image = Image.open(open("resources/images/reset.jpg", mode="rb"))
+        paper.init()
         logger = Logger(0, tag="reset")
         result = os.popen("git checkout .")
         os.remove("reset")
         logger.info("已重置")
     elif os.path.exists("update"):
-        paper.background_image = Image.open(open("resources/images/Updating.jpg", mode="rb"))
+        paper.background_image = Image.open(open("resources/images/updating.jpg", mode="rb"))   # TODO:使用更精美的图像
         paper.init()
         logger = Logger(0, tag="updater")
         result = os.popen("git pull")
         logger.info(result.read())
     elif os.path.exists("changeBranch"):
+        paper.background_image = Image.open(open("resources/images/change.jpg", mode="rb"))
+        paper.init()
         logger = Logger(0, tag="changeBranch")
         file = open("changeBranch", encoding="utf-8")
         targetBranch = file.read()
@@ -101,5 +105,6 @@ if __name__ == "__main__":  # TODO:添加显示功能
         logger.info("已重置")
         result = os.popen("git checkout " + targetBranch)
         logger.info(result.read())
+    paper.update_background(Image.open(open("resources/images/done.jpg", mode="rb")))
     epd.sleep()
     os.system("python3 main.py &")
