@@ -146,6 +146,7 @@ class Paper:
         self.epd.display_Partial_Wait(b_image)
 
     def build(self) -> Image:
+        self.image_old = self.background_image
         return self.background_image
 
     def init(self):
