@@ -12,9 +12,12 @@ class EpdController(epdDriver.EPD_2IN9_V2):
     """
     用这个类来显示图片可能会被阻塞（当多个线程尝试访问屏幕时）
     """
-    def __init__(self, auto_sleep_time, lock: threading.RLock, init=False):
+    def __init__(self, auto_sleep_time, lock: threading.RLock, init=False, refresh_time=600, refresh_interval=15):
         super().__init__()
         self.last_update = time.time()
+        self.partial_time = 0
+        self.refresh_time = refresh_time
+        self.refresh_interval = refresh_interval
         self.__auto_sleep_time = auto_sleep_time
         self.lock = lock
         self.tk = general.TimingTask(auto_sleep_time, self.controller)
@@ -50,24 +53,42 @@ class EpdController(epdDriver.EPD_2IN9_V2):
         super().display(image)
         self.lock.release()
         self.last_update = time.time()
+        self.partial_time = 0
+
+    def display_Base(self, image, timeout=0):
+        self.lock.acquire(timeout=timeout)
+        super().display(image)
+        self.lock.release()
+        self.last_update = time.time()
+        self.partial_time = 0
 
     def display_Partial(self, image, timeout=0):
         self.lock.acquire(timeout=timeout)
         super().display_Partial(image)
         self.lock.release()
         self.last_update = time.time()
+        self.partial_time += 1
+
+    def display_Auto(self, image, timeout=0):
+        self.lock.acquire(timeout=timeout)
+        if time.time() - self.last_update > self.refresh_time | self.partial_time >= self.refresh_interval:
+            self.display_Base(image, timeout)
+        else:
+            self.display(image, timeout)
 
     def display_Partial_Wait(self, image, timeout=0):
         self.lock.acquire(timeout=timeout)
         super().display_Partial_Wait(image)
         self.lock.release()
         self.last_update = time.time()
+        self.partial_time += 1
 
     def clear(self, color, timeout=0):
         self.lock.acquire(timeout=timeout)
         super().clear(color)
         self.lock.release()
         self.last_update = time.time()
+        self.partial_time = 0
 
     def exit(self):
         self.tk.stop()
