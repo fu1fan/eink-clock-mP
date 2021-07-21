@@ -49,8 +49,8 @@ class ThreadPool:
             self.threads.append(Worker(self.tasks,
                                        self.is_running,
                                        self.handler,
-                                       self.__thread_start_work(),
-                                       self.__thread_finish_work()))
+                                       self.__thread_start_work,
+                                       self.__thread_finish_work))
 
     @staticmethod
     def __errorHandler(_):
@@ -153,27 +153,27 @@ class ThreadPool:
 
 
 class Worker(threading.Thread):
-    def __init__(self, tasks: Queue, is_running, handler, start, finish):
+    def __init__(self, tasks: Queue, is_running, handler, start_log, finish_log):
         super().__init__()
         self.setDaemon(True)
         self.tasks = tasks
         self.is_running = is_running
         self.handler = handler
-        self.start = start
-        self.finish = finish
+        self.start_log = start_log
+        self.finish_log = finish_log
 
     def run(self):
         while True:
-            self.start()
             try:
                 task = self.tasks.get(block=True, timeout=2)
+                self.start_log()
                 task[0](*task[1], **task[2])
-                self.finish()
+                self.finish_log()
             except queue.Empty:
                 pass
             except:
                 self.handler(traceback.format_exc())
-                self.finish(False)
+                self.finish_log(False)
             else:
                 if not self.is_running():
                     break
