@@ -41,6 +41,8 @@ if __name__ == "__main__":  # 主线程：UI管理
         ###
         load_lock.wait()
 
+        paperNow.refresh()
+
         # 主程序开始
     except KeyboardInterrupt:
         print("ctrl+c")
