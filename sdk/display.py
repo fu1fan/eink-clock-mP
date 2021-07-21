@@ -54,7 +54,7 @@ class EpdController(epdDriver.EPD_2IN9_V2):
 
     def display_Partial_Wait(self, image, timeout=0):
         self.lock.acquire(timeout=timeout)
-        super().display_Partial_Wait()
+        super().display_Partial_Wait(image)
         self.lock.release()
         self.last_update = time.time()
 
@@ -94,7 +94,7 @@ class Paper:
     def __init__(self,
                  epd: epdDriver.EPD_2IN9_V2,
                  paper_lock: threading.Lock,
-                 background_image=Image.new(1, (296, 128), 1),):
+                 background_image=Image.new("RGB", (296, 128), 1)):
         self.inited = False
         self.background_image = background_image
         self.paper_lock = paper_lock  # 确保只有一个Page对象能获得主动权～

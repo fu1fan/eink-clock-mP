@@ -3,7 +3,6 @@ import threading
 import time
 import traceback
 from sdk import logger
-from sdk import epd2in9_V2
 from sdk import display
 from PIL import Image
 from sdk import general
