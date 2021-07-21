@@ -7,7 +7,6 @@ from sdk import display
 from PIL import Image
 from sdk import general
 
-os.chdir(os.path.dirname(__file__))
 
 if __name__ == "__main__":  # 主线程：UI管理
     logger_main = logger.Logger(logger.DEBUG)

@@ -257,7 +257,7 @@ class TimingTask:
         pass
 
     def __run(self):
-        if not self.__running:  # TODO:测试实例被删除后执行这段语句的结果
+        if (not self.__running) | self.cycle <= 0:  # TODO:测试实例被删除后执行这段语句的结果
             return
         self.__timer = threading.Timer(self.cycle, self.__run)
         self.__timer.setDaemon(self.daemonic)
@@ -265,6 +265,8 @@ class TimingTask:
         self.func(*self.args, **self.kwargs)
 
     def start(self):
+        if self.__running | self.cycle <= 0:
+            return
         self.__running = True
         self.__timer = threading.Timer(self.cycle, self.__run)
         self.__timer.setDaemon(self.daemonic)

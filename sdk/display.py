@@ -17,8 +17,9 @@ class EpdController(epdDriver.EPD_2IN9_V2):
         self.last_update = time.time()
         self.__auto_sleep_time = auto_sleep_time
         self.lock = lock
+        self.tk = general.TimingTask(auto_sleep_time, self.controller)
         if auto_sleep_time > 0:
-            self.tk = general.TimingTask(auto_sleep_time, self.controller)
+            self.tk.start()
         if init:
             self.init()
 
@@ -32,6 +33,10 @@ class EpdController(epdDriver.EPD_2IN9_V2):
     def set_auto_sleep_time(self, auto_sleep_time):
         self.tk.cycle = auto_sleep_time
         self.__auto_sleep_time = auto_sleep_time
+        if auto_sleep_time > 0:
+            self.tk.start()
+        else:
+            self.tk.stop()
 
     def controller(self):   # 自动休眠
         if time.time() - self.last_update >= self.auto_sleep_time:
