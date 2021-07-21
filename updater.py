@@ -1,9 +1,13 @@
 import json
 import os
+import threading
+
 import requests
 import traceback
 
 from sdk.logger import Logger
+from sdk import display
+from PIL import Image
 
 os.chdir(os.path.dirname(__file__))
 
@@ -71,7 +75,16 @@ class VersionCtrl:
 
 
 if __name__ == "__main__":  # TODO:添加显示功能
+    epd_lock = threading.RLock()
+    epd = display.EpdController(0, epd_lock, True)
+    paper = display.Paper(epd, threading.Lock())
+    if epd.IsBusy():
+        Logger(0, tag="updaterError").error("The screen is busy!")
+        os.system("python3 main.py &")
+        raise RuntimeError("The screen is busy!")
     if os.path.exists("reset"):
+        paper.background_image = Image.open(open("resources/images/Updating.jpg", mode="rb"))
+        paper.init()
         logger = Logger(0, tag="reset")
         result = os.popen("git checkout .")
         os.remove("reset")
@@ -81,14 +94,14 @@ if __name__ == "__main__":  # TODO:添加显示功能
         result = os.popen("git pull")
         logger.info(result.read())
     elif os.path.exists("changeBranch"):
-        logger = Logger(0, tag="changerannch")
+        logger = Logger(0, tag="changeBranch")
         file = open("changeBranch", encoding="utf-8")
         targetBranch = file.read()
         result = os.popen("git pull")
         logger.info(result.read())
-        result = os.popen("git checkout .")
+        os.popen("git checkout .")
         logger.info("已重置")
         result = os.popen("git checkout " + targetBranch)
         logger.info(result.read())
-
+    epd.sleep()
     os.system("python3 main.py &")

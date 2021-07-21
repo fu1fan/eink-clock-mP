@@ -104,6 +104,17 @@ class ThreadPool:
     def add(self, func, *args, **kwargs):
         self.tasks.put((func, args, kwargs))
 
+    def add_immediately(self, func, *args, **kwargs):
+        """
+        这种方法添加的线程可能不受线程池控制
+        """
+        if self.full():
+            new_thread = threading.Thread(target=func, args=args, kwargs=kwargs)
+            new_thread.start()
+            return new_thread
+        else:
+            self.tasks.put((func, args, kwargs))
+
     def stop(self):
         self.running = False
 
@@ -298,9 +309,9 @@ class TimingTasks(TimingTask):
 
 class TimingTasksAsyn(TimingTasks):
     def __init__(self, cycle: int, pool: ThreadPool, funcs=None, limit=None, timeoutHandler=None, daemonic=True):
-        super().__init__(cycle, funcs, limit, timeoutHandler, daemonic)
         if funcs is None:
             funcs = {}
+        super().__init__(cycle, funcs, limit, timeoutHandler, daemonic)
         self.pool = pool
 
     def __do_tasks(self):

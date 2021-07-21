@@ -116,17 +116,20 @@ class EPD_2IN9_V2:
         epdconfig.spi_writebyte2(data)
         epdconfig.digital_write(self.cs_pin, 1)
 
-    def ReadBusy(self):  # 等待直到屏幕结束忙碌
+    def WaitBusy(self):  # 等待直到屏幕结束忙碌
         # logging.debug("e-Paper busy")
         while epdconfig.digital_read(self.busy_pin) == 1:  # 0: idle, 1: busy
             epdconfig.delay_ms(0.1)
         # logging.debug("e-Paper busy release")
 
+    def IsBusy(self):
+        return epdconfig.digital_read(self.busy_pin)
+
     def TurnOnDisplay(self):  # 不建议进行操作
         self.send_command(0x22)  # DISPLAY_UPDATE_CONTROL_2
         self.send_data(0xF7)
         self.send_command(0x20)  # MASTER_ACTIVATION
-        self.ReadBusy()
+        self.WaitBusy()
 
     def TurnOnDisplay_Partial(self):  # 不建议进行操作
         self.send_command(0x22)  # DISPLAY_UPDATE_CONTROL_2
@@ -138,7 +141,7 @@ class EPD_2IN9_V2:
         self.send_command(0x22)  # DISPLAY_UPDATE_CONTROL_2
         self.send_data(0x0F)
         self.send_command(0x20)  # MASTER_ACTIVATION
-        self.ReadBusy()
+        self.WaitBusy()
 
     def SendLut(self, lut):  # 不建议进行操作
         self.send_command(0x32)
@@ -148,7 +151,7 @@ class EPD_2IN9_V2:
             self.send_data2(self.WF_PARTIAL_2IN9)
         else:
             self.send_data2(self.WF_PARTIAL_2IN9_Wait)
-        self.ReadBusy()
+        self.WaitBusy()
 
     def SetWindow(self, x_start, y_start, x_end, y_end):  # 不建议进行操作
         self.send_command(0x44)  # SET_RAM_X_ADDRESS_START_END_POSITION
@@ -169,7 +172,7 @@ class EPD_2IN9_V2:
         self.send_command(0x4F)  # SET_RAM_Y_ADDRESS_COUNTER
         self.send_data(y & 0xFF)
         self.send_data((y >> 8) & 0xFF)
-        self.ReadBusy()
+        self.WaitBusy()
 
     def init(self):  # 初始化
         if epdconfig.module_init() != 0:
@@ -177,9 +180,9 @@ class EPD_2IN9_V2:
         # EPD hardware init start
         self.reset()
 
-        self.ReadBusy()
+        self.WaitBusy()
         self.send_command(0x12)  # SWRESET
-        self.ReadBusy()
+        self.WaitBusy()
 
         self.send_command(0x01)  # Driver output control
         self.send_data(0x27)
@@ -196,7 +199,7 @@ class EPD_2IN9_V2:
         self.send_data(0x80)
 
         self.SetCursor(0, 0)
-        self.ReadBusy()
+        self.WaitBusy()
         # EPD hardware init end
         return 0
 
@@ -280,7 +283,7 @@ class EPD_2IN9_V2:
         self.send_command(0x22)
         self.send_data(0xC0)
         self.send_command(0x20)
-        self.ReadBusy()
+        self.WaitBusy()
 
         self.SetWindow(0, 0, self.width - 1, self.height - 1)
         self.SetCursor(0, 0)
@@ -321,7 +324,7 @@ class EPD_2IN9_V2:
         self.send_command(0x22)
         self.send_data(0xC0)
         self.send_command(0x20)
-        self.ReadBusy()
+        self.WaitBusy()
 
         self.SetWindow(0, 0, self.width - 1, self.height - 1)
         self.SetCursor(0, 0)
