@@ -65,9 +65,11 @@ class Logger:
             self.lock.acquire()
             file = open(self.folder + self.name,
                         "a+", encoding="utf-8")
-            if "\n" in text:
+            if len(text) == 0:
+                text = "\n"
+            elif "\n" in text:
                 text = "\n%s" % text
-            if text[-1] != "\n":
+            elif text[-1] != "\n":
                 text = text + "\n"
             content = "%s%s[%s]%s" % (
                 self.__levelDic[level], time.strftime("[%Y%m%d-%H:%M:%S]", time.localtime()), the_name,
