@@ -9,8 +9,6 @@ from sdk.logger import Logger
 from sdk import display
 from PIL import Image
 
-os.chdir(os.path.dirname(__file__))
-
 branch = "develop"
 version = 1
 version_name = "beta_0_1"
