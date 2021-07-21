@@ -43,14 +43,14 @@ class ThreadPool:
         self.__lock_wait = threading.Lock()
         self.__running_num = 0
         self.__thread_num = thread_num
+        self.succeed = 0
+        self.fail = 0
         for _ in range(thread_num):
             self.threads.append(Worker(self.tasks,
                                        self.is_running,
                                        self.handler,
                                        self.__thread_start_work(),
                                        self.__thread_finish_work()))
-        self.succeed = 0
-        self.fail = 0
 
     @staticmethod
     def __errorHandler(_):

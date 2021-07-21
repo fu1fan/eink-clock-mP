@@ -81,13 +81,13 @@ if __name__ == "__main__":  # TODO:添加显示功能
         os.system("python3 main.py &")
         raise RuntimeError("The screen is busy!")
     if os.path.exists("reset"):
-        paper.background_image = Image.open(open("resources/images/Updating.jpg", mode="rb"))
-        paper.init()
         logger = Logger(0, tag="reset")
         result = os.popen("git checkout .")
         os.remove("reset")
         logger.info("已重置")
     elif os.path.exists("update"):
+        paper.background_image = Image.open(open("resources/images/Updating.jpg", mode="rb"))
+        paper.init()
         logger = Logger(0, tag="updater")
         result = os.popen("git pull")
         logger.info(result.read())
