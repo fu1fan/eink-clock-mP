@@ -57,7 +57,7 @@ class EpdController(epdDriver.EPD_2IN9_V2):
 
     def display_Base(self, image, timeout=0):
         self.lock.acquire(timeout=timeout)
-        super().display(image)
+        super().display_Base(image)
         self.lock.release()
         self.last_update = time.time()
         self.partial_time = 0
@@ -118,7 +118,7 @@ class Paper:
     """
 
     def __init__(self,
-                 epd: epdDriver.EPD_2IN9_V2,
+                 epd: EpdController,
                  paper_lock: threading.Lock,
                  background_image=Image.new("RGB", (296, 128), 1)):
         self.inited = False
