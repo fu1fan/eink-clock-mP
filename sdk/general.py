@@ -229,7 +229,7 @@ class TimingTask:
         self.cycle = cycle
         self.func = func
         self.daemonic = daemonic
-        self.__timer = None
+        self.__timer = threading.Timer(self.cycle, self.__run)
         self.__running = False
         self.args = args
         self.kwargs = kwargs
