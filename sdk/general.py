@@ -138,7 +138,7 @@ class ThreadPool:
     def clear(self):
         self.tasks.queue.clear()    # TODO:未测试
 
-    def wait(self, timeout=0):
+    def wait(self, timeout=-1):
         self.__lock_wait.acquire(timeout=timeout)
 
     def full(self):
@@ -275,11 +275,11 @@ class TimingTask:
 
 class TimingTasks(TimingTask):
     def __init__(self, cycle: int, funcs=None, limit=None, timeoutHandler=None, daemonic=True):
-        super().__init__(cycle, self.__do_tasks(), limit, timeoutHandler, daemonic)
+        self.lock = threading.Lock()  # 不知道为啥，用单下划线子类无法访问到，这里只好这样了
+        super().__init__(cycle, self.__do_tasks, limit, timeoutHandler, daemonic)
         if funcs is None:
             funcs = dict()
         self.funcs = funcs
-        self.lock = threading.Lock()    # 不知道为啥，用单下划线子类无法访问到，这里只好这样了
 
     def __do_tasks(self):
         self.lock.acquire()
@@ -287,7 +287,7 @@ class TimingTasks(TimingTask):
             func(*arguments[0], **arguments[1])
         self.lock.release()
 
-    def add(self, func, timeout=0, *args, **kwargs):
+    def add(self, func, timeout=-1, *args, **kwargs):
         """
         建议使用线程池进行此操作（异步执行）
         """
@@ -295,7 +295,7 @@ class TimingTasks(TimingTask):
         self.funcs[func] = (args, kwargs)
         self.lock.release()
 
-    def remove(self, func, timeout=0):
+    def remove(self, func, timeout=-1):
         """
         建议使用线程池进行此操作（异步执行）
         """
@@ -303,7 +303,7 @@ class TimingTasks(TimingTask):
         del self.funcs[func]
         self.lock.release()
 
-    def clear(self, timeout=0):
+    def clear(self, timeout=-1):
         self.lock.acquire(timeout=timeout)
         self.funcs = {}
         self.lock.release()

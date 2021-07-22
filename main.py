@@ -1,5 +1,5 @@
 import threading
-import traceback
+import time
 from sdk import logger
 from sdk import display
 from PIL import Image
@@ -7,21 +7,19 @@ from sdk import general
 
 from modules.theme.default import theme as text_clock
 
-
 if __name__ == "__main__":  # 主线程：UI管理
     logger_main = logger.Logger(logger.DEBUG)
-    main_pool = general.ThreadPool(20)  # 创建20个空进程
+    main_pool = general.ThreadPool(1)  # 创建20个空进程
     main_pool.start()
     epdLock = threading.RLock()  # 将该锁发送给对应的paper，可让屏幕在刷新时阻塞触摸的扫描，同时也可以防止两个进程同时访问屏幕
     epd = display.EpdController(20, epdLock, True)
     if epd.IsBusy():
         logger_main.error("The screen is busy!")
         raise RuntimeError("The screen is busy!")
-    paperLock = threading.Lock()
     openingImages = (Image.open(open("resources/images/raspberry.jpg", mode="rb")),
                      Image.open(open("resources/images/github.jpg", mode="rb")),
                      Image.open(open("resources/images/simplebytes.jpg", mode="rb")))
-    paperNow = display.Paper(epd, paperLock, background_image=openingImages[0])
+    paperNow = display.Paper(epd, background_image=openingImages[0])
 
     load_lock = threading.Barrier(2)
 
@@ -40,17 +38,15 @@ if __name__ == "__main__":  # 主线程：UI管理
 
         ###
         load_lock.wait()
-
-        del paperNow
-        clock = text_clock.Theme(epd, paperLock, main_pool)
+        clock = text_clock.Theme(epd, main_pool)
         paperNow = clock.build()
         paperNow.init()
 
         # 主程序开始
+        while True:
+            time.sleep(10)
     except KeyboardInterrupt:
         print("ctrl+c")
-    except:
-        logger_main.warn(traceback.format_exc())
     else:
         epd.sleep()
         epd.exit()

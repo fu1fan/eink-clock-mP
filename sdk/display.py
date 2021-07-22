@@ -49,42 +49,43 @@ class EpdController(epdDriver.EPD_2IN9_V2):
             self.sleep()
             self.lock.release()
 
-    def display(self, image, timeout=0):
+    def display(self, image, timeout=-1):
         self.lock.acquire(timeout=timeout)
         super().display(image)
         self.lock.release()
         self.last_update = time.time()
         self.partial_time = 0
 
-    def display_Base(self, image, timeout=0):
-        self.lock.acquire(timeout=timeout)
+    def display_Base(self, image, timeout=-1):
+        self.lock.acquire()
         super().display_Base(image)
         self.lock.release()
         self.last_update = time.time()
         self.partial_time = 0
 
-    def display_Partial(self, image, timeout=0):
+    def display_Partial(self, image, timeout=-1):
         self.lock.acquire(timeout=timeout)
         super().display_Partial(image)
         self.lock.release()
         self.last_update = time.time()
         self.partial_time += 1
 
-    def display_Auto(self, image, timeout=0):
+    def display_Auto(self, image, timeout=-1):
         self.lock.acquire(timeout=timeout)
         if time.time() - self.last_update > self.refresh_time | self.partial_time >= self.refresh_interval:
             self.display_Base(image, timeout)
         else:
-            self.display(image, timeout)
+            self.display_Partial_Wait(image, timeout)
+        self.lock.release()
 
-    def display_Partial_Wait(self, image, timeout=0):
+    def display_Partial_Wait(self, image, timeout=-1):
         self.lock.acquire(timeout=timeout)
         super().display_Partial_Wait(image)
         self.lock.release()
         self.last_update = time.time()
         self.partial_time += 1
 
-    def clear(self, color, timeout=0):
+    def clear(self, color, timeout=-1):
         self.lock.acquire(timeout=timeout)
         super().clear(color)
         self.lock.release()
@@ -96,7 +97,7 @@ class EpdController(epdDriver.EPD_2IN9_V2):
         self.sleep()
         super().exit()
 
-    def acquire(self, timeout=0):
+    def acquire(self, timeout=-1):
         return self.lock.acquire(timeout=timeout)
 
     def release(self):
@@ -110,18 +111,12 @@ class Paper:
 
     def __init__(self,
                  epd: EpdController,
-                 paper_lock: threading.Lock,
                  background_image=Image.new("RGB", (296, 128), 1)):
         self.inited = False
         self.background_image = background_image
-        self.paper_lock = paper_lock  # 确保只有一个Page对象能获得主动权～
         self.epd = epd
         self.image_old = self.background_image
         self.update_lock = threading.Lock()
-
-    def __del__(self):
-        if self.inited:
-            self.paper_lock.release()
 
     def display(self, image: Image):
         b_image = self.epd.get_buffer(image)
@@ -140,8 +135,6 @@ class Paper:
         return self.background_image
 
     def init(self):
-        if not self.paper_lock.acquire(blocking=False):
-            raise RuntimeError("Existing Page object")
         self.inited = True
         self.display(self.build())
         return True
@@ -176,10 +169,9 @@ class PaperDynamic(Paper):
 
     def __init__(self,
                  epd: epdDriver,
-                 paper_lock: threading.Lock,
                  pool: general.ThreadPool,
-                 background_image=None, ):
-        super().__init__(epd, paper_lock, background_image)
+                 background_image=Image.new("RGB", (296, 128), 1)):
+        super().__init__(epd, background_image)
         # 实例化各种定时器
         self.pool = pool
         self.timing_task_secondly = general.TimingTasksAsyn(1, pool)
@@ -196,7 +188,6 @@ class PaperDynamic(Paper):
         self.timing_task_ten_minutely.stop()
         self.timing_task_half_hourly.stop()
         self.timing_task_hourly.stop()
-        super().__del__()
 
     def pause(self):
         self.__del__()
@@ -206,7 +197,7 @@ class PaperDynamic(Paper):
         for element in self.pages[self.nowPage]:
             element_image = element.build()
             new_image.paste(element_image, (element.x, element.y))
-        self.image_old = new_image()
+        self.image_old = new_image
         return new_image
 
     def init(self):
@@ -265,10 +256,10 @@ class PaperDynamic(Paper):
     def addPage(self, name: str):
         self.pages[name] = []
 
-    def addElement(self, target: str, element: Element):
+    def addElement(self, target: str, element):
         self.pages[target].append(element)
         element.page = target
-        Element.init()
+        element.init()
 
     def changePage(self, name):
         if name in self.pages:
@@ -306,7 +297,7 @@ class Element(metaclass=abc.ABCMeta):  # 定义抽象类
         self.inited = False
 
     @abc.abstractmethod
-    def init(self, register):  # 初始化函数，当被添加到动态Paper时被调用
+    def init(self):  # 初始化函数，当被添加到动态Paper时被调用
         self.inited = True
         pass
 
