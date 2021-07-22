@@ -95,6 +95,12 @@ class EpdController(epdDriver.EPD_2IN9_V2):
         self.sleep()
         super().exit()
 
+    def acquire(self, timeout=0):
+        return self.lock.acquire(timeout=timeout)
+
+    def release(self):
+        return self.lock.release()
+
 
 class Element(metaclass=abc.ABCMeta):  # 定义抽象类
     def __init__(self, x, y):
@@ -126,22 +132,17 @@ class Paper:
         self.paper_lock = paper_lock  # 确保只有一个Page对象能获得主动权～
         self.epd = epd
         self.image_old = self.background_image
+        self.update_lock = threading.Lock()
 
     def __del__(self):
         if self.inited:
             self.paper_lock.release()
 
-    def __inited_check(self):
-        if not self.inited:
-            raise RuntimeError("The object has not been initialized!")
-
     def display(self, image: Image):
-        self.__inited_check()
         b_image = self.epd.get_buffer(image)
         self.epd.display_Base(b_image)  # 是这样的吗？？？迷人的驱动
 
     def display_partial(self, image: Image):
-        self.__inited_check()
         b_image = self.epd.get_buffer(image)
         self.epd.display_Partial_Wait(b_image)
 
@@ -157,19 +158,20 @@ class Paper:
         return True
 
     def refresh(self):
-        self.__inited_check()
         self.display(self.image_old)
         return True
 
     def update(self, refresh=False):
-        self.__inited_check()
-        if refresh:
-            self.display(self.build())
-        else:
-            self.display_partial(self.build())
+        if self.update_lock.acquire(blocking=False):
+            self.epd.acquire()  # 重入锁，保证到屏幕刷新时使用的是最新的 self.build()
+            self.update_lock.release()
+            if refresh:
+                self.display(self.build())
+            else:
+                self.display_partial(self.build())
+            self.epd.release()
 
     def update_background(self, image, refresh=False):
-        self.__inited_check()
         self.background_image = image
         self.update(refresh)
 
@@ -182,7 +184,7 @@ class PaperDynamic(Paper):
     HOURLY = 4
 
     def __init__(self,
-                 epd: epdDriver.EPD_2IN9_V2,
+                 epd: epdDriver,
                  paper_lock: threading.Lock,
                  pool: general.ThreadPool,
                  background_image=None,):
@@ -205,6 +207,9 @@ class PaperDynamic(Paper):
         self.timing_task_hourly.stop()
         super().__del__()
 
+    def pause(self):
+        self.__del__()
+
     def build(self) -> Image:
         new_image = self.background_image
         for element in self.pages[self.nowPage]:
@@ -213,34 +218,48 @@ class PaperDynamic(Paper):
         self.image_old = new_image()
         return new_image
 
+    def init(self):
+        super().init()
+        if not self.timing_task_secondly.is_empty():
+            self.timing_task_secondly.start()
+        if not self.timing_task_minutely.is_empty():
+            self.timing_task_minutely.start()
+        if not self.timing_task_ten_minutely.is_empty():
+            self.timing_task_ten_minutely.start()
+        if not self.timing_task_half_hourly.is_empty():
+            self.timing_task_half_hourly.start()
+        if not self.timing_task_hourly.is_empty():
+            self.timing_task_hourly.start()
+        return True
+
     def register(self, cycle, func, *args, **kwargs):  # 注册周期函数
         if cycle == self.SECONDLY:
             def adder():
                 self.timing_task_secondly.add(func, *args, **kwargs)
 
             self.pool.add(adder)
-            if not self.timing_task_secondly.is_running():
+            if (not self.timing_task_secondly.is_running()) & self.inited:
                 self.timing_task_secondly.start()
         elif cycle == self.MINUTELY:
             def adder():
                 self.timing_task_minutely.add(func, *args, **kwargs)
 
             self.pool.add(adder)
-            if not self.timing_task_minutely.is_running():
+            if (not self.timing_task_minutely.is_running()) & self.inited:
                 self.timing_task_minutely.start()
         elif cycle == self.TEN_MINUTELY:
             def adder():
                 self.timing_task_ten_minutely.add(func, *args, **kwargs)
 
             self.pool.add(adder)
-            if not self.timing_task_ten_minutely.is_running():
+            if (not self.timing_task_ten_minutely.is_running()) & self.inited:
                 self.timing_task_ten_minutely.start()
         elif cycle == self.HALF_HOURLY:
             def adder():
                 self.timing_task_half_hourly.add(func, *args, **kwargs)
 
             self.pool.add(adder)
-            if not self.timing_task_half_hourly.is_running():
+            if (not self.timing_task_half_hourly.is_running()) & self.inited:
                 self.timing_task_half_hourly.start()
         elif cycle == self.HOURLY:
             def adder():
@@ -267,7 +286,6 @@ class PaperDynamic(Paper):
             raise ValueError("The specified page does not exist!")
 
     def update_async(self, refresh=False):
-        self.__inited_check()
         self.pool.add_immediately(self.update, refresh)
 
     def infoHandler(self):

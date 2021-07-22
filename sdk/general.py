@@ -308,6 +308,11 @@ class TimingTasks(TimingTask):
         self.funcs = {}
         self.lock.release()
 
+    def is_empty(self):
+        if len(self.funcs) == 0:
+            return True
+        return False
+
 
 class TimingTasksAsyn(TimingTasks):
     def __init__(self, cycle: int, pool: ThreadPool, funcs=None, limit=None, timeoutHandler=None, daemonic=True):
