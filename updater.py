@@ -74,7 +74,7 @@ class VersionCtrl:
 
 if __name__ == "__main__":
     epd_lock = threading.RLock()
-    logger_updater = logger_updater.Logger(logger_updater.DEBUG, tag="updater")
+    logger_updater = logger.Logger(logger.DEBUG, tag="updater")
     epd = display.EpdController(logger_updater, threading.RLock())
     paper = display.Paper(epd, threading.Lock())
     if epd.IsBusy():
