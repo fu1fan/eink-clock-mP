@@ -46,6 +46,6 @@ class Theme:
 
     def build(self):
         paper = display.PaperDynamic(self.epd, self.pool)
-        text_clock = TextClock(0, 0, paper)
+        text_clock = TextClock(0, 0, paper, self.pool)
         paper.addElement("mainPaper", text_clock)
         return paper
