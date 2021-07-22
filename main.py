@@ -7,9 +7,11 @@ from sdk import general
 
 from modules.theme.default import theme as text_clock
 
+# TODO:删除TimingTask相关内容
+
 if __name__ == "__main__":  # 主线程：UI管理
     logger_main = logger.Logger(logger.DEBUG)
-    main_pool = general.ThreadPool(1)  # 创建20个空进程
+    main_pool = general.ThreadPool(5)  # 创建20个空进程
     main_pool.start()
     epdLock = threading.RLock()  # 将该锁发送给对应的paper，可让屏幕在刷新时阻塞触摸的扫描，同时也可以防止两个进程同时访问屏幕
     epd = display.EpdController(20, epdLock, True)

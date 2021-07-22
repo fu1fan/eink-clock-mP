@@ -98,6 +98,7 @@ class ThreadPool:
         if self.__inited:
             raise RuntimeError("A ThreadPool can only be started once!")
         self.__inited = True
+        self.running = True
         for i in self.threads:
             i.start()
 
@@ -282,10 +283,10 @@ class TimingTasks(TimingTask):
         self.funcs = funcs
 
     def __do_tasks(self):
-        self.lock.acquire()
+        #self.lock.acquire()
         for func, arguments in self.funcs:
             func(*arguments[0], **arguments[1])
-        self.lock.release()
+        #self.lock.release()
 
     def add(self, func, timeout=-1, *args, **kwargs):
         """

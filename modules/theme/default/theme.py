@@ -12,13 +12,22 @@ class TextClock(display.Element):
         super().__init__(x, y, paper)
         self.last_update = -1
         self.image = Image.new("RGB", (296, 128), 0)
+        self.pool = paper.pool
+        self.stop_sign = False
+
+    def __del__(self):
+        self.stop_sign = True
 
     def update(self):
-        if self.last_update != time.localtime(time.time()).tm_min:
-            self.paper.update()
+        while True:
+            if self.stop_sign:
+                return
+            if self.last_update != time.localtime(time.time()).tm_min:
+                self.paper.update()
+            time.sleep(1)
 
     def init(self):
-        self.paper.register(self.paper.SECONDLY, self.update)
+        threading.Thread(target=self.update()).start()
 
     def build(self) -> Image:
         now_time = time.strftime("%H : %M", time.localtime())
