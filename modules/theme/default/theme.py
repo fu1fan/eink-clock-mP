@@ -9,7 +9,7 @@ from sdk import general
 
 class TextClock(display.Element):
     def __init__(self, x, y, paper, pool: general.ThreadPool):
-        super().__init__(x, y, paper)
+        super().__init__(x, y, paper, pool)
         self.last_update = -1
         self.image = Image.new("RGB", (296, 128), 0)
         self.pool = pool
