@@ -12,6 +12,7 @@ class EpdController(epdDriver.EPD_2IN9_V2):
     """
     用这个类来显示图片可能会被阻塞（当多个线程尝试访问屏幕时）
     """
+
     def __init__(self, auto_sleep_time, lock: threading.RLock, init=False, refresh_time=600, refresh_interval=15):
         super().__init__()
         self.last_update = time.time()
@@ -41,7 +42,7 @@ class EpdController(epdDriver.EPD_2IN9_V2):
         else:
             self.tk.stop()
 
-    def controller(self):   # 自动休眠
+    def controller(self):  # 自动休眠
         if time.time() - self.last_update >= self.auto_sleep_time:
             if not self.lock.acquire(blocking=False):
                 return
@@ -102,22 +103,6 @@ class EpdController(epdDriver.EPD_2IN9_V2):
         return self.lock.release()
 
 
-class Element(metaclass=abc.ABCMeta):  # 定义抽象类
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.page = ""
-        self.inited = False
-
-    @abc.abstractmethod
-    def init(self, register):  # 初始化函数，当被添加到动态Paper时被调用
-        pass
-
-    @abc.abstractmethod
-    def build(self) -> Image:  # 当页面刷新时被调用，须返回一个图像
-        pass
-
-
 class Paper:
     """
     用于显示静态图像，不支持切换Page
@@ -146,6 +131,10 @@ class Paper:
         b_image = self.epd.get_buffer(image)
         self.epd.display_Partial_Wait(b_image)
 
+    def display_auto(self, image: Image):
+        b_image = self.epd.get_buffer(image)
+        self.epd.display_Auto(b_image)
+
     def build(self) -> Image:
         self.image_old = self.background_image
         return self.background_image
@@ -161,17 +150,19 @@ class Paper:
         self.display(self.image_old)
         return True
 
-    def update(self, refresh=False):
+    def update(self, refresh=None):
         if self.update_lock.acquire(blocking=False):
             self.epd.acquire()  # 重入锁，保证到屏幕刷新时使用的是最新的 self.build()
             self.update_lock.release()
-            if refresh:
+            if refresh is None:
+                self.display_auto(self.build())
+            elif refresh:
                 self.display(self.build())
             else:
                 self.display_partial(self.build())
             self.epd.release()
 
-    def update_background(self, image, refresh=False):
+    def update_background(self, image, refresh=None):
         self.background_image = image
         self.update(refresh)
 
@@ -187,7 +178,7 @@ class PaperDynamic(Paper):
                  epd: epdDriver,
                  paper_lock: threading.Lock,
                  pool: general.ThreadPool,
-                 background_image=None,):
+                 background_image=None, ):
         super().__init__(epd, paper_lock, background_image)
         # 实例化各种定时器
         self.pool = pool
@@ -211,7 +202,7 @@ class PaperDynamic(Paper):
         self.__del__()
 
     def build(self) -> Image:
-        new_image = self.background_image
+        new_image = self.background_image.copy()
         for element in self.pages[self.nowPage]:
             element_image = element.build()
             new_image.paste(element_image, (element.x, element.y))
@@ -274,18 +265,19 @@ class PaperDynamic(Paper):
     def addPage(self, name: str):
         self.pages[name] = []
 
-    def addElement(self, target: str, element):
+    def addElement(self, target: str, element: Element):
         self.pages[target].append(element)
         element.page = target
-        # TODO:初始化元素
+        Element.init()
 
     def changePage(self, name):
         if name in self.pages:
             self.nowPage = name
+            self.update_async()
         else:
             raise ValueError("The specified page does not exist!")
 
-    def update_async(self, refresh=False):
+    def update_async(self, refresh=None):
         self.pool.add_immediately(self.update, refresh)
 
     def infoHandler(self):
@@ -304,3 +296,20 @@ class PageHome(PaperDynamic):
 
 class PageApp(PaperDynamic):
     pass
+
+
+class Element(metaclass=abc.ABCMeta):  # 定义抽象类
+    def __init__(self, x, y, paper: PaperDynamic):
+        self.x = x
+        self.y = y
+        self.paper = paper
+        self.inited = False
+
+    @abc.abstractmethod
+    def init(self, register):  # 初始化函数，当被添加到动态Paper时被调用
+        self.inited = True
+        pass
+
+    @abc.abstractmethod
+    def build(self) -> Image:  # 当页面刷新时被调用，须返回一个图像
+        pass

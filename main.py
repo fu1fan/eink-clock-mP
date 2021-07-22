@@ -1,11 +1,11 @@
-import os
 import threading
-import time
 import traceback
 from sdk import logger
 from sdk import display
 from PIL import Image
 from sdk import general
+
+from modules.theme.default import theme as text_clock
 
 
 if __name__ == "__main__":  # 主线程：UI管理
@@ -41,7 +41,10 @@ if __name__ == "__main__":  # 主线程：UI管理
         ###
         load_lock.wait()
 
-        paperNow.refresh()
+        del paperNow
+        clock = text_clock.Theme(epd, paperLock, main_pool)
+        paperNow = clock.build()
+        paperNow.init()
 
         # 主程序开始
     except KeyboardInterrupt:
