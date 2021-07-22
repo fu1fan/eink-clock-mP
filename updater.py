@@ -5,7 +5,7 @@ import threading
 import requests
 import traceback
 
-from sdk import logger_updater
+from sdk import logger
 from sdk import display
 from PIL import Image
 
