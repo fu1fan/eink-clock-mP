@@ -4,6 +4,7 @@ import time
 
 from sdk import epd2in9_V2 as epdDriver
 from sdk import general
+from sdk import logger
 
 from PIL import Image
 
@@ -13,15 +14,23 @@ class EpdController(epdDriver.EPD_2IN9_V2):
     用这个类来显示图片可能会被阻塞（当多个线程尝试访问屏幕时）
     """
 
-    def __init__(self, auto_sleep_time, lock: threading.RLock, init=False, refresh_time=600, refresh_interval=15):
+    def __init__(self,
+                 logger_: logger.Logger,
+                 lock: threading.RLock,
+                 init=False,
+                 auto_sleep_time=20,
+                 refresh_time=3600,
+                 refresh_interval=15):
         super().__init__()
         self.last_update = time.time()
         self.partial_time = 0
         self.refresh_time = refresh_time
         self.refresh_interval = refresh_interval
         self.__auto_sleep_time = auto_sleep_time
+        self.logger_ = logger_
         self.lock = lock
         self.tk = general.TimingTask(auto_sleep_time, self.controller)
+        self.sleep_status = threading.Lock()    # 上锁表示休眠
         if auto_sleep_time > 0:
             self.tk.start()
         if init:
@@ -49,6 +58,14 @@ class EpdController(epdDriver.EPD_2IN9_V2):
             self.sleep()
             self.lock.release()
 
+    def init(self):
+        super().init()
+        try:
+            self.sleep_status.release()
+        except RuntimeError:
+            pass
+        self.logger_.debug("屏幕初始化")
+
     def display(self, image, timeout=-1):
         self.lock.acquire(timeout=timeout)
         super().display(image)
@@ -72,7 +89,7 @@ class EpdController(epdDriver.EPD_2IN9_V2):
 
     def display_Auto(self, image, timeout=-1):
         self.lock.acquire(timeout=timeout)
-        if time.time() - self.last_update > self.refresh_time | self.partial_time >= self.refresh_interval:
+        if (time.time() - self.last_update > self.refresh_time) or (self.partial_time >= self.refresh_interval):
             self.display_Base(image, timeout)
         else:
             self.display_Partial_Wait(image, timeout)
@@ -96,6 +113,11 @@ class EpdController(epdDriver.EPD_2IN9_V2):
         self.tk.stop()
         self.sleep()
         super().exit()
+
+    def sleep(self):
+        if self.sleep_status.acquire(blocking=False):
+            super().sleep()
+            self.logger_.debug("屏幕休眠")
 
     def acquire(self, timeout=-1):
         return self.lock.acquire(timeout=timeout)
@@ -174,23 +196,8 @@ class PaperDynamic(Paper):
         super().__init__(epd, background_image)
         # 实例化各种定时器
         self.pool = pool
-        self.timing_task_secondly = general.TimingTasksAsyn(1, pool)
-        self.timing_task_minutely = general.TimingTasksAsyn(60, pool)
-        self.timing_task_ten_minutely = general.TimingTasksAsyn(600, pool)
-        self.timing_task_half_hourly = general.TimingTasksAsyn(1800, pool)
-        self.timing_task_hourly = general.TimingTasksAsyn(3600, pool)
         self.pages = {"mainPaper": [], "infoPaper": [], "warnPaper": [], "errorPaper": []}  # TODO:为Handler页面添加内容
         self.nowPage = "mainPaper"
-
-    def __del__(self):  # TODO: 测试销毁器
-        self.timing_task_secondly.stop()
-        self.timing_task_minutely.stop()
-        self.timing_task_ten_minutely.stop()
-        self.timing_task_half_hourly.stop()
-        self.timing_task_hourly.stop()
-
-    def pause(self):
-        self.__del__()
 
     def build(self) -> Image:
         new_image = self.background_image.copy()
@@ -202,56 +209,7 @@ class PaperDynamic(Paper):
 
     def init(self):
         super().init()
-        if not self.timing_task_secondly.is_empty():
-            self.timing_task_secondly.start()
-        if not self.timing_task_minutely.is_empty():
-            self.timing_task_minutely.start()
-        if not self.timing_task_ten_minutely.is_empty():
-            self.timing_task_ten_minutely.start()
-        if not self.timing_task_half_hourly.is_empty():
-            self.timing_task_half_hourly.start()
-        if not self.timing_task_hourly.is_empty():
-            self.timing_task_hourly.start()
         return True
-
-    def register(self, cycle, func, *args, **kwargs):  # 注册周期函数
-        if cycle == self.SECONDLY:
-            def adder():
-                self.timing_task_secondly.add(func, *args, **kwargs)
-
-            self.pool.add(adder)
-            if (not self.timing_task_secondly.is_running()) & self.inited:
-                self.timing_task_secondly.start()
-        elif cycle == self.MINUTELY:
-            def adder():
-                self.timing_task_minutely.add(func, *args, **kwargs)
-
-            self.pool.add(adder)
-            if (not self.timing_task_minutely.is_running()) & self.inited:
-                self.timing_task_minutely.start()
-        elif cycle == self.TEN_MINUTELY:
-            def adder():
-                self.timing_task_ten_minutely.add(func, *args, **kwargs)
-
-            self.pool.add(adder)
-            if (not self.timing_task_ten_minutely.is_running()) & self.inited:
-                self.timing_task_ten_minutely.start()
-        elif cycle == self.HALF_HOURLY:
-            def adder():
-                self.timing_task_half_hourly.add(func, *args, **kwargs)
-
-            self.pool.add(adder)
-            if (not self.timing_task_half_hourly.is_running()) & self.inited:
-                self.timing_task_half_hourly.start()
-        elif cycle == self.HOURLY:
-            def adder():
-                self.timing_task_hourly.add(func, *args, **kwargs)
-
-            self.pool.add(adder)
-            if not self.timing_task_hourly.is_running():
-                self.timing_task_hourly.start()
-        else:
-            raise ValueError("We don't have a cycle of this length!")
 
     def addPage(self, name: str):
         self.pages[name] = []
@@ -290,10 +248,11 @@ class PageApp(PaperDynamic):
 
 
 class Element(metaclass=abc.ABCMeta):  # 定义抽象类
-    def __init__(self, x, y, paper: PaperDynamic):
+    def __init__(self, x, y, paper: PaperDynamic, pool: general.ThreadPool):
         self.x = x
         self.y = y
         self.paper = paper
+        self.pool = pool
         self.inited = False
 
     @abc.abstractmethod

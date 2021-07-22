@@ -76,6 +76,7 @@ class Logger:
                 text)  # 格式[level][time][name]--event--
             file.write(content)
             file.close()
+            print(content, end="")
             self.lock.release()
 
     def debug(self, text, info=None) -> None:  # text为写入日志的内容，info为为用户显示的内容，只有当启用Handler时info才会被使用
