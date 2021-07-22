@@ -5,7 +5,7 @@ import threading
 import requests
 import traceback
 
-from sdk import logger_updater
+from sdk import logger
 from sdk import display
 from PIL import Image
 
@@ -16,7 +16,7 @@ repository = "https://gitee.com/fu1fan/eink-clock-mP"
 
 
 class VersionCtrl:
-    def __init__(self, __logger: Logger) -> None:
+    def __init__(self, __logger: logger.Logger) -> None:
         self.logger = __logger
         self.data = None
         pass
