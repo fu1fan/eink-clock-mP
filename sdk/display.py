@@ -17,7 +17,7 @@ class EpdController(epdDriver.EPD_2IN9_V2):
     def __init__(self,
                  logger_: logger.Logger,
                  lock: threading.RLock,
-                 init=False,
+                 init=True,
                  auto_sleep_time=20,
                  refresh_time=3600,
                  refresh_interval=15):
@@ -31,6 +31,7 @@ class EpdController(epdDriver.EPD_2IN9_V2):
         self.lock = lock
         self.tk = general.TimingTask(auto_sleep_time, self.controller)
         self.sleep_status = threading.Lock()    # 上锁表示休眠
+        self.upside_down = False
         if auto_sleep_time > 0:
             self.tk.start()
         if init:
@@ -119,11 +120,20 @@ class EpdController(epdDriver.EPD_2IN9_V2):
             super().sleep()
             self.logger_.debug("屏幕休眠")
 
+    def get_buffer(self, image: Image.Image):
+        if self.upside_down:
+            return super().get_buffer(image.transpose(Image.ROTATE_180))
+        else:
+            return super().get_buffer(image)
+
     def acquire(self, timeout=-1):
         return self.lock.acquire(timeout=timeout)
 
     def release(self):
         return self.lock.release()
+
+    def set_upside_down(self, value: bool):
+        self.upside_down = value
 
 
 class Paper:

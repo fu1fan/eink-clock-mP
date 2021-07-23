@@ -75,7 +75,7 @@ class VersionCtrl:
 if __name__ == "__main__":
     epd_lock = threading.RLock()
     logger_updater = logger.Logger(logger.DEBUG, tag="updater")
-    epd = display.EpdController(logger_updater, threading.RLock(), True)
+    epd = display.EpdController(logger_updater, threading.RLock())
     paper = display.Paper(epd, threading.Lock())
     if epd.IsBusy():
         logger_updater.error("The screen is busy!")
