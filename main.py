@@ -1,5 +1,7 @@
 import threading
 import time
+import traceback
+
 from sdk import logger
 from sdk import display
 from PIL import Image
@@ -50,6 +52,8 @@ if __name__ == "__main__":  # 主线程：UI管理
             time.sleep(10)
     except KeyboardInterrupt:
         print("ctrl+c")
+    except:
+        logger.ERROR(traceback.format_exc())
     else:
         epd.sleep()
         epd.exit()
