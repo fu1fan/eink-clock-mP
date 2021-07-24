@@ -1,16 +1,18 @@
+import threading
+
 from sdk import icnt86
 from sdk import epdconfig as config
 from sdk import logger
+from sdk import threadpool_mini
 
 
 class TouchRecoderNew(icnt86.ICNT_Development):
     pass
 
 
-class TouchReaderOld():
+class TouchRecoderOld():
     def __init__(self):
         self.TouchCount = 0
-
         self.TouchEvenId = [0, 1, 2, 3, 4]
         self.X = [0, 1, 2, 3, 4]
         self.Y = [0, 1, 2, 3, 4]
@@ -34,7 +36,7 @@ class TouchDriver(icnt86.INCT86):
         super().ICNT_Init()
         self.logger_touch.debug("触摸屏初始化")
 
-    def ICNT_Scan(self, ICNT_Dev: TouchRecoderNew, ICNT_Old: TouchReaderOld):
+    def ICNT_Scan(self, ICNT_Dev: TouchRecoderNew, ICNT_Old: TouchRecoderOld):
         mask = 0x00
 
         if self.digital_read(self.INT) == 0:
@@ -74,3 +76,35 @@ class TouchDriver(icnt86.INCT86):
                     ICNT_Dev.P[i] = buf[5 + 7 * i]
 
                 return
+
+
+class TouchHandler:
+    def __init__(self, pool: threadpool_mini.ThreadPool):
+        self.pool = pool
+        self.objects = []   # ((x1, x2, y1, y2), func, args, kwargs)
+        self.data_lock = threading.Lock()
+
+    def add(self, area: tuple, func, *args, **kwargs):
+        """
+        添加一个触摸元件
+        :param func:
+        :param area: (x1, x2, y1, y2)
+        :return:
+        """
+        if area[0]>area[1] or area[2]>area[3] or area[0]<0 or area[1]>296 or area[2]<0 or area[3]>128:
+            raise ValueError("Area out of range!")
+        self.data_lock.acquire()
+        self.objects.append((area, func, args, kwargs))
+        self.data_lock.release()
+
+    def clear(self):
+        self.data_lock.acquire()
+        self.objects = []
+        self.data_lock.release()
+
+    def handle(self, ICNT_Dev: TouchRecoderNew):
+        self.data_lock.acquire()
+        for i in self.objects:
+            if i[0][0] <= ICNT_Dev.X <= i[0][1] and i[0][2] <= ICNT_Dev.Y <= i[0][3]:
+                self.pool.add(i[1], i[2], i[3])
+        self.data_lock.release()

@@ -18,7 +18,7 @@ if __name__ == "__main__":  # 主线程：UI管理
     main_pool.start()   # 启动线程池
     epdLock = threading.RLock()  # 将该锁发送给对应的paper，可让屏幕在刷新时阻塞触摸的扫描，同时也可以防止两个进程同时访问屏幕
     epd = display.EpdController(logger_main, epdLock)   # 显示驱动
-    # epd.set_upside_down(True)   # 倒置图像
+    # epd.set_upside_down(True)   # 倒置图像 TODO:处理触摸屏倒转后的操作
     if epd.IsBusy():
         logger_main.error("The screen is busy!")
         raise RuntimeError("The screen is busy!")
@@ -42,6 +42,8 @@ if __name__ == "__main__":  # 主线程：UI管理
         # 显示开屏动画
         main_pool.add(opening)
         ### 在这里放置要预加载的东西（主题与插件等）
+        touch_recoder_new = touchpad.TouchRecoderNew()
+        touch_recoder_old = touchpad.TouchRecoderOld()
         icnt86 = touchpad.TouchDriver()  # 触摸驱动
         icnt86.ICNT_Init()
         ###
@@ -52,6 +54,7 @@ if __name__ == "__main__":  # 主线程：UI管理
 
         # 主程序开始
         while True:
+            icnt86.ICNT_Scan(touch_recoder_new, touch_recoder_old)
 
             time.sleep(10)
     except KeyboardInterrupt:
