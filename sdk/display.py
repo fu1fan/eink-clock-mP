@@ -2,8 +2,9 @@ import threading
 import abc
 import time
 
+from sdk import threadpool_mini
+from sdk import timing_task
 from sdk import epd2in9_V2 as epdDriver
-from sdk import general
 from sdk import logger
 
 from PIL import Image
@@ -13,14 +14,13 @@ class EpdController(epdDriver.EPD_2IN9_V2):
     """
     用这个类来显示图片可能会被阻塞（当多个线程尝试访问屏幕时）
     """
-
     def __init__(self,
                  logger_: logger.Logger,
                  lock: threading.RLock,
                  init=True,
-                 auto_sleep_time=20,
+                 auto_sleep_time=30,
                  refresh_time=3600,
-                 refresh_interval=15):
+                 refresh_interval=20):
         super().__init__()
         self.last_update = time.time()
         self.partial_time = 0
@@ -29,7 +29,7 @@ class EpdController(epdDriver.EPD_2IN9_V2):
         self.__auto_sleep_time = auto_sleep_time
         self.logger_ = logger_
         self.lock = lock
-        self.tk = general.TimingTask(auto_sleep_time, self.controller)
+        self.tk = timing_task.TimingTask(auto_sleep_time, self.controller)
         self.sleep_status = threading.Lock()    # 上锁表示休眠
         self.upside_down = False
         if auto_sleep_time > 0:
@@ -201,7 +201,7 @@ class PaperDynamic(Paper):
 
     def __init__(self,
                  epd: epdDriver,
-                 pool: general.ThreadPool,
+                 pool: threadpool_mini.ThreadPool,
                  background_image=Image.new("RGB", (296, 128), 1)):
         super().__init__(epd, background_image)
         # 实例化各种定时器
@@ -258,7 +258,7 @@ class PageApp(PaperDynamic):
 
 
 class Element(metaclass=abc.ABCMeta):  # 定义抽象类
-    def __init__(self, x, y, paper: PaperDynamic, pool: general.ThreadPool):
+    def __init__(self, x, y, paper: PaperDynamic, pool: threadpool_mini.ThreadPool):
         self.x = x
         self.y = y
         self.paper = paper

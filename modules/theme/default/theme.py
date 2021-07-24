@@ -3,12 +3,12 @@ import time
 
 from PIL import Image, ImageFont, ImageDraw
 
+import sdk.threadpool_mini
 from sdk import display
-from sdk import general
 
 
 class TextClock(display.Element):
-    def __init__(self, x, y, paper, pool: general.ThreadPool):
+    def __init__(self, x, y, paper, pool: sdk.threadpool_mini.ThreadPool):
         super().__init__(x, y, paper, pool)
         self.last_update = -1
         self.image = Image.new("RGB", (296, 128), 0)
@@ -40,7 +40,7 @@ class TextClock(display.Element):
 
 
 class Theme:
-    def __init__(self, epd: display.EpdController, pool: general.ThreadPool):
+    def __init__(self, epd: display.EpdController, pool: sdk.threadpool_mini.ThreadPool):
         self.epd = epd
         self.pool = pool
 

@@ -4,8 +4,8 @@ import traceback
 
 from sdk import logger
 from sdk import display
+from sdk import threadpool_mini
 from PIL import Image
-from sdk import general
 
 from modules.theme.default import theme as text_clock
 
@@ -13,7 +13,7 @@ from modules.theme.default import theme as text_clock
 
 if __name__ == "__main__":  # 主线程：UI管理
     logger_main = logger.Logger(logger.DEBUG)
-    main_pool = general.ThreadPool(20)  # 创建20个空进程
+    main_pool = threadpool_mini.ThreadPool(20)  # 创建20个空进程
     main_pool.start()
     epdLock = threading.RLock()  # 将该锁发送给对应的paper，可让屏幕在刷新时阻塞触摸的扫描，同时也可以防止两个进程同时访问屏幕
     epd = display.EpdController(logger_main, epdLock)
