@@ -44,7 +44,7 @@ if __name__ == "__main__":  # 主线程：UI管理
         ### 在这里放置要预加载的东西（主题与插件等）
         touch_recoder_new = touchpad.TouchRecoderNew()
         touch_recoder_old = touchpad.TouchRecoderOld()
-        icnt86 = touchpad.TouchDriver()  # 触摸驱动
+        icnt86 = touchpad.TouchDriver(logger_main)  # 触摸驱动
         icnt86.ICNT_Init()
         ###
         load_lock.wait()
@@ -60,7 +60,7 @@ if __name__ == "__main__":  # 主线程：UI管理
     except KeyboardInterrupt:
         print("ctrl+c")
     except:     # ⚠️只在生产环境使用 会影响调试结果！！！
-        logger.ERROR(traceback.format_exc())
+        logger_main.error(traceback.format_exc())
     else:
         epd.sleep()
         epd.exit()
