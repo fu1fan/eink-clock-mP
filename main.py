@@ -14,7 +14,7 @@ from modules.theme.default import theme as text_clock
 
 if __name__ == "__main__":  # 主线程：UI管理
     logger_main = logger.Logger(logger.DEBUG)   # 日志
-    main_pool = threadpool_mini.ThreadPool(20)  # 创建20个空进程
+    main_pool = threadpool_mini.ThreadPool(2)  # 创建20个空进程
     main_pool.start()   # 启动线程池
     epdLock = threading.RLock()  # 将该锁发送给对应的paper，可让屏幕在刷新时阻塞触摸的扫描，同时也可以防止两个进程同时访问屏幕
     epd = display.EpdController(logger_main, epdLock)   # 显示驱动
@@ -42,21 +42,19 @@ if __name__ == "__main__":  # 主线程：UI管理
         # 显示开屏动画
         main_pool.add(opening)
         ### 在这里放置要预加载的东西（主题与插件等）
-        touch_recoder_new = touchpad.TouchRecoderNew()
-        touch_recoder_old = touchpad.TouchRecoderOld()
+        touch_recoder_new = touchpad.TouchRecoder()
+        touch_recoder_old = touchpad.TouchRecoder()
         icnt86 = touchpad.TouchDriver(logger_main)  # 触摸驱动
         icnt86.ICNT_Init()
-        ###
+        touch_handler = touchpad.TouchHandler(main_pool, logger_main)
+        ### 主程序开始
         load_lock.wait()
         clock = text_clock.Theme(epd, main_pool)
         paperNow = clock.build()
         paperNow.init()
-
-        # 主程序开始
         while True:
             icnt86.ICNT_Scan(touch_recoder_new, touch_recoder_old)
-
-            time.sleep(10)
+            touch_handler.handle(touch_recoder_new, touch_recoder_old)
     except KeyboardInterrupt:
         print("ctrl+c")
     except:     # ⚠️只在生产环境使用 会影响调试结果！！！

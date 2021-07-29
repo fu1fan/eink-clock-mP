@@ -172,10 +172,14 @@ class Paper:
         return True
 
     def refresh(self):
+        if not self.inited:
+            return
         self.display(self.image_old)
         return True
 
     def update(self, refresh=None):
+        if not self.inited:
+            return
         if self.update_lock.acquire(blocking=False):
             self.epd.acquire()  # 重入锁，保证到屏幕刷新时使用的是最新的 self.build()
             self.update_lock.release()
@@ -188,6 +192,8 @@ class Paper:
             self.epd.release()
 
     def update_background(self, image, refresh=None):
+        if not self.inited:
+            return
         self.background_image = image
         self.update(refresh)
 

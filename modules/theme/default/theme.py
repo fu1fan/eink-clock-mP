@@ -28,7 +28,9 @@ class TextClock(display.Element):
             time.sleep(1)
 
     def init(self):
-        threading.Thread(target=self.update()).start()
+        t = threading.Thread(target=self.update)
+        t.setDaemon(True)
+        t.start()
 
     def build(self) -> Image:
         now_time = time.strftime("%H : %M", time.localtime())
