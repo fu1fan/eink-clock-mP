@@ -167,8 +167,8 @@ class Paper:
         return self.background_image
 
     def init(self):
-        self.inited = True
         self.display(self.build())
+        self.inited = True
         return True
 
     def refresh(self):
