@@ -1,5 +1,7 @@
+import json
+import os
 import threading
-import time
+import importlib
 import traceback
 
 from sdk import logger
@@ -9,13 +11,11 @@ from sdk import touchpad
 from sdk import configurator
 from PIL import Image
 
-from modules.theme.default import theme as text_clock
-
 example_config = {
     "main": {
         "enable_plugins": [],
-        "enable_theme": [],
-        "enable_app": [],
+        "enable_theme": "default",
+        "enable_apps": [],
         "threadpool_size": 20,
         "opening_images": [
             "resources/images/raspberry.jpg",
@@ -24,11 +24,14 @@ example_config = {
         ],
         "loading_image": "resources/images/loading.jpg"
     },
-    "plugin": {},
-    "theme": {},
-    "app": {},
-    "update_0b5721sje4": 1
+    "plugins": {},
+    "themes": "default",
+    "apps": {},
+    "update_0b53d1sje4": 1
 }
+
+class DependenceError(Exception):
+    pass
 
 if __name__ == "__main__":  # 主线程：UI管理
     logger_main = logger.Logger(logger.DEBUG)  # 日志
@@ -76,13 +79,69 @@ if __name__ == "__main__":  # 主线程：UI管理
         icnt86.ICNT_Init()
         touch_handler = touchpad.TouchHandler(main_pool, logger_main)
 
+        wheels_name = []
+        plugins = []
+        plugins_name = []
+        themes = None
+        apps = []
+        enable_plugins = configurator_main.read("enable_plugins", raise_error=True)
+        for wheel_name in os.listdir("modules/wheels"):     # 检测当前的轮子
+            if wheel_name.endswith(".py") and (wheel_name != "__init__.py"):
+                wheels_name.append(wheel_name)
 
+        for plugin_name in enable_plugins:      # 加载已注册的插件
+            try:
+                file = open("modules/plugins/%s/index.json" % plugin_name)
+                plugin_info = json.load(file)
+                file.close()
+                for wheel_ in plugin_info["depended-wheels"]:
+                    if not wheel_ in wheels_name:
+                        raise DependenceError("No wheel named %s!" % wheel_)
+                plugins.append(importlib.import_module("modules.plugins.%s.index"))
+
+            except FileNotFoundError and json.JSONDecodeError and DependenceError:
+                logger_main.error("插件[%s]加载失败:\n" + traceback.format_exc())
+
+        theme_name = configurator_main.read("enable_theme", raise_error=True)    # 加载主题
+        try:
+            file = open("module/themes/%s/index.json" % theme_name)
+            theme_info = json.load(file)
+            file.close()
+            for wheel_ in theme_info["depended-wheels"]:
+                if not wheel_ in wheels_name:
+                    raise DependenceError("No wheel named %s!" % wheel_)
+            for plugin_ in theme_info["depended-apps"]:
+                if not plugin_ in wheels_name:
+                    raise DependenceError("No plugin named %s!" % plugin_)
+            themes = importlib.import_module("modules.themes.%s.index")
+        except FileNotFoundError and json.JSONDecodeError and DependenceError:
+            logger_main.error("主题[%s]加载失败:\n" + traceback.format_exc())
+            try:
+                file = open("module/themes/default/index.json" % theme_name)
+                theme_info = json.load(file)
+                file.close()
+            except FileNotFoundError and json.JSONDecodeError and DependenceError as e:
+                logger_main.error("默认主题加载失败:\n%s程序已退出" % traceback.format_exc())
+                raise e
+
+        enable_apps = configurator_main.read("enable_apps", raise_error=True)     # 加载程序
+        for app_name in enable_apps:
+            try:
+                file = open("modules/apps/%s/index.json" % app_name)
+                app_info = json.load(file)
+                file.close()
+                for wheel_ in app_info["depended-wheels"]:
+                    if not wheel_ in wheels_name:
+                        raise DependenceError("No wheel named %s!" % wheel_)
+                for plugin_ in app_info["depended-apps"]:
+                    if not plugin_ in wheels_name:
+                        raise DependenceError("No plugin named %s!" % plugin_)
+            except FileNotFoundError and json.JSONDecodeError and DependenceError:
+                logger_main.error("程序[%s]加载失败:\n" + traceback.format_exc())
 
         load_lock.wait()
         ### 主程序开始
-        clock = text_clock.Theme(epd, main_pool)
-        paperNow = clock.build()
-        paperNow.init()
+
         while True:
             icnt86.ICNT_Scan(touch_recoder_new, touch_recoder_old)
             touch_handler.handle(touch_recoder_new, touch_recoder_old)
