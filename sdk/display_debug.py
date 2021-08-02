@@ -4,13 +4,12 @@ import time
 
 from sdk import threadpool_mini
 from sdk import timing_task
-from sdk import epd2in9_V2 as epdDriver
 from sdk import logger
 
 from PIL import Image
 
 
-class EpdController(epdDriver.EPD_2IN9_V2):
+class EpdController:
     """
     用这个类来显示图片可能会被阻塞（当多个线程尝试访问屏幕时）
     """
@@ -61,30 +60,29 @@ class EpdController(epdDriver.EPD_2IN9_V2):
             self.lock.release()
 
     def init(self):
-        super().init()
         try:
             self.sleep_status.release()
         except RuntimeError:
             pass
         self.logger_.debug("屏幕初始化")
 
-    def display(self, image, timeout=-1):
+    def display(self, image: Image.Image, timeout=-1):
         self.lock.acquire(timeout=timeout)
-        super().display(image)
+        image.show()
         self.lock.release()
         self.last_update = time.time()
         self.partial_time = 0
 
     def display_Base(self, image, timeout=-1):
         self.lock.acquire()
-        super().display_Base(image)
+        image.show()
         self.lock.release()
         self.last_update = time.time()
         self.partial_time = 0
 
     def display_Partial(self, image, timeout=-1):
-        self.lock.acquire(timeout=timeout)  # TODO:修复Timeout的问题
-        super().display_Partial(image)
+        self.lock.acquire(timeout=timeout)
+        image.show()
         self.lock.release()
         self.last_update = time.time()
         self.partial_time += 1
@@ -99,14 +97,14 @@ class EpdController(epdDriver.EPD_2IN9_V2):
 
     def display_Partial_Wait(self, image, timeout=-1):
         self.lock.acquire(timeout=timeout)
-        super().display_Partial_Wait(image)
+        image.show()
         self.lock.release()
         self.last_update = time.time()
         self.partial_time += 1
 
     def clear(self, color, timeout=-1):
         self.lock.acquire(timeout=timeout)
-        super().clear(color)
+        pass
         self.lock.release()
         self.last_update = time.time()
         self.partial_time = 0
@@ -114,18 +112,16 @@ class EpdController(epdDriver.EPD_2IN9_V2):
     def exit(self):
         self.tk.stop()
         self.sleep()
-        super().exit()
 
     def sleep(self):
         if self.sleep_status.acquire(blocking=False):
-            super().sleep()
             self.logger_.debug("屏幕休眠")
 
     def get_buffer(self, image: Image.Image):
         if self.upside_down:
-            return super().get_buffer(image.transpose(Image.ROTATE_180))
+            return image.transpose(Image.ROTATE_180)
         else:
-            return super().get_buffer(image)
+            return image
 
     def acquire(self, timeout=-1):
         return self.lock.acquire(timeout=timeout)
@@ -136,6 +132,9 @@ class EpdController(epdDriver.EPD_2IN9_V2):
     def set_upside_down(self, value: bool):
         self.upside_down = value
 
+    @staticmethod
+    def IsBusy():
+        return False
 
 class Paper:
     """
@@ -207,7 +206,7 @@ class PaperDynamic(Paper):
     HOURLY = 4
 
     def __init__(self,
-                 epd: epdDriver,
+                 epd,
                  pool: threadpool_mini.ThreadPool,
                  background_image=Image.new("RGB", (296, 128), 1)):
         super().__init__(epd, background_image)

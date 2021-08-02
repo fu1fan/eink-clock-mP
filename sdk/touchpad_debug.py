@@ -1,37 +1,37 @@
 import threading
 import time
 
-from sdk import icnt86
-from sdk import epdconfig as config
 from sdk import logger
 from sdk import threadpool_mini
 
+class TouchRecoder():
+    def __init__(self):
+        self.Touch = 0
+        self.TouchGestureId = 0
+        self.TouchCount = 0
 
-class TouchRecoder(icnt86.ICNT_Development):
-    pass
+        self.TouchEvenId = [0, 1, 2, 3, 4]
+        self.X = [0, 1, 2, 3, 4]
+        self.Y = [0, 1, 2, 3, 4]
+        self.P = [0, 1, 2, 3, 4]
 
 
-class TouchDriver(icnt86.INCT86):
+class TouchDriver():
     def __init__(self, logger_touch: logger):
-        super().__init__()
         self.logger_touch = logger_touch
 
     def ICNT_Reset(self):
-        super().ICNT_Reset()
         self.logger_touch.debug("触摸屏重置")
 
     def ICNT_ReadVersion(self):
-        buf = self.ICNT_Read(0x000a, 4)
-        self.logger_touch.debug("触摸屏的版本为:" + str(buf))
+        self.logger_touch.debug("触摸屏的版本为:" + "调试器模式")
 
     def ICNT_Init(self):
-        super().ICNT_Init()
         self.logger_touch.debug("触摸屏初始化")
 
     def ICNT_Scan(self, ICNT_Dev: TouchRecoder, ICNT_Old: TouchRecoder):
-        global n
-        mask = 0x00
-
+        x = input("x:")
+        y = input("y:")
         ICNT_Old.Touch = ICNT_Dev.Touch
         ICNT_Old.TouchGestureId = ICNT_Dev.TouchGestureId
         ICNT_Old.TouchCount = ICNT_Dev.TouchCount
@@ -39,44 +39,12 @@ class TouchDriver(icnt86.INCT86):
         ICNT_Old.X = ICNT_Dev.X.copy()
         ICNT_Old.Y = ICNT_Dev.Y.copy()
         ICNT_Old.P = ICNT_Dev.P.copy()
-
-        for _ in range(100):
-            n = self.digital_read(self.INT)
-            if n == 0:
-                break
-            time.sleep(0.001)
-
-        if n == 0:  # 检测屏幕是否被点击，不是每次都能扫描出来
-            ICNT_Dev.Touch = 1
-            buf = self.ICNT_Read(0x1001, 1)
-
-            if buf[0] == 0x00:
-                self.ICNT_Write(0x1001, mask)
-                config.delay_ms(1)
-                self.logger_touch.warn("touchpad buffers status is 0!")
-                return
-            else:
-                ICNT_Dev.TouchCount = buf[0]
-
-                if ICNT_Dev.TouchCount > 5 or ICNT_Dev.TouchCount < 1:
-                    self.ICNT_Write(0x1001, mask)
-                    ICNT_Dev.TouchCount = 0
-                    self.logger_touch.warn("TouchCount number is wrong!")
-                    return
-
-                buf = self.ICNT_Read(0x1002, ICNT_Dev.TouchCount * 7)
-                self.ICNT_Write(0x1001, mask)
-
-                for i in range(0, ICNT_Dev.TouchCount, 1):
-                    ICNT_Dev.TouchEvenId[i] = buf[6 + 7 * i]
-                    ICNT_Dev.X[i] = 295 - ((buf[2 + 7 * i] << 8) + buf[1 + 7 * i])
-                    ICNT_Dev.Y[i] = 127 - ((buf[4 + 7 * i] << 8) + buf[3 + 7 * i])
-                    ICNT_Dev.P[i] = buf[5 + 7 * i]
-
-                return
-        else:
+        if x == "" or y == "":
             ICNT_Dev.Touch = 0
-            return
+        else:
+            ICNT_Dev.Touch = 1
+            ICNT_Dev.X[0] = x
+            ICNT_Dev.Y[0] = y
 
 
 class TouchHandler:
@@ -109,7 +77,7 @@ class TouchHandler:
         self.data_lock.release()
         self.signal_1 = False
 
-    def add_touched(self, area, func1, func2, *args, **kwargs): # TODO:添加批量导入
+    def add_touched(self, area, func1, func2, *args, **kwargs):  # TODO:添加批量导入
         if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
             raise ValueError("Area out of range!")
         self.signal_1 = True

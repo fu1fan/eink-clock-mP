@@ -175,3 +175,4 @@ class Worker(threading.Thread):
             else:
                 if not self.is_running():
                     break
+
