@@ -33,6 +33,7 @@ example_config = {
     "update_0bdsssj4": 1
 }
 
+
 class DependenceError(Exception):
     pass
 
@@ -145,10 +146,9 @@ if __name__ == "__main__":  # 主线程：UI管理
             except FileNotFoundError and json.JSONDecodeError and DependenceError:
                 logger_main.error("程序[%s]加载失败:\n" + traceback.format_exc())
 
-        paperNow = theme.build(epd, main_pool)
-
         load_lock.wait()
         ### 主程序开始
+        paperNow = theme.build(epd, main_pool)
         paperNow.init()
 
         while True:
