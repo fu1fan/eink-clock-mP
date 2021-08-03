@@ -43,6 +43,28 @@ class TouchHandler:
         self.clicked.append([area, func, args, kwargs, False])
         self.signal_1 = False
 
+    def remove_clicked(self, func) -> bool:     # 未测试
+        self.signal_1 = True
+        while True:
+            if not self.signal_2:
+                break
+            time.sleep(0.1)
+        counter = 0
+        remove_list = []
+        for i in self.clicked:
+            if i[1] == func:
+                remove_list.append(counter)
+            counter += 1
+        counter = 0
+        if len(remove_list) == 0:
+            self.signal_1 = False
+            return False
+        for i in remove_list:
+            del self.clicked[i - counter]
+            counter += 1
+        self.signal_1 = False
+        return True
+
     def add_touched(self, area, func1, func2, *args, **kwargs):  # TODO:添加批量导入
         if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
             raise ValueError("Area out of range!")
@@ -53,6 +75,28 @@ class TouchHandler:
             time.sleep(0.1)
         self.touched.append([area, func1, func2, args, kwargs, False])
         self.signal_1 = False
+
+    def remove_touched(self, func) -> bool:
+        self.signal_1 = True
+        while True:
+            if not self.signal_2:
+                break
+            time.sleep(0.1)
+        counter = 0
+        remove_list = []
+        for i in self.touched:
+            if i[1] == func:    # 只对func1进行匹配
+                remove_list.append(counter)
+            counter += 1
+        counter = 0
+        if len(remove_list) == 0:
+            self.signal_1 = False
+            return False
+        for i in remove_list:
+            del self.touched[i - counter]
+            counter += 1
+        self.signal_1 = False
+        return True
 
     def add_slide_x(self, area, func):
         if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
@@ -65,6 +109,28 @@ class TouchHandler:
         self.slide_x.append([area, func, None])
         self.signal_1 = False
 
+    def remove_slide_x(self, func) -> bool:
+        self.signal_1 = True
+        while True:
+            if not self.signal_2:
+                break
+            time.sleep(0.1)
+        counter = 0
+        remove_list = []
+        for i in self.slide_x:
+            if i[1] == func:
+                remove_list.append(counter)
+            counter += 1
+        counter = 0
+        if len(remove_list) == 0:
+            self.signal_1 = False
+            return False
+        for i in remove_list:
+            del self.slide_x[i - counter]
+            counter += 1
+        self.signal_1 = False
+        return True
+
     def add_slide_y(self, area, func):
         if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
             raise ValueError("Area out of range!")
@@ -75,6 +141,28 @@ class TouchHandler:
             time.sleep(0.1)
         self.slide_y.append([area, func, None])
         self.signal_1 = False
+
+    def remove_slide_y(self, func) -> bool:
+        self.signal_1 = True
+        while True:
+            if not self.signal_2:
+                break
+            time.sleep(0.1)
+        counter = 0
+        remove_list = []
+        for i in self.slide_y:
+            if i[1] == func:
+                remove_list.append(counter)
+            counter += 1
+        counter = 0
+        if len(remove_list) == 0:
+            self.signal_1 = False
+            return False
+        for i in remove_list:
+            del self.slide_y[i - counter]
+            counter += 1
+        self.signal_1 = False
+        return True
 
     def clear(self):
         self.signal_1 = True
