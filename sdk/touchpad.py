@@ -105,11 +105,10 @@ class TouchHandler:
             if not self.signal_2:
                 break
             time.sleep(0.1)
-        self.clicked.append((area, func, args, kwargs, False))
-        self.data_lock.release()
+        self.clicked.append([area, func, args, kwargs, False])
         self.signal_1 = False
 
-    def add_touched(self, area, func1, func2, *args, **kwargs): # TODO:添加批量导入
+    def add_touched(self, area, func1, func2, *args, **kwargs):  # TODO:添加批量导入
         if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
             raise ValueError("Area out of range!")
         self.signal_1 = True
@@ -117,7 +116,7 @@ class TouchHandler:
             if not self.signal_2:
                 break
             time.sleep(0.1)
-        self.touched.append((area, func1, func2, args, kwargs, False))
+        self.touched.append([area, func1, func2, args, kwargs, False])
         self.signal_1 = False
 
     def add_slide_x(self, area, func):
@@ -128,7 +127,7 @@ class TouchHandler:
             if not self.signal_2:
                 break
             time.sleep(0.1)
-        self.slide_x.append((area, func, None))
+        self.slide_x.append([area, func, None])
         self.signal_1 = False
 
     def add_slide_y(self, area, func):
@@ -139,7 +138,7 @@ class TouchHandler:
             if not self.signal_2:
                 break
             time.sleep(0.1)
-        self.slide_y.append((area, func, None))
+        self.slide_y.append([area, func, None])
         self.signal_1 = False
 
     def clear(self):
@@ -166,18 +165,18 @@ class TouchHandler:
                 for i in self.touched:  # 扫描touch
                     if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
                         if not i[-1]:
-                            self.pool.add(i[1], i[3], i[4])  # 如果被点击，且标记为False，则执行func1
+                            self.pool.add(i[1], *i[3], **i[4])  # 如果被点击，且标记为False，则执行func1
                             i[-1] = True
                     else:
                         if i[-1]:
-                            self.pool.add(i[2], i[3], i[4])  # 如果没有被点击，且标记为True，则执行func2
+                            self.pool.add(i[2], *i[3], **i[4])  # 如果没有被点击，且标记为True，则执行func2
                             i[-1] = False
 
         elif ICNT_Dev.Touch and (not ICNT_Old.Touch):  # 如果开始触摸
             self.logger_touch.debug("触摸事件开始：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
             for i in self.touched:  # 扫描touch
                 if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
-                    self.pool.add(i[1], i[3], i[4])  # 如果被点击，且标记为False，则执行func1
+                    self.pool.add(i[1], *i[3], **i[4])  # 如果被点击，且标记为False，则执行func1
                     i[-1] = True
 
             for i in self.clicked:
@@ -196,13 +195,13 @@ class TouchHandler:
             self.logger_touch.debug("触摸事件终止：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
             for i in self.touched:
                 if i[-1]:
-                    self.pool.add(i[2], i[3], i[4])  # 如果没有被点击，且标记为True，则执行func2
+                    self.pool.add(i[2], *i[3], **i[4])  # 如果没有被点击，且标记为True，则执行func2
                     i[-1] = False
 
             for i in self.clicked:
                 if i[-1]:
                     if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
-                        self.pool.add(i[1], i[2], i[3])
+                        self.pool.add(i[1], *i[2], **i[3])
                     i[-1] = False
 
             for i in self.slide_x:  # ⚠️参数需要经过测试后调整
