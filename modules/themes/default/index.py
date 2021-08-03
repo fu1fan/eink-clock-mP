@@ -3,18 +3,19 @@ import time
 
 from PIL import Image, ImageFont, ImageDraw
 
-from main import threadpool_mini
-from main import display
+from main import environment
+
+display = environment.display
 
 
 class TextClock(display.Element):
-    def __init__(self, x, y, paper, pool: threadpool_mini.ThreadPool):
-        super().__init__(x, y, paper, pool)
+    def __init__(self, x, y, paper):
+        super().__init__(x, y, paper)
         self.last_update = -1
         self.image = Image.new("RGB", (296, 128), 0)
-        self.pool = pool
         self.stop_sign = False
         self.font25 = ImageFont.truetype("resources/fonts/PTSerifCaption.ttc", 53)
+        self.paper.touch_handler.add_clicked((0, 296, 0, 128), self.paper.refresh)
 
     def __del__(self):
         self.stop_sign = True
@@ -41,8 +42,8 @@ class TextClock(display.Element):
         return now_image
 
 
-def build(epd: display.EpdController, pool: threadpool_mini):
-    paper = display.PaperDynamic(epd, pool)
-    text_clock = TextClock(0, 0, paper, pool)
+def build(env: environment):
+    paper = display.PaperDynamic(env)
+    text_clock = TextClock(0, 0, paper)
     paper.addElement("mainPage", text_clock)
     return paper

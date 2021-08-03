@@ -1,6 +1,6 @@
 # 已被fu1fan修改，勿直接应用于生产环境
 
-from . import epdconfig as config
+from sdk import epdconfig as config
 
 
 class ICNT_Development:

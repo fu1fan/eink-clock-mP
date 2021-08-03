@@ -1,10 +1,8 @@
 import threading
 import time
 
-from sdk import logger
-from sdk import threadpool_mini
 
-class TouchRecoder():
+class TouchRecoder:
     def __init__(self):
         self.Touch = 0
         self.TouchGestureId = 0
@@ -16,49 +14,15 @@ class TouchRecoder():
         self.P = [0, 1, 2, 3, 4]
 
 
-class TouchDriver():
-    def __init__(self, logger_touch: logger):
-        self.logger_touch = logger_touch
-
-    def ICNT_Reset(self):
-        self.logger_touch.debug("触摸屏重置")
-
-    def ICNT_ReadVersion(self):
-        self.logger_touch.debug("触摸屏的版本为:" + "调试器模式")
-
-    def ICNT_Init(self):
-        self.logger_touch.debug("触摸屏初始化")
-
-    def ICNT_Scan(self, ICNT_Dev: TouchRecoder, ICNT_Old: TouchRecoder):
-        try:
-            x = int(input("x:"))
-            y = int(input("y:"))
-        except ValueError:
-            x = None
-            y = None
-        ICNT_Old.Touch = ICNT_Dev.Touch
-        ICNT_Old.TouchGestureId = ICNT_Dev.TouchGestureId
-        ICNT_Old.TouchCount = ICNT_Dev.TouchCount
-        ICNT_Old.TouchEvenId = ICNT_Dev.TouchEvenId
-        ICNT_Old.X = ICNT_Dev.X.copy()
-        ICNT_Old.Y = ICNT_Dev.Y.copy()
-        ICNT_Old.P = ICNT_Dev.P.copy()
-        if x == None or y == None:
-            ICNT_Dev.Touch = 0
-        else:
-            ICNT_Dev.Touch = 1
-            ICNT_Dev.X[0] = x
-            ICNT_Dev.Y[0] = y
-
-
 class TouchHandler:
-    def __init__(self, pool: threadpool_mini.ThreadPool, logger: logger.Logger):
-        self.pool = pool
+    def __init__(self, env):
+        self.pool = env.pool
         self.clicked = []  # 当对象被点击并松开后调用指定函数                      ((x1, x2, y1, y2), func, args, kwargs)
         self.touched = []  # 当对象被按下后调用指定函数，直到松开后再次调用另一指定函数 ((x1, x2, y1, y2), func1, func2, args, kwargs)
         self.slide_x = []  # 当屏幕从指定区域被横向滑动后调用指定函数               ((x1, x2, y1, y2), func, args, kwargs)
         self.slide_y = []  # 当屏幕从指定区域被纵向滑动后调用指定函数               ((x1, x2, y1, y2), func, args, kwargs)
-        self.logger_touch = logger
+        self.data_lock = threading.Lock()
+        self.logger_touch = env.logger_env
         self.signal_1 = False
         self.signal_2 = False
 
