@@ -5,6 +5,7 @@ import time
 from sdk import threadpool_mini
 from sdk import timing_task
 from sdk import logger
+from sdk import touchpad_debug as touchpad
 
 from PIL import Image
 
@@ -208,12 +209,14 @@ class PaperDynamic(Paper):
     def __init__(self,
                  epd,
                  pool: threadpool_mini.ThreadPool,
+                 touch_handler: touchpad.TouchHandler,
                  background_image=Image.new("RGB", (296, 128), 1)):
         super().__init__(epd, background_image)
         # 实例化各种定时器
         self.pool = pool
         self.pages = {"mainPage": [], "infoPage": [], "warnPage": [], "errorPage": []}  # TODO:为Handler页面添加内容
         self.nowPage = "mainPage"
+        self.touch_handler = touch_handler
 
     def build(self) -> Image:
         new_image = self.background_image.copy()
@@ -260,11 +263,11 @@ class PageApp(PaperDynamic):
 
 
 class Element(metaclass=abc.ABCMeta):  # 定义抽象类
-    def __init__(self, x, y, paper: PaperDynamic, pool: threadpool_mini.ThreadPool):
+    def __init__(self, x, y, paper: PaperDynamic):
         self.x = x
         self.y = y
         self.paper = paper
-        self.pool = pool
+        self.pool = paper.pool
         self.inited = False
 
     def init(self):  # 初始化函数，当被添加到动态Paper时被调用
