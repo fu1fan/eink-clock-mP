@@ -4,8 +4,8 @@ import time
 from PIL import Image
 
 from sdk import logger
-from sdk import touchpad_dev as touchpad
-from sdk import display_dev as display
+from sdk import touchpad
+from sdk import display
 from sdk import timing_task
 from sdk import threadpool_mini
 

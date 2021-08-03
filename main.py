@@ -4,7 +4,7 @@ import threading
 import importlib
 import traceback
 
-from sdk import environment
+from sdk import environment_dev as environment
 
 from sdk import logger
 from sdk import configurator
