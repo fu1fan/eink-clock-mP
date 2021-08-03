@@ -79,9 +79,13 @@ class PaperDynamic(Paper):
         super().__init__(env, background_image)
         # 实例化各种定时器
         self.pool = env.pool
-        self.pages = {"mainPage": [], "infoPage": [], "warnPage": [], "errorPage": []}  # TODO:为Handler页面添加内容
+        self.pages = {"mainPage": []}
         self.nowPage = "mainPage"
         self.touch_handler = env.touch_handler
+
+    def init(self):
+        super().init()
+        self.touch_handler.clear()
 
     def build(self) -> Image:
         new_image = self.background_image.copy()
@@ -101,6 +105,7 @@ class PaperDynamic(Paper):
 
     def changePage(self, name):
         if name in self.pages:
+            self.touch_handler.clear()
             self.nowPage = name
             self.update_async()
         else:
@@ -109,22 +114,13 @@ class PaperDynamic(Paper):
     def update_async(self, refresh=None):
         self.pool.add_immediately(self.update, refresh)
 
-    def infoHandler(self):
+
+class Page(list, metaclass=abc.ABCMeta):  # page是对list的重写，本质为添加一个构造器
+    def __init__(self):
+        super().__init__()
+
+    def init(self):
         pass
-
-    def warnHandler(self):
-        pass
-
-    def errorHandler(self):
-        pass
-
-
-class PageHome(PaperDynamic):
-    pass
-
-
-class PageApp(PaperDynamic):
-    pass
 
 
 class Element(metaclass=abc.ABCMeta):  # 定义抽象类
@@ -142,3 +138,35 @@ class Element(metaclass=abc.ABCMeta):  # 定义抽象类
     @abc.abstractmethod
     def build(self) -> Image:  # 当页面刷新时被调用，须返回一个图像
         pass
+
+
+class PaperBasis(PaperDynamic):
+    def __init__(self, env):
+        super().__init__(env)
+        self.pages = {"mainPage": Page(), "infoHandler": Page(), "warnHandler": Page(), "errorHandler": Page()}       # TODO:为Handler页面添加内容
+
+    def changePage(self, name):
+        if name in self.pages:
+            self.touch_handler.clear()
+            self.nowPage = name
+            self.pages[name].init()
+            self.update_async()
+        else:
+            raise ValueError("The specified page does not exist!")
+
+    def infoHandler(self):
+        pass
+
+    def warnHandler(self):
+        pass
+
+    def errorHandler(self):
+        pass
+
+
+class PaperTheme(PaperBasis):
+    pass
+
+
+class PaperApp(PaperBasis):
+    pass
