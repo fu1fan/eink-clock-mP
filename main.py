@@ -120,7 +120,7 @@ if __name__ == "__main__":  # 主线程：UI管理
                 logger_main.error("默认主题加载失败:\n%s程序已退出" % traceback.format_exc())
                 raise e
 
-        enable_apps = configurator_main.read("enable_apps", raise_error=True)  # 加载程序
+        enable_apps = configurator_main.read("enable_apps", raise_error=True)  # 加载程序 TODO:添加applogo
         for app_name in enable_apps:
             try:
                 file = open("modules/apps/%s/index.json" % app_name)

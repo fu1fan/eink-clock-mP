@@ -233,14 +233,16 @@ class Env:
         self.touchpad_driver = TouchDriver(self.logger_env)
         self.touchpad_driver.ICNT_Init()
         self.paper = None
+        self.plugins = None
         self.apps = None
         self.inited = False
 
-    def init(self, paper, apps):
+    def init(self, paper, plugins, apps):
         if self.inited:
             return
         self.inited = True
         self.paper = paper
+        self.plugins = plugins
         self.apps = apps
         self.paper.init()
 
