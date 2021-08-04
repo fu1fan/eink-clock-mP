@@ -19,7 +19,8 @@ class Paper:
         self.update_lock = threading.Lock()
 
     def __del__(self):
-        self.exit()
+        if self.inited:
+            self.exit()
 
     def display(self, image: Image):
         b_image = self.epd.get_buffer(image)
