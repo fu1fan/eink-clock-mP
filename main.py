@@ -39,24 +39,6 @@ class DependenceError(Exception):
     pass
 
 
-class PaperManager:
-    def __init__(self):
-        self.paper = None
-        self.inited = False
-
-    def init(self, paper: environment.graphics.PaperDynamic):
-        self.paper = paper
-        self.inited = True
-        self.paper.init()
-
-    def changePaper(self, paper: environment.graphics.PaperDynamic):
-        env.touch_handler.clear()
-        self.paper.exit()
-        self.paper = paper
-        self.paper.init()
-
-
-
 if __name__ == "__main__":  # 主线程：UI管理
     logger_main = logger.Logger(logger.DEBUG)  # 日志
 
@@ -95,10 +77,9 @@ if __name__ == "__main__":  # 主线程：UI管理
         touch_recoder_old = environment.touchpad.TouchRecoder()
 
         wheels_name = []
-        plugins = []
-        plugins_name = []
+        plugins = {}
         theme = None
-        apps = []
+        apps = {}
         enable_plugins = configurator_main.read("enable_plugins", raise_error=True)
         for wheel_name in os.listdir("modules/wheels"):  # 检测当前的轮子
             if wheel_name.endswith(".py") and (wheel_name != "__init__.py"):
@@ -112,7 +93,7 @@ if __name__ == "__main__":  # 主线程：UI管理
                 for wheel_ in plugin_info["depended-wheels"]:
                     if wheel_ not in wheels_name:
                         raise DependenceError("No wheel named %s!" % wheel_)
-                plugins.append(importlib.import_module("modules.plugins.%s.index"))
+                plugins[plugin_name] = importlib.import_module("modules.plugins.%s.index")
 
             except FileNotFoundError and json.JSONDecodeError and DependenceError:
                 logger_main.error("插件[%s]加载失败:\n" + traceback.format_exc())
@@ -151,17 +132,13 @@ if __name__ == "__main__":  # 主线程：UI管理
                 for plugin_ in app_info["depended-apps"]:
                     if plugin_ not in wheels_name:
                         raise DependenceError("No plugin named %s!" % plugin_)
+                apps[app_name] = importlib.import_module("modules.apps.%s.index")
             except FileNotFoundError and json.JSONDecodeError and DependenceError:
                 logger_main.error("程序[%s]加载失败:\n" + traceback.format_exc())
 
-        env.apps = apps
-
-        paper_manager = PaperManager()
-        env.paper_manager = paper_manager
-
         load_lock.wait()
         ### 主程序开始
-        paper_manager.init(theme.build(env))
+        env.init(theme.build(), plugins, apps)
 
         while 1:    # 据说 while 1 的效率比 while True 高
             env.touchpad_driver.ICNT_Scan(touch_recoder_new, touch_recoder_old)

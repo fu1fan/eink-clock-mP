@@ -232,5 +232,22 @@ class Env:
         self.touch_handler = touchpad.TouchHandler(self)
         self.touchpad_driver = TouchDriver(self.logger_env)
         self.touchpad_driver.ICNT_Init()
+        self.paper = None
         self.apps = None
-        self.paper_manage = None
+        self.inited = False
+
+    def init(self, paper, apps):
+        if self.inited:
+            return
+        self.inited = True
+        self.paper = paper
+        self.apps = apps
+        self.paper.init()
+
+    def changePaper(self, paper):
+        if not self.inited:
+            return
+        self.touch_handler.clear()
+        self.paper.exit()
+        self.paper = paper
+        self.paper.init()
