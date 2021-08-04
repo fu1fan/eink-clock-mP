@@ -193,3 +193,5 @@ class Env:
         self.touch_handler = touchpad.TouchHandler(self)
         self.touchpad_driver = TouchDriver(self.logger_env)
         self.touchpad_driver.ICNT_Init()
+        self.apps = None
+        self.paper_manager = None

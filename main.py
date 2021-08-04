@@ -39,6 +39,23 @@ class DependenceError(Exception):
     pass
 
 
+class PaperManager:
+    def __init__(self):
+        self.paper = None
+        self.inited = False
+
+    def init(self, paper: environment.graphics.PaperDynamic):
+        self.paper = paper
+        self.inited = True
+        self.paper.init()
+
+    def changePaper(self, paper: environment.graphics.PaperDynamic):
+        env.touch_handler.clear()
+        self.paper.exit()
+        self.paper = paper
+        self.paper.init()
+
+
 if __name__ == "__main__":  # 主线程：UI管理
     logger_main = logger.Logger(logger.DEBUG)  # 日志
 
@@ -136,10 +153,14 @@ if __name__ == "__main__":  # 主线程：UI管理
             except FileNotFoundError and json.JSONDecodeError and DependenceError:
                 logger_main.error("程序[%s]加载失败:\n" + traceback.format_exc())
 
+        env.apps = apps
+
+        paper_manager = PaperManager()
+        env.paper_manager = paper_manager
+
         load_lock.wait()
         ### 主程序开始
-        paperNow = theme.build(env)
-        paperNow.init()
+        paper_manager.init(theme.build(env))
 
         while 1:    # 据说 while 1 的效率比 while True 高
             env.touchpad_driver.ICNT_Scan(touch_recoder_new, touch_recoder_old)

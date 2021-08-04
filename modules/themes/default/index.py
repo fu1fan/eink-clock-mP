@@ -17,9 +17,6 @@ class TextClock(display.Element):
         self.font25 = ImageFont.truetype("resources/fonts/PTSerifCaption.ttc", 53)
         self.paper.touch_handler.add_clicked((0, 296, 0, 128), self.paper.refresh)
 
-    def __del__(self):
-        self.stop_sign = True
-
     def update(self):
         while True:
             if self.stop_sign:
@@ -32,6 +29,9 @@ class TextClock(display.Element):
         t = threading.Thread(target=self.update)
         t.setDaemon(True)
         t.start()
+
+    def exit(self):
+        self.stop_sign = True
 
     def build(self) -> Image:
         now_time = time.strftime("%H : %M", time.localtime())

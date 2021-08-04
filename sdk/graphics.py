@@ -3,7 +3,6 @@ import abc
 
 from PIL import Image
 
-
 class Paper:
     """
     用于显示静态图像，不支持切换Page
@@ -17,6 +16,9 @@ class Paper:
         self.epd = env.epd_driver
         self.image_old = self.background_image
         self.update_lock = threading.Lock()
+
+    def __del__(self):
+        self.exit()
 
     def display(self, image: Image):
         b_image = self.epd.get_buffer(image)
@@ -38,6 +40,9 @@ class Paper:
         self.display(self.build())
         self.inited = True
         return True
+
+    def exit(self):
+        self.inited = False
 
     def refresh(self):
         if not self.inited:
@@ -83,10 +88,6 @@ class PaperDynamic(Paper):
         self.nowPage = "mainPage"
         self.touch_handler = env.touch_handler
 
-    def init(self):
-        super().init()
-        self.touch_handler.clear()
-
     def build(self) -> Image:
         new_image = self.background_image.copy()
         for element in self.pages[self.nowPage]:
@@ -120,7 +121,12 @@ class Page(list, metaclass=abc.ABCMeta):  # page是对list的重写，本质为�
         super().__init__()
 
     def init(self):
-        pass
+        for i in self:
+            i.init()
+
+    def exit(self):
+        for i in self:
+            i.exit()
 
 
 class Element(metaclass=abc.ABCMeta):  # 定义抽象类
@@ -131,9 +137,14 @@ class Element(metaclass=abc.ABCMeta):  # 定义抽象类
         self.pool = paper.pool
         self.inited = False
 
-    def init(self):  # 初始化函数，当被添加到动态Paper时被调用
+    def __del__(self):
+        self.exit()
+
+    def init(self):     # 初始化函数，当被添加到动态Paper时被调用
         self.inited = True
-        pass
+
+    def exit(self):     # 退出时调用
+        self.inited = False
 
     @abc.abstractmethod
     def build(self) -> Image:  # 当页面刷新时被调用，须返回一个图像
@@ -145,9 +156,13 @@ class PaperBasis(PaperDynamic):
         super().__init__(env)
         self.pages = {"mainPage": Page(), "infoHandler": Page(), "warnHandler": Page(), "errorHandler": Page()}       # TODO:为Handler页面添加内容
 
+    def exit(self):
+        self.pages[self.nowPage].exit()
+
     def changePage(self, name):
         if name in self.pages:
             self.touch_handler.clear()
+            self.pages[self.nowPage].exit()
             self.nowPage = name
             self.pages[name].init()
             self.update_async()
