@@ -6,7 +6,7 @@ import requests
 import traceback
 
 from sdk import logger
-from sdk import display
+from sdk import graphics
 from PIL import Image
 
 branch = "develop"
@@ -75,8 +75,8 @@ class VersionCtrl:
 if __name__ == "__main__":
     epd_lock = threading.RLock()
     logger_updater = logger.Logger(logger.DEBUG, tag="updater")
-    epd = display.EpdController(logger_updater, threading.RLock())
-    paper = display.Paper(epd, threading.Lock())
+    epd = graphics.EpdController(logger_updater, threading.RLock())
+    paper = graphics.Paper(epd, threading.Lock())
     if epd.IsBusy():
         logger_updater.error("The screen is busy!")
         os.system("python3 main.py &")

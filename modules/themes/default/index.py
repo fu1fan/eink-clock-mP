@@ -5,7 +5,7 @@ from PIL import Image, ImageFont, ImageDraw
 
 from main import environment
 
-display = environment.display
+display = environment.graphics
 
 
 class TextClock(display.Element):

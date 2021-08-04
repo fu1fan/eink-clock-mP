@@ -7,7 +7,7 @@ from sdk import logger, icnt86, epd2in9_V2
 from sdk import touchpad
 from sdk import timing_task
 from sdk import threadpool_mini
-from sdk import display
+from sdk import graphics
 
 config = icnt86.config
 

@@ -1,6 +1,6 @@
 from sdk import threadpool_mini
-from sdk import display
+from sdk import graphics
 
 
-def build(epd: display.EpdController, pool: threadpool_mini.ThreadPool):
+def build(epd: graphics.EpdController, pool: threadpool_mini.ThreadPool):
     pass

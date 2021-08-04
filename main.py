@@ -53,7 +53,7 @@ if __name__ == "__main__":  # 主线程：UI管理
     for path in opening_images_path:
         file = open(path, "rb")
         opening_images.append(Image.open(file))
-    paperNow = environment.display.Paper(env, opening_images[0])
+    paperNow = environment.graphics.Paper(env, opening_images[0])
     load_lock = threading.Barrier(2)
 
 
@@ -141,7 +141,7 @@ if __name__ == "__main__":  # 主线程：UI管理
         paperNow = theme.build(env)
         paperNow.init()
 
-        while True:
+        while 1:    # 据说 while 1 的效率比 while True 高
             env.touchpad_driver.ICNT_Scan(touch_recoder_new, touch_recoder_old)
             env.touch_handler.handle(touch_recoder_new, touch_recoder_old)
     except KeyboardInterrupt:

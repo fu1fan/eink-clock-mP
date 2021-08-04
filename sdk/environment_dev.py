@@ -5,7 +5,7 @@ from PIL import Image
 
 from sdk import logger
 from sdk import touchpad
-from sdk import display
+from sdk import graphics
 from sdk import timing_task
 from sdk import threadpool_mini
 
