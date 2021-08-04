@@ -42,8 +42,17 @@ class TextClock(graphics.Element):
 
 
 def build(env: environment):
+   
+    
     paper = graphics.PaperBasis(env)
+    refreshBtn = graphics.Button(0, 0, paper, paper.refresh, (52, 33), "刷新")
+    def hideRefreshBtn():
+        refreshBtn.setVisible(False)
+
+    btnToHideRefreshBtn = graphics.Button(65, 0, paper,hideRefreshBtn ,(125, 33), "隐藏刷新按钮")
     text_clock = TextClock(0, 0, paper)
     paper.addElement("mainPage", text_clock)
-    paper.addElement("mainPage", graphics.Button(0, 0, paper, paper.refresh, text="刷新"))
+    paper.addElement("mainPage", refreshBtn)
+    paper.addElement("mainPage", btnToHideRefreshBtn)
+
     return paper
