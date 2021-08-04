@@ -138,7 +138,7 @@ if __name__ == "__main__":  # 主线程：UI管理
 
         load_lock.wait()
         ### 主程序开始
-        env.init(theme.build(), plugins, apps)
+        env.init(theme.build(env), plugins, apps)
 
         while 1:    # 据说 while 1 的效率比 while True 高
             env.touchpad_driver.ICNT_Scan(touch_recoder_new, touch_recoder_old)
