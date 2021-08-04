@@ -47,17 +47,6 @@ if __name__ == "__main__":  # 主线程：UI管理
     configurator_main.change_path("/main")
 
     env = environment.Env(configurator_main.read("env_configs"), logger_main)
-    '''
-    main_pool = threadpool_mini.ThreadPool(configurator_main.read("threadpool_size"), handler=print)  # 启动线程池
-    main_pool.start()  # 启动线程池
-
-    epdLock = threading.RLock()  # 显示驱动
-    epd = display.EpdController(logger_main, epdLock)
-    # epd.set_upside_down(True)   # 倒置图像 TODO:处理触摸屏倒转后的操作
-    if epd.IsBusy():
-        logger_main.error("The screen is busy!")
-        raise RuntimeError("The screen is busy!")
-    '''
 
     opening_images = []  # 准备开屏动画
     opening_images_path = configurator_main.read("opening_images")
