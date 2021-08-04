@@ -1,7 +1,8 @@
 import threading
 import abc
 
-from PIL import Image
+from PIL import Image, ImageFont, ImageDraw
+
 
 class Paper:
     """
@@ -83,16 +84,18 @@ class PaperDynamic(Paper):
                  background_image=Image.new("RGB", (296, 128), 1)):
         super().__init__(env, background_image)
         # 实例化各种定时器
-        self.pool = env.pool
+        # self.pool = env.pool
         self.pages = {"mainPage": []}
         self.nowPage = "mainPage"
-        self.touch_handler = env.touch_handler
+        # self.touch_handler = env.touch_handler
+        self.env = env
 
     def build(self) -> Image:
         new_image = self.background_image.copy()
         for element in self.pages[self.nowPage]:
             element_image = element.build()
-            new_image.paste(element_image, (element.x, element.y))
+            if element_image:
+                new_image.paste(element_image, (element.x, element.y))
         self.image_old = new_image
         return new_image
 
@@ -106,14 +109,14 @@ class PaperDynamic(Paper):
 
     def changePage(self, name):
         if name in self.pages:
-            self.touch_handler.clear()
+            self.env.touch_handler.clear()
             self.nowPage = name
             self.update_async()
         else:
             raise ValueError("The specified page does not exist!")
 
     def update_async(self, refresh=None):
-        self.pool.add_immediately(self.update, refresh)
+        self.env.pool.add_immediately(self.update, refresh)
 
 
 class Page(list, metaclass=abc.ABCMeta):  # page是对list的重写，本质为添加一个构造器
@@ -134,16 +137,16 @@ class Element(metaclass=abc.ABCMeta):  # 定义抽象类
         self.x = x
         self.y = y
         self.paper = paper
-        self.pool = paper.pool
+        self.pool = paper.env.pool
         self.inited = False
 
     def __del__(self):
         self.exit()
 
-    def init(self):     # 初始化函数，当被添加到动态Paper时被调用
+    def init(self):  # 初始化函数，当被添加到动态Paper时被调用
         self.inited = True
 
-    def exit(self):     # 退出时调用
+    def exit(self):  # 退出时调用
         self.inited = False
 
     @abc.abstractmethod
@@ -156,21 +159,16 @@ class UILib:
 
 
 class Button(Element, UILib):
-    def build(self) -> Image:
-        pass
-
-    @staticmethod
-    def __defaultHandler():
-        pass
-
-    def __init__(self, x, y, paper: PaperDynamic, size=(35, 20) ,text="", onclick=None):
+    def __init__(self, x, y, paper: PaperDynamic, onclick, size=(60, 33), text="", *args, **kwargs):
         super().__init__(x, y, paper)
-        if onclick is None:
-            self.on_clicked = self.__defaultHandler
-        else:
-            self.on_clicked = onclick
-        self.text=text
+        self.on_clicked = onclick
+        self.text = text
         self.__visible = True
+        self.size = size
+        self.args = args
+        self.kwargs = kwargs
+        self.font = ImageFont.truetype("resources/fonts/PTSerifCaption.ttc", 20)
+        self.background_image = Image.new("RGB", size, (255, 255, 255))
 
     @property
     def visible(self):
@@ -178,26 +176,42 @@ class Button(Element, UILib):
 
     def setVisible(self, m: bool):
         self.__visible = m
+        self.paper.update_async()
 
     def clickedHandler(self):
         if self.__visible and self.inited:
             self.on_clicked()
 
     def init(self):
+        self.inited = True
+        self.paper.env.touch_handler.add_clicked((self.x, self.x + self.size[0], self.y, self.y + self.size[1]),
+                                                 self.clickedHandler,
+                                                 *self.args,
+                                                 **self.kwargs)
 
+    def build(self) -> Image:
+        if self.inited and self.__visible:
+            image = self.background_image.copy()
+            image_draw = ImageDraw.ImageDraw(image)
+            image_draw.rectangle((0, 0, self.size[0], self.size[1]), fill="white", outline="black", width=1)
+            image_draw.text((5, 5), self.text, font=self.font)
+            return image
+        elif not self.__visible:
+            return None
 
 
 class PaperBasis(PaperDynamic):
     def __init__(self, env):
         super().__init__(env)
-        self.pages = {"mainPage": Page(), "infoHandler": Page(), "warnHandler": Page(), "errorHandler": Page()}       # TODO:为Handler页面添加内容
+        self.pages = {"mainPage": Page(), "infoHandler": Page(), "warnHandler": Page(),
+                      "errorHandler": Page()}  # TODO:为Handler页面添加内容
 
     def exit(self):
         self.pages[self.nowPage].exit()
 
     def changePage(self, name):
         if name in self.pages:
-            self.touch_handler.clear()
+            self.env.touch_handler.clear()
             self.pages[self.nowPage].exit()
             self.nowPage = name
             self.pages[name].init()

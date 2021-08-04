@@ -5,17 +5,16 @@ from PIL import Image, ImageFont, ImageDraw
 
 from main import environment
 
-display = environment.graphics
+graphics = environment.graphics
 
 
-class TextClock(display.Element):
+class TextClock(graphics.Element):
     def __init__(self, x, y, paper):
         super().__init__(x, y, paper)
         self.last_update = -1
         self.image = Image.new("RGB", (296, 128), 0)
         self.stop_sign = False
         self.font25 = ImageFont.truetype("resources/fonts/PTSerifCaption.ttc", 53)
-        self.paper.touch_handler.add_clicked((0, 296, 0, 128), self.paper.refresh)
 
     def update(self):
         while True:
@@ -43,7 +42,8 @@ class TextClock(display.Element):
 
 
 def build(env: environment):
-    paper = display.PaperDynamic(env)
+    paper = graphics.PaperBasis(env)
     text_clock = TextClock(0, 0, paper)
     paper.addElement("mainPage", text_clock)
+    paper.addElement("mainPage", graphics.Button(0, 0, paper, paper.refresh, text="刷新"))
     return paper
