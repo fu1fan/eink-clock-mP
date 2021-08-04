@@ -3,6 +3,7 @@ import time
 
 from PIL import Image, ImageFont, ImageDraw
 
+import sdk.graphics.lib
 from main import environment
 
 graphics = environment.graphics
@@ -45,11 +46,11 @@ def build(env: environment):
    
     
     paper = graphics.PaperBasis(env)
-    refreshBtn = graphics.Button(0, 0, paper, paper.refresh, (52, 33), "刷新")
+    refreshBtn = sdk.graphics.lib.Button(0, 0, paper, paper.refresh, (52, 33), "刷新")
     def hideRefreshBtn():
         refreshBtn.setVisible(False)
 
-    btnToHideRefreshBtn = graphics.Button(65, 0, paper,hideRefreshBtn ,(125, 33), "隐藏刷新按钮")
+    btnToHideRefreshBtn = sdk.graphics.lib.Button(65, 0, paper, hideRefreshBtn, (125, 33), "隐藏刷新按钮")
     text_clock = TextClock(0, 0, paper)
     paper.addElement("mainPage", text_clock)
     paper.addElement("mainPage", refreshBtn)
