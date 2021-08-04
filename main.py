@@ -56,6 +56,7 @@ class PaperManager:
         self.paper.init()
 
 
+
 if __name__ == "__main__":  # 主线程：UI管理
     logger_main = logger.Logger(logger.DEBUG)  # 日志
 
