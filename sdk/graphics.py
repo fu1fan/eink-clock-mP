@@ -151,6 +151,42 @@ class Element(metaclass=abc.ABCMeta):  # 定义抽象类
         pass
 
 
+class UILib:
+    pass
+
+
+class Button(Element, UILib):
+    def build(self) -> Image:
+        pass
+
+    @staticmethod
+    def __defaultHandler():
+        pass
+
+    def __init__(self, x, y, paper: PaperDynamic, size=(35, 20) ,text="", onclick=None):
+        super().__init__(x, y, paper)
+        if onclick is None:
+            self.on_clicked = self.__defaultHandler
+        else:
+            self.on_clicked = onclick
+        self.text=text
+        self.__visible = True
+
+    @property
+    def visible(self):
+        return self.__visible
+
+    def setVisible(self, m: bool):
+        self.__visible = m
+
+    def clickedHandler(self):
+        if self.__visible and self.inited:
+            self.on_clicked()
+
+    def init(self):
+
+
+
 class PaperBasis(PaperDynamic):
     def __init__(self, env):
         super().__init__(env)
