@@ -3,6 +3,10 @@ import json
 from sdk import logger
 
 default_config_path = "configs/config.json"
+try:
+    os.mkdir("configs")
+except OSError:
+    pass
 
 
 class TargetExists(Exception):
