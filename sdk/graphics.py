@@ -167,7 +167,7 @@ class Button(Element, UILib):
         self.size = size
         self.args = args
         self.kwargs = kwargs
-        self.font = ImageFont.truetype("resources/fonts/PTSerifCaption.ttc", 20)
+        self.font = ImageFont.truetype("resources/fonts/STHeiti_Light.ttc", 20)
         self.background_image = Image.new("RGB", size, (255, 255, 255))
 
     @property
@@ -194,7 +194,7 @@ class Button(Element, UILib):
             image = self.background_image.copy()
             image_draw = ImageDraw.ImageDraw(image)
             image_draw.rectangle((0, 0, self.size[0], self.size[1]), fill="white", outline="black", width=1)
-            image_draw.text((5, 5), self.text, font=self.font)
+            image_draw.text((5, 5), self.text, font=self.font, fill=(0, 0, 0))
             return image
         elif not self.__visible:
             return None
