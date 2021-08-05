@@ -73,6 +73,19 @@ class Paper:
         self.update(refresh)
 
 
+class Page(list):  # page是对list的重写，本质为添加一个构造器
+    def __init__(self):
+        super().__init__()
+
+    def init(self):
+        for i in self:
+            i.init()
+
+    def exit(self):
+        for i in self:
+            i.exit()
+
+
 class PaperDynamic(Paper):
     SECONDLY = 0
     MINUTELY = 1
@@ -86,10 +99,14 @@ class PaperDynamic(Paper):
         super().__init__(env, background_image)
         # 实例化各种定时器
         # self.pool = env.pool
-        self.pages = {"mainPage": []}
+        self.pages = {"mainPage": Page(), "infoHandler": Page(), "warnHandler": Page(), "errorHandler": Page()}     # TODO:为Handler页面添加内容
         self.nowPage = "mainPage"
         # self.touch_handler = env.touch_handler
         self.env = env
+
+    def exit(self):
+        for page in self.pages.values():
+            page.exit()
 
     def build(self) -> Image:
         new_image = self.background_image.copy()
@@ -100,8 +117,10 @@ class PaperDynamic(Paper):
         self.image_old = new_image
         return new_image
 
-    def addPage(self, name: str):
-        self.pages[name] = []
+    def addPage(self, name: str, page=None):
+        if page is None:
+            page = Page()
+        self.pages[name] = page
 
     def addElement(self, target: str, element):
         self.pages[target].append(element)
@@ -111,26 +130,25 @@ class PaperDynamic(Paper):
     def changePage(self, name):
         if name in self.pages:
             self.env.touch_handler.clear()
+            # self.pages[self.nowPage].exit()
             self.nowPage = name
+            self.pages[name].init()
             self.update_async()
         else:
             raise ValueError("The specified page does not exist!")
 
+    def infoHandler(self):
+        pass
+
+    def warnHandler(self):
+        pass
+
+    def errorHandler(self):
+        pass
+
+
     def update_async(self, refresh=None):
         self.env.pool.add_immediately(self.update, refresh)
-
-
-class Page(list, metaclass=abc.ABCMeta):  # page是对list的重写，本质为添加一个构造器
-    def __init__(self):
-        super().__init__()
-
-    def init(self):
-        for i in self:
-            i.init()
-
-    def exit(self):
-        for i in self:
-            i.exit()
 
 
 class Element(metaclass=abc.ABCMeta):  # 定义抽象类
@@ -155,38 +173,10 @@ class Element(metaclass=abc.ABCMeta):  # 定义抽象类
         pass
 
 
-class PaperBasis(PaperDynamic):
-    def __init__(self, env):
-        super().__init__(env)
-        self.pages = {"mainPage": Page(), "infoHandler": Page(), "warnHandler": Page(),
-                      "errorHandler": Page()}  # TODO:为Handler页面添加内容
+class PaperTheme(PaperDynamic):
 
-    def exit(self):
-        self.pages[self.nowPage].exit()
-
-    def changePage(self, name):
-        if name in self.pages:
-            self.env.touch_handler.clear()
-            self.pages[self.nowPage].exit()
-            self.nowPage = name
-            self.pages[name].init()
-            self.update_async()
-        else:
-            raise ValueError("The specified page does not exist!")
-
-    def infoHandler(self):
-        pass
-
-    def warnHandler(self):
-        pass
-
-    def errorHandler(self):
-        pass
-
-
-class PaperTheme(PaperBasis):
     pass
 
 
-class PaperApp(PaperBasis):
+class PaperApp(PaperDynamic):
     pass

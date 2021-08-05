@@ -6,7 +6,7 @@ class TextElement(Element):
     def __init__(self, x, y, paper: PaperDynamic, text, size=(60, 33), bgcolor="white", textColor="black", fontSize=20, *args, **kwargs):
         super().__init__(x, y, paper)
         self.text = text
-        self.__visible = True
+        self._visible = True
         self.size = size
         self.args = args
         self.kwargs = kwargs
@@ -19,14 +19,14 @@ class TextElement(Element):
 
     @property
     def visible(self):
-        return self.__visible
+        return self._visible
 
     def setVisible(self, m: bool):
-        self.__visible = m
+        self._visible = m
         self.paper.update_async()
 
     def build(self) -> Image:
-        if self.inited and self.__visible:
+        if self.inited and self._visible:
             image = self.background_image.copy()
             image_draw = ImageDraw.ImageDraw(image)
             #image_draw.rectangle((0, 0, self.size[0], self.size[1]), fill="white", outline="black", width=1)
@@ -35,7 +35,7 @@ class TextElement(Element):
             elif self.textColor=="white":
                 image_draw.text((5, 5), self.text, font=self.font, fill=(255, 255, 255))
             return image
-        elif not self.__visible:
+        elif not self._visible:
             return None
 
     def init(self):
@@ -47,12 +47,12 @@ class Button(TextElement):
         self.on_clicked = onclick
 
     def clickedHandler(self):
-        if self.__visible and self.inited:
+        if self._visible and self.inited:
             self.on_clicked()
 
     def init(self):
         super().init()
-        #print("%d  %d, %d  %d" % (self.x,self.y,self.size[0],self.size[1]))
+        # print("%d  %d, %d  %d" % (self.x,self.y,self.size[0],self.size[1]))
         self.paper.env.touch_handler.add_clicked((self.x, self.x + self.size[0], self.y, self.y + self.size[1]),
                                                  self.clickedHandler,
                                                  *self.args,

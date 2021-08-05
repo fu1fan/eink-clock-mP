@@ -43,9 +43,7 @@ class TextClock(graphics.Element):
 
 
 def build(env: environment):
-   
-    
-    paper = graphics.PaperBasis(env)
+    paper = graphics.PaperDynamic(env)
     refreshBtn = sdk.graphics.lib.Button(0, 0, paper, "刷新", paper.refresh)
     def hideRefreshBtn():
         refreshBtn.setVisible(False)
