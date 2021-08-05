@@ -10,8 +10,8 @@ graphics = environment.graphics
 
 
 class TextClock(graphics.Element):
-    def __init__(self, x, y, paper):
-        super().__init__(x, y, paper)
+    def __init__(self, xy, paper):
+        super().__init__(xy, paper)
         self.last_update = -1
         self.image = Image.new("RGB", (296, 128), 0)
         self.stop_sign = False
@@ -45,10 +45,11 @@ class TextClock(graphics.Element):
 def build(env: environment):
     paper = graphics.PaperDynamic(env)
     refreshBtn = sdk.graphics.lib.Button(0, 0, paper, "刷新", paper.refresh)
+
     def hideRefreshBtn():
         refreshBtn.setVisible(False)
 
-    btnToHideRefreshBtn = sdk.graphics.lib.Button(65, 0, paper,"隐藏刷新按钮", hideRefreshBtn, (125, 33))
+    btnToHideRefreshBtn = sdk.graphics.lib.Button(65, 0, paper, "隐藏刷新按钮", hideRefreshBtn, (125, 33))
     text_clock = TextClock(0, 0, paper)
     paper.addElement("mainPage", text_clock)
     paper.addElement("mainPage", refreshBtn)

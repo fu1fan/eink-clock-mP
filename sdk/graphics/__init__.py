@@ -52,9 +52,10 @@ class Paper:
         self.display(self.image_old)
         return True
 
-    def update(self, refresh=None):
+    def update_background(self, image, refresh=None):
         if not self.inited:
             return
+        self.background_image = image
         if self.update_lock.acquire(blocking=False):
             self.epd.acquire()  # 重入锁，保证到屏幕刷新时使用的是最新的 self.build()
             self.update_lock.release()
@@ -66,24 +67,29 @@ class Paper:
                 self.display_partial(self.build())
             self.epd.release()
 
-    def update_background(self, image, refresh=None):
-        if not self.inited:
-            return
-        self.background_image = image
-        self.update(refresh)
-
 
 class Page(list):  # page是对list的重写，本质为添加一个构造器
     def __init__(self):
         super().__init__()
+        self.inited = False
 
     def init(self):
         for i in self:
             i.init()
+        self.inited = True
+
+    def pause(self):
+        for i in self:
+            i.pause()
+
+    def recover(self):
+        for i in self:
+            i.recover()
 
     def exit(self):
         for i in self:
             i.exit()
+        self.inited = False
 
 
 class PaperDynamic(Paper):
@@ -113,7 +119,7 @@ class PaperDynamic(Paper):
         for element in self.pages[self.nowPage]:
             element_image = element.build()
             if element_image:
-                new_image.paste(element_image, (element.x, element.y))
+                new_image.paste(element_image, (element.xy[0], element.xy[1]))
         self.image_old = new_image
         return new_image
 
@@ -127,13 +133,16 @@ class PaperDynamic(Paper):
         element.page = target
         element.init()
 
-    def changePage(self, name):
+    def changePage(self, name, refresh=None):
         if name in self.pages:
             self.env.touch_handler.clear()
-            # self.pages[self.nowPage].exit()
+            self.pages[self.nowPage].pause()
             self.nowPage = name
-            self.pages[name].init()
-            self.update_async()
+            if self.pages[name].inited:
+                self.pages[name].recover()
+            else:
+                self.pages[name].pause()
+            self.env.pool.add_immediately(self._update, refresh)
         else:
             raise ValueError("The specified page does not exist!")
 
@@ -146,18 +155,34 @@ class PaperDynamic(Paper):
     def errorHandler(self):
         pass
 
+    def _update(self, refresh=None):
+        if self.update_lock.acquire(blocking=False):
+            self.epd.acquire()  # 重入锁，保证到屏幕刷新时使用的是最新的 self.build()
+            self.update_lock.release()
+            if refresh is None:
+                self.display_auto(self.build())
+            elif refresh:
+                self.display(self.build())
+            else:
+                self.display_partial(self.build())
+            self.epd.release()
 
-    def update_async(self, refresh=None):
-        self.env.pool.add_immediately(self.update, refresh)
+    def update(self, page_name: str, refresh=None):
+        if not (self.inited and page_name == self.nowPage):
+            return
+        self._update(refresh)
+
+    def update_async(self, page_name: str, refresh=None):
+        self.env.pool.add_immediately(self.update, page_name, refresh)
 
 
 class Element(metaclass=abc.ABCMeta):  # 定义抽象类
-    def __init__(self, x, y, paper: PaperDynamic):
-        self.x = x
-        self.y = y
+    def __init__(self, xy: tuple, paper: PaperDynamic):
+        self.xy = xy
         self.paper = paper
         self.pool = paper.env.pool
         self.inited = False
+        self.page = None
 
     def __del__(self):
         self.exit()
@@ -167,6 +192,12 @@ class Element(metaclass=abc.ABCMeta):  # 定义抽象类
 
     def exit(self):  # 退出时调用
         self.inited = False
+
+    def pause(self):
+        pass
+
+    def recover(self):
+        pass
 
     @abc.abstractmethod
     def build(self) -> Image:  # 当页面刷新时被调用，须返回一个图像
