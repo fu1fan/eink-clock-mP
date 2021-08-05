@@ -69,5 +69,7 @@ class Button(TextElement):
                                                  **self.kwargs)
 
 
-class Label:
-    pass
+class Label(TextElement):
+    def __init__(self, xy, paper: PaperDynamic, text, size=(60, 33), bgcolor="black", textColor="white", fontSize=20, *args, **kwargs):
+        super().__init__(xy, paper, text, size=size, bgcolor=bgcolor, textColor=textColor, fontSize=fontSize, *args, **kwargs)
+    
