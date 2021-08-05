@@ -15,7 +15,8 @@ class TextClock(graphics.Element):
         self.last_update = -1
         self.image = Image.new("RGB", (296, 128), 0)
         self.stop_sign = False
-        self.font25 = ImageFont.truetype("resources/fonts/PTSerifCaption.ttc", 53)
+        self.font25 = ImageFont.truetype(
+            "resources/fonts/PTSerifCaption.ttc", 53)
 
     def update(self):
         while True:
@@ -45,10 +46,15 @@ class TextClock(graphics.Element):
 def build(env: environment):
     paper = graphics.PaperTheme(env)
     refreshBtn = sdk.graphics.lib.Button((0, 0), paper, "刷新", paper.refresh)
-    textLabel = sdk.graphics.lib.Label((50,50), paper, "标签1")
+    textLabel = sdk.graphics.lib.Label((50, 50), paper, "标签1")
+
+    def changeTheTextOfLabal():
+        textLabel.setText("okk")
+    
+    testBtn = sdk.graphics.lib.Button((220, 0), paper, "测试", changeTheTextOfLabal)
     text_clock = TextClock((0, 0), paper)
     paper.addElement("mainPage", text_clock)
-    paper.addElement("mainPage", refreshBtn)
+    #paper.addElement("mainPage", refreshBtn)
     paper.addElement("mainPage", textLabel)
 
     return paper

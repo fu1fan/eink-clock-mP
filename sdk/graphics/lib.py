@@ -22,16 +22,14 @@ class TextElement(Element):
         elif bgcolor == "black":
             self.background_image = Image.new("RGB", size, (0, 0, 0))
 
-    @property
-    def visible(self):
+    def isVisible(self):
         return self._visible
 
     def setVisible(self, m: bool):
         self._visible = m
         self.paper.update_async(self.page)
 
-    @property
-    def text(self):
+    def getText(self):
         return self.text
 
     def setText(self,newText):
