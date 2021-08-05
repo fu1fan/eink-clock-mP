@@ -46,11 +46,11 @@ def build(env: environment):
    
     
     paper = graphics.PaperBasis(env)
-    refreshBtn = sdk.graphics.lib.Button(0, 0, paper, paper.refresh, (52, 33), "刷新")
+    refreshBtn = sdk.graphics.lib.Button(0, 0, paper, "刷新", paper.refresh)
     def hideRefreshBtn():
         refreshBtn.setVisible(False)
 
-    btnToHideRefreshBtn = sdk.graphics.lib.Button(65, 0, paper, hideRefreshBtn, (125, 33), "隐藏刷新按钮")
+    btnToHideRefreshBtn = sdk.graphics.lib.Button(65, 0, paper,"隐藏刷新按钮", hideRefreshBtn, (125, 33))
     text_clock = TextClock(0, 0, paper)
     paper.addElement("mainPage", text_clock)
     paper.addElement("mainPage", refreshBtn)
