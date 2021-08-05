@@ -2,6 +2,7 @@ import json
 import os
 import threading
 import importlib
+import time
 import traceback
 
 from sdk import environment_dev as environment
@@ -138,11 +139,14 @@ if __name__ == "__main__":  # 主线程：UI管理
 
         load_lock.wait()
         ### 主程序开始
-        env.init(theme.build(env), plugins, apps) #是这样的吗❓
+        env.init(theme.build(env), plugins, apps)
 
         while 1:    # 据说 while 1 的效率比 while True 高
             env.touchpad_driver.ICNT_Scan(touch_recoder_new, touch_recoder_old)
             env.touch_handler.handle(touch_recoder_new, touch_recoder_old)
+            env.touchpad_driver.ICNT_Scan(touch_recoder_new, touch_recoder_old)
+            env.touch_handler.handle(touch_recoder_new, touch_recoder_old)
+            time.sleep(10000)
     except KeyboardInterrupt:
         print("ctrl+c")
     except:  # ⚠️只在生产环境使用 会影响调试结果！！！

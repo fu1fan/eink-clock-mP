@@ -216,6 +216,7 @@ class TouchHandler:
 
         elif (not ICNT_Dev.Touch) and ICNT_Old.Touch:  # 如果停止触摸
             self.logger_touch.debug("触摸事件终止：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
+
             for i in self.touched:
                 if i[-1]:
                     self.pool.add(i[2], *i[3], **i[4])  # 如果没有被点击，且标记为True，则执行func2

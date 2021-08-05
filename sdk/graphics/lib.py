@@ -1,3 +1,5 @@
+import time
+
 from PIL import ImageFont, Image, ImageDraw
 
 from sdk.graphics import Element, PaperDynamic
@@ -25,7 +27,7 @@ class TextElement(Element):
 
     def setVisible(self, m: bool):
         self._visible = m
-        self.paper.update_async()
+        self.paper.update_async(self.page)
 
     def build(self) -> Image:
         if self.inited and self._visible:

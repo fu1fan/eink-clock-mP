@@ -1,4 +1,5 @@
 import threading
+import time
 
 from PIL import Image
 
@@ -104,7 +105,8 @@ class PaperDynamic(Paper):
         super().__init__(env, background_image)
         # 实例化各种定时器
         # self.pool = env.pool
-        self.pages = {"mainPage": Page(), "infoHandler": Page(), "warnHandler": Page(), "errorHandler": Page()}     # TODO:为Handler页面添加内容
+        self.pages = {"mainPage": Page(), "infoHandler": Page(), "warnHandler": Page(), "errorHandler": Page()}
+        # TODO:为Handler页面添加内容
         self.nowPage = "mainPage"
         # self.touch_handler = env.touch_handler
         self.env = env
@@ -130,7 +132,6 @@ class PaperDynamic(Paper):
     def addElement(self, target: str, element):
         self.pages[target].append(element)
         element.page = target
-        element.init()
 
     def changePage(self, name, refresh=None):
         if name in self.pages:
@@ -174,6 +175,10 @@ class PaperDynamic(Paper):
     def update_async(self, page_name: str, refresh=None):
         self.env.pool.add_immediately(self.update, page_name, refresh)
 
+    def init(self):
+        self.pages[self.nowPage].init()
+        super().init()
+
 
 class Element:
     def __init__(self, xy: tuple, size, paper: PaperDynamic, background=None):
@@ -207,11 +212,42 @@ class Element:
         return self.background
 
 
+class _Docker(Element):
+    def __init__(self, paper: PaperDynamic):
+        super().__init__((60, 0), (176, 30), paper)
+        self.image = Image.open(open("resources/images/docker.jpg", "rb"))
+        self.__active = False
+        self.inited = False
+
+    def clicked_handler(self):
+        if self.paper.nowPage == self.page and not self.__active and self.inited:
+            self.__active = True
+        self.paper.update_async(self.page)
+        time.sleep(5)
+        self.__active = False
+        self.paper.update(self.page)
+
+    def init(self):
+        self.paper.env.touch_handler.add_clicked((0, 296, 0, 60), self.clicked_handler)
+        self.inited = True
+
+    def exit(self):
+        self.inited = False
+
+    def build(self) -> Image:
+        if self.__active:
+            return self.image
+        else:
+            return
+
+
 class PaperTheme(PaperDynamic):
     def __init__(self, env):
         super().__init__(env)
-        self.addElement("mainPage", Element((60, 0), (176, 30), self, Image.open(open("resources/images/docker/jpg"))))
-        self.env.touch_handler.add_clicked((0, 296, 0, 60), )
+
+    def init(self):
+        self.addElement("mainPage", _Docker(self))
+        super().init()
 
 
 class PaperApp(PaperDynamic):
