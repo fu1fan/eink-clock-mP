@@ -30,6 +30,14 @@ class TextElement(Element):
         self._visible = m
         self.paper.update_async(self.page)
 
+    @property
+    def text(self):
+        return self.text
+
+    def setText(self,newText):
+        self.text = newText
+        self.paper.update_async(self.page)
+        
     def build(self) -> Image:
         if self.inited and self._visible:
             image = self.background_image.copy()
