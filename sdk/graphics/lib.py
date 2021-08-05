@@ -58,7 +58,7 @@ class Button(TextElement):
         super().init()
         # print("%d  %d, %d  %d" % (self.x,self.y,self.size[0],self.size[1]))
         self.paper.env.touch_handler.add_clicked((self.xy[0], self.xy[0] + self.size[0],
-                                                  self.xy[0], self.xy[1] + self.size[1]),
+                                                  self.xy[1], self.xy[1] + self.size[1]),
                                                  self.clickedHandler,
                                                  *self.args,
                                                  **self.kwargs)
