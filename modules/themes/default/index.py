@@ -11,7 +11,7 @@ graphics = environment.graphics
 
 class TextClock(graphics.Element):
     def __init__(self, xy, paper):
-        super().__init__(xy, paper)
+        super().__init__(xy, (296, 128), paper)
         self.last_update = -1
         self.image = Image.new("RGB", (296, 128), 0)
         self.stop_sign = False

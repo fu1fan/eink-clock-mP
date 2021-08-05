@@ -1,5 +1,4 @@
 import threading
-import abc
 
 from PIL import Image
 
@@ -176,9 +175,14 @@ class PaperDynamic(Paper):
         self.env.pool.add_immediately(self.update, page_name, refresh)
 
 
-class Element(metaclass=abc.ABCMeta):  # 定义抽象类
-    def __init__(self, xy: tuple, paper: PaperDynamic):
+class Element:
+    def __init__(self, xy: tuple, size, paper: PaperDynamic, background=None):
+        if background is None:
+            self.background = Image.new("RGB", size, (255, 255, 255))
+        else:
+            self.background = background
         self.xy = xy
+        self.size = size
         self.paper = paper
         self.pool = paper.env.pool
         self.inited = False
@@ -193,19 +197,21 @@ class Element(metaclass=abc.ABCMeta):  # 定义抽象类
     def exit(self):  # 退出时调用
         self.inited = False
 
-    def pause(self):
+    def pause(self):    # 切换出page时调用
         pass
 
-    def recover(self):
+    def recover(self):  # 切换回page时调用
         pass
 
-    @abc.abstractmethod
     def build(self) -> Image:  # 当页面刷新时被调用，须返回一个图像
-        pass
+        return self.background
 
 
 class PaperTheme(PaperDynamic):
-    pass
+    def __init__(self, env):
+        super().__init__(env)
+        self.addElement("mainPage", Element((60, 0), (176, 30), self, Image.open(open("resources/images/docker/jpg"))))
+        self.env.touch_handler.add_clicked((0, 296, 0, 60), )
 
 
 class PaperApp(PaperDynamic):

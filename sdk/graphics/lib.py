@@ -6,7 +6,7 @@ from sdk.graphics import Element, PaperDynamic
 class TextElement(Element):
     def __init__(self, xy, paper: PaperDynamic, text, size=(60, 33), bgcolor="white", textColor="black", fontSize=20,
                  *args, **kwargs):
-        super().__init__(xy, paper)
+        super().__init__(xy, size, paper)
         self.text = text
         self._visible = True
         self.size = size
