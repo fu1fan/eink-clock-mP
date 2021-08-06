@@ -37,7 +37,7 @@ class _Docker(Element):
 class PaperTheme(PaperDynamic):
     def __init__(self, env):
         super().__init__(env)
-        self.pages["appList"] = page_lib.List(self, "appList")
+        self.pages["appList"] = page_lib.ListPage(self, "appList")
 
     def init(self):
         self.addElement("mainPage", _Docker(self))

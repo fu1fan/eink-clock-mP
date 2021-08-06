@@ -2,7 +2,7 @@ from sdk.graphics import Page as _Page
 from sdk.graphics.element_lib import ImageElement as _ImageElement
 
 
-class List(_Page):
+class ListPage(_Page):
     def __init__(self, paper, name):
         super().__init__(paper)
         self.name = name
