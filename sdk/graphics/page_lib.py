@@ -1,3 +1,5 @@
+import time
+
 import sdk
 from sdk.graphics import Page as _Page
 from sdk.graphics.element_lib import ImageElement as _ImageElement
@@ -79,8 +81,8 @@ class ListPage(_Page):
 
         self.showItems()
 
-        self.paper.recover_update()  # 解锁
         self.paper.changePage(self.name)
+        self.paper.recover_update()  # 解锁
 
     def showAppList(self):
         appList = []

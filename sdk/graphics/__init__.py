@@ -144,7 +144,7 @@ class PaperDynamic(Paper):
                 self.pages[name].recover()
             else:
                 self.pages[name].init()
-            self.env.pool.add_immediately(self._update, refresh)
+            self._update(refresh)
         else:
             raise ValueError("The specified page does not exist!")
 
