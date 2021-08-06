@@ -11,6 +11,8 @@ class ListPage(_Page):
             (0, 0), self.paper, "resources/images/list.jpg"))
         self.labels = (
             sdk.graphics.element_lib.Label((5, 5), self.paper, "测试"),
+            sdk.graphics.element_lib.Label((5, 35), self.paper, "测试2"),
+            sdk.graphics.element_lib.Label((5, 65), self.paper, "测试3"),
         )
         for label in self.labels:
             self.addElement(label)
@@ -18,9 +20,11 @@ class ListPage(_Page):
 
     def show(self, content=[]):
         self.content = content
-        #self.paper.pause_update()
+        self.paper.pause_update() #上锁，防止setText重复刷新屏幕
         self.labels[0].setText("23333")
-        #self.paper.recover_update()
+        self.labels[1].setText("66666")
+        self.labels[2].setText("33333")
+        self.paper.recover_update() #解锁
         self.paper.changePage(self.name)
 
     def showAppList(self):
