@@ -65,7 +65,7 @@ class TextElement(Element):
 
 
 class Button(TextElement):
-    def __init__(self, xy, paper: PaperDynamic, text, onclick, size=(50, 30), bgcolor="white", textColor="black",
+    def __init__(self, xy, paper: PaperDynamic, text, onclick, size=(50, 30), bgcolor="black", textColor="white",
                  fontSize=20, *args, **kwargs):
         super().__init__(xy, paper, text, size, bgcolor,
                          textColor, fontSize, *args, **kwargs)
@@ -85,7 +85,7 @@ class Button(TextElement):
 
 
 class Label(TextElement):
-    def __init__(self, xy, paper: PaperDynamic, text, size=(50, 30), bgcolor="black", textColor="white", fontSize=20,
+    def __init__(self, xy, paper: PaperDynamic, text, size=(50, 30), bgcolor="white", textColor="black", fontSize=20,
                  *args, **kwargs):
         super().__init__(xy, paper, text, size=size, bgcolor=bgcolor, textColor=textColor, fontSize=fontSize,
                          *args, **kwargs)
