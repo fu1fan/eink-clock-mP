@@ -68,10 +68,15 @@ class Paper:
 
 
 class Page(list):  # page是对list的重写，本质为添加一个构造器
-    def __init__(self, paper):
+    def __init__(self, paper, name):
         super().__init__()
         self.paper = paper
+        self.name = name
         self.inited = False
+
+    def addElement(self, element):
+        self.append(element)
+        element.page = self.name
 
     def init(self):
         for i in self:
@@ -99,7 +104,7 @@ class PaperDynamic(Paper):
         super().__init__(env, background_image)
         # 实例化各种定时器
         # self.pool = env.pool
-        self.pages = {"mainPage": Page(self), "infoHandler": Page(self), "warnHandler": Page(self), "errorHandler": Page(self)}
+        self.pages = {"mainPage": Page(self, "mainPage"), "infoHandler": Page(self, "infoHandler"), "warnHandler": Page(self, "warnHandler"), "errorHandler": Page(self, "errorHandler")}
         # TODO:为Handler页面添加内容
         self.nowPage = "mainPage"
         self.oldPage = "mainPage"
@@ -121,7 +126,7 @@ class PaperDynamic(Paper):
 
     def addPage(self, name: str, page=None):
         if page is None:
-            page = Page(self)
+            page = Page(self, name)
         self.pages[name] = page
 
     def addElement(self, target: str, element):
@@ -137,7 +142,7 @@ class PaperDynamic(Paper):
             if self.pages[name].inited:
                 self.pages[name].recover()
             else:
-                self.pages[name].pause()
+                self.pages[name].init()
             self.env.pool.add_immediately(self._update, refresh)
         else:
             raise ValueError("The specified page does not exist!")

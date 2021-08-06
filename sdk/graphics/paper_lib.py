@@ -12,6 +12,10 @@ class _Docker(Element):
         self.__active = False
         self.inited = False
 
+    def appbox_click_handler(self):
+        if self.__active:
+            self.paper.pages["appList"].show_app([])
+
     def clicked_handler(self):
         if self.paper.nowPage == self.page and not self.__active and self.inited:
             self.__active = True
@@ -22,6 +26,7 @@ class _Docker(Element):
 
     def init(self):
         self.paper.env.touch_handler.add_clicked((0, 296, 0, 30), self.clicked_handler)
+        self.paper.env.touch_handler.add_clicked((60, 100, 0, 30), self)
         self.inited = True
 
     def exit(self):
@@ -38,9 +43,12 @@ class PaperTheme(PaperDynamic):
     def __init__(self, env):
         super().__init__(env)
         self.pages["appList"] = page_lib.ListPage(self, "appList")
+        self.first_init = True
 
     def init(self):
-        self.addElement("mainPage", _Docker(self))
+        if self.first_init:
+            self.addElement("mainPage", _Docker(self))
+            self.first_init = False
         super().init()
 
 
