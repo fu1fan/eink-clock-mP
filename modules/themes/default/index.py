@@ -45,17 +45,27 @@ class TextClock(graphics.Element):
 
 def build(env: environment):
     paper = graphics.PaperTheme(env)
-    refreshBtn = sdk.graphics.lib.Button((0, 0), paper, "刷新", paper.refresh)
-    textLabel = sdk.graphics.lib.Label((50, 50), paper, "标签1")
+    #refreshBtn = sdk.graphics.lib.Button((0, 0), paper, "刷新", paper.refresh)
+    textLabel = sdk.graphics.lib.Label((0, 90), paper, "标签1")
 
     def changeTheTextOfLabal():
         textLabel.setText("okk")
-    
-    testBtn = sdk.graphics.lib.Button((220, 0), paper, "测试", changeTheTextOfLabal)
-    text_clock = TextClock((0, 0), paper)
-    paper.addElement("mainPage", text_clock)
+
+    #testBtn = sdk.graphics.lib.Button(
+    #    (60, 90), paper, "测试", changeTheTextOfLabal)
+    #text_clock = TextClock((0, 0), paper)
+    #paper.addElement("mainPage", text_clock)
     #paper.addElement("mainPage", refreshBtn)
-    paper.addElement("mainPage", textLabel)
-    paper.addElement("mainPage", testBtn)
+    #paper.addElement("mainPage", textLabel)
+    #paper.addElement("mainPage", testBtn)
+    keyboardList = [["Q","W","E","R","T","Y","U","I","O","P"],
+                    ["A","S","D","F","G","H","J","K","L","←"],
+                    ["↑","Z","X","C","V","B","N","M",",","."]]
+    keyboard = {}
+
+    for i in range(3):
+        for j in range(10):
+            keyboard[keyboardList[i][j]]=sdk.graphics.lib.Button((j*29+3,i*30+36),paper,keyboardList[i][j],paper.refresh,(28,29))
+            paper.addElement("mainPage",keyboard[keyboardList[i][j]])
 
     return paper
