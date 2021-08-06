@@ -8,7 +8,7 @@ class ListPage(_Page):
         self.addElement(_ImageElement((0, 0), self.paper, "resources/images/list.jpg"))
         self.content = []
 
-    def show(self, content: list):
+    def show(self, content=[]):
         self.content = content
         self.paper.changePage(self.name)
 
