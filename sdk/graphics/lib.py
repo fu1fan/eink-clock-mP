@@ -6,7 +6,7 @@ from sdk.graphics import Element, PaperDynamic
 
 
 class TextElement(Element):
-    def __init__(self, xy, paper: PaperDynamic, text, size=(60, 33), bgcolor="white", textColor="black", fontSize=20,
+    def __init__(self, xy, paper: PaperDynamic, text, size=(50, 30), bgcolor="white", textColor="black", fontSize=20,
                  *args, **kwargs):
         super().__init__(xy, size, paper)
         self.text = text
@@ -56,7 +56,7 @@ class TextElement(Element):
 
 
 class Button(TextElement):
-    def __init__(self, xy, paper: PaperDynamic, text, onclick, size=(60, 33), bgcolor="white", textColor="black",
+    def __init__(self, xy, paper: PaperDynamic, text, onclick, size=(50, 30), bgcolor="white", textColor="black",
                  fontSize=20, *args, **kwargs):
         super().__init__(xy, paper, text, size, bgcolor,
                          textColor, fontSize, *args, **kwargs)
@@ -76,6 +76,6 @@ class Button(TextElement):
 
 
 class Label(TextElement):
-    def __init__(self, xy, paper: PaperDynamic, text, size=(60, 33), bgcolor="black", textColor="white", fontSize=20, *args, **kwargs):
+    def __init__(self, xy, paper: PaperDynamic, text, size=(50, 30), bgcolor="black", textColor="white", fontSize=20, *args, **kwargs):
         super().__init__(xy, paper, text, size=size, bgcolor=bgcolor, textColor=textColor, fontSize=fontSize, *args, **kwargs)
     

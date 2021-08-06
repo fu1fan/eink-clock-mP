@@ -56,5 +56,6 @@ def build(env: environment):
     paper.addElement("mainPage", text_clock)
     #paper.addElement("mainPage", refreshBtn)
     paper.addElement("mainPage", textLabel)
+    paper.addElement("mainPage", testBtn)
 
     return paper
