@@ -83,6 +83,13 @@ class Button(TextElement):
                                                  *self.args,
                                                  **self.kwargs)
 
+    def recover(self):
+        self.paper.env.touch_handler.add_clicked((self.xy[0], self.xy[0] + self.size[0],
+                                                  self.xy[1], self.xy[1] + self.size[1]),
+                                                 self.clickedHandler,
+                                                 *self.args,
+                                                 **self.kwargs)
+
 
 class Label(TextElement):
     def __init__(self, xy, paper: PaperDynamic, text, size=(50, 30), bgcolor="white", textColor="black", fontSize=20,

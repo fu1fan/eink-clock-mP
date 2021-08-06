@@ -29,6 +29,10 @@ class _Docker(Element):
         self.paper.env.touch_handler.add_clicked((60, 100, 0, 30), self.appbox_click_handler)
         self.inited = True
 
+    def recover(self):
+        self.paper.env.touch_handler.add_clicked((0, 296, 0, 30), self.clicked_handler)
+        self.paper.env.touch_handler.add_clicked((60, 100, 0, 30), self.appbox_click_handler)
+
     def exit(self):
         self.inited = False
 
