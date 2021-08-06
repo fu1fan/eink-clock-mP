@@ -49,9 +49,17 @@ def build(env: environment):
     # refreshBtn = sdk.graphics.lib.Button((0, 0), paper, "刷新", paper.refresh)
     textLabel = sdk.graphics.element_lib.Label((0, 90), paper, "标签1")
 
+    """
+    def elementRecover():
+        textLabel.setText("recovered!")
+        print("recovered!")
+    
+    textLabel.recover = elementRecover
+
     def changeTheTextOfLabal():
         textLabel.setText("okk")
-
+    """
+    
     # testBtn = sdk.graphics.lib.Button(
     #    (60, 90), paper, "测试", changeTheTextOfLabal)
     # text_clock = TextClock((0, 0), paper)
