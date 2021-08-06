@@ -1,14 +1,29 @@
-import time
+import traceback
 
 from PIL import ImageFont, Image, ImageDraw
 
 from sdk.graphics import Element, PaperDynamic
 
 
+class ImageElement(Element):
+    def __init__(self, xy: tuple, paper: PaperDynamic, image_path: str):
+        super().__init__(xy, paper)
+        try:
+            file = open(image_path, "rb")
+            self.image = Image.open(file)
+            self.size = (self.image.size[0], self.image.size[1])
+        except:
+            self.image = None
+            paper.env.logger_env.error(traceback.format_exc())
+
+    def build(self) -> Image:
+        return self.image
+
+
 class TextElement(Element):
     def __init__(self, xy, paper: PaperDynamic, text, size=(50, 30), bgcolor="white", textColor="black", fontSize=20,
                  *args, **kwargs):
-        super().__init__(xy, size, paper)
+        super().__init__(xy, paper, size)
         self.text = text
         self._visible = True
         self.size = size
@@ -29,10 +44,10 @@ class TextElement(Element):
     def getText(self):
         return self.text
 
-    def setText(self,newText):
+    def setText(self, newText):
         self.text = newText
         self.paper.update_async(self.page)
-        
+
     def build(self) -> Image:
         if self.inited and self._visible:
             image = self.background_image.copy()
@@ -47,9 +62,6 @@ class TextElement(Element):
             return image
         elif not self._visible:
             return None
-
-    def init(self):
-        self.inited = True
 
 
 class Button(TextElement):
@@ -73,7 +85,7 @@ class Button(TextElement):
 
 
 class Label(TextElement):
-    def __init__(self, xy, paper: PaperDynamic, text, size=(50, 30), bgcolor="black", textColor="white", fontSize=20
-                 , *args, **kwargs):
-        super().__init__(xy, paper, text, size=size, bgcolor=bgcolor, textColor=textColor, fontSize=fontSize
-                         , *args, **kwargs)
+    def __init__(self, xy, paper: PaperDynamic, text, size=(50, 30), bgcolor="black", textColor="white", fontSize=20,
+                 *args, **kwargs):
+        super().__init__(xy, paper, text, size=size, bgcolor=bgcolor, textColor=textColor, fontSize=fontSize,
+                         *args, **kwargs)
