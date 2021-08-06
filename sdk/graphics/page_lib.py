@@ -40,23 +40,27 @@ class ListPage(_Page):
         self.paper.changePage("mainPage")
 
     def showItems(self):
-        for i in range((self.current_page_of_content-1)*3, (self.current_page_of_content-1)*3+3):
-            if (i < len(self.content)):
-                self.labels[i].setText(self.content[i][0])
+        index_of_the_first = (self.current_page_of_content-1)*3
+        for i in range(0, 3):
+            if (index_of_the_first + i < len(self.content)):
+                self.labels[i].setText(self.content[index_of_the_first + i][0])
+            else:
+                self.labels[i].setText("")
+            
 
     def goPrev(self):
-        self.paper.pause_update()  # 上锁，防止setText重复刷新屏幕
         if (self.current_page_of_content > 1):
+            self.paper.pause_update()  # 上锁，防止setText重复刷新屏幕
             self.current_page_of_content -= 1
             self.showItems()
-        self.paper.recover_update()  # 解锁
+            self.paper.recover_update()  # 解锁
 
     def goNext(self):
-        self.paper.pause_update()  # 上锁，防止setText重复刷新屏幕
         if (self.current_page_of_content < self.total_pages_of_content):
+            self.paper.pause_update()  # 上锁，防止setText重复刷新屏幕
             self.current_page_of_content += 1
             self.showItems()
-        self.paper.recover_update()  # 解锁
+            self.paper.recover_update()  # 解锁
 
     def show(self, content=[]):
         self.content = content
@@ -65,7 +69,7 @@ class ListPage(_Page):
         self.content = [["app1", "img1", self.close], ["app2", "img2", self.close], [
             "app3", "app3", self.close], ["app4", "img4", self.close]]
 
-        self.total_pages_of_content = len(self.content) // 3
+        self.total_pages_of_content = len(self.content) // 3 + 1
         self.current_page_of_content = 1
 
         self.paper.pause_update()  # 上锁，防止setText重复刷新屏幕
