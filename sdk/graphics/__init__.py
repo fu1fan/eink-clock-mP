@@ -1,4 +1,5 @@
 import threading
+import traceback
 
 from PIL import Image
 
@@ -172,6 +173,20 @@ class PaperDynamic(Paper):
         if not (self.inited and page_name == self.nowPage):
             return
         self._update(refresh)
+
+    def pause_update(self, timeout=-1):
+        if not self.update_lock.acquire(timeout=-1):
+            raise TimeoutError
+
+    def recover_update(self, raise_for_unlocked=False):
+        try:
+            self.update_lock.release()
+        except RuntimeError as e:
+            if raise_for_unlocked:
+                raise e
+            else:
+                self.env.logger_env.warn(traceback.format_exc())
+        self.env.pool.add_immediately(self._update)
 
     def update_async(self, page_name: str, refresh=None):
         self.env.pool.add_immediately(self.update, page_name, refresh)
