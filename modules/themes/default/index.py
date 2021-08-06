@@ -24,7 +24,7 @@ class TextClock(graphics.Element):
             if self.stop_sign:
                 return
             if self.last_update != time.localtime(time.time()).tm_min:
-                self.paper.update(self.page)
+                self.paper.update(self.page.name)
             time.sleep(1)
 
     def init(self):

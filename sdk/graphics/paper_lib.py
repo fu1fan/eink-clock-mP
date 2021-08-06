@@ -17,12 +17,12 @@ class _Docker(Element):
             self.paper.pages["appList"].showAppList()
 
     def clicked_handler(self):
-        if self.paper.nowPage == self.page and not self.__active and self.inited:
+        if self.paper.nowPage == self.page.name and not self.__active and self.inited:
             self.__active = True
-        self.paper.update_async(self.page)
+        self.paper.update(self.page.name)
         time.sleep(5)
         self.__active = False
-        self.paper.update(self.page)
+        self.paper.update(self.page.name)
 
     def init(self):
         self.paper.env.touch_handler.add_clicked((0, 296, 0, 30), self.clicked_handler)

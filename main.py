@@ -141,9 +141,12 @@ if __name__ == "__main__":  # 主线程：UI管理
         ### 主程序开始
         env.init(theme.build(env), plugins, apps)
 
-        while 1:    # 据说 while 1 的效率比 while True 高
-            env.touchpad_driver.ICNT_Scan(touch_recoder_new, touch_recoder_old)
-            env.touch_handler.handle(touch_recoder_new, touch_recoder_old)
+        # while 1:    # 据说 while 1 的效率比 while True 高
+        env.touchpad_driver.ICNT_Scan(touch_recoder_new, touch_recoder_old)
+        env.touch_handler.handle(touch_recoder_new, touch_recoder_old)
+        env.touchpad_driver.ICNT_Scan(touch_recoder_new, touch_recoder_old)
+        env.touch_handler.handle(touch_recoder_new, touch_recoder_old)
+        time.sleep(100000)
 
     except KeyboardInterrupt:
         print("ctrl+c")

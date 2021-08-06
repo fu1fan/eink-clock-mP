@@ -39,14 +39,14 @@ class TextElement(Element):
 
     def setVisible(self, m: bool):
         self._visible = m
-        self.paper.update_async(self.page)
+        self.paper.update_async(self.page.name)
 
     def getText(self):
         return self.text
 
     def setText(self, newText):
         self.text = newText
-        self.paper.update_async(self.page)
+        self.paper.update_async(self.page.name)
 
     def build(self) -> Image:
         if self.inited and self._visible:
