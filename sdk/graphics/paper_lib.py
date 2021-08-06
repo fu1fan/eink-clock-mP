@@ -14,7 +14,7 @@ class _Docker(Element):
 
     def appbox_click_handler(self):
         if self.__active:
-            self.paper.pages["appList"].show()
+            self.paper.pages["appList"].showAppList()
 
     def clicked_handler(self):
         if self.paper.nowPage == self.page and not self.__active and self.inited:

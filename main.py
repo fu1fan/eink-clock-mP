@@ -15,7 +15,7 @@ example_config = {
     "main": {
         "enable_plugins": [],
         "enable_theme": "default",
-        "enable_apps": [],
+        "enable_apps": ["hello_world"],
         "opening_images": [
             "resources/images/raspberry.jpg",
             "resources/images/github.jpg",
@@ -32,7 +32,7 @@ example_config = {
     "plugins": {},
     "themes": {},
     "apps": {},
-    "update_0bd86j4": 1
+    "update_0bd89j4": 1
 }
 
 
@@ -108,7 +108,7 @@ if __name__ == "__main__":  # 主线程：UI管理
                 if wheel_ not in wheels_name:
                     raise DependenceError("No wheel named %s!" % wheel_)
             for plugin_ in theme_info["depended-plugins"]:
-                if plugin_ not in wheels_name:
+                if plugin_ not in plugins:
                     raise DependenceError("No plugin named %s!" % plugin_)
             theme = importlib.import_module("modules.themes.%s.index" % theme_name)
         except FileNotFoundError and json.JSONDecodeError and DependenceError:
@@ -130,10 +130,10 @@ if __name__ == "__main__":  # 主线程：UI管理
                 for wheel_ in app_info["depended-wheels"]:
                     if wheel_ not in wheels_name:
                         raise DependenceError("No wheel named %s!" % wheel_)
-                for plugin_ in app_info["depended-apps"]:
-                    if plugin_ not in wheels_name:
+                for plugin_ in app_info["depended-plugins"]:
+                    if plugin_ not in plugins:
                         raise DependenceError("No plugin named %s!" % plugin_)
-                apps[app_name] = importlib.import_module("modules.apps.%s.index")
+                apps[app_name] = importlib.import_module("modules.apps.%s.index" % app_name)
             except FileNotFoundError and json.JSONDecodeError and DependenceError:
                 logger_main.error("程序[%s]加载失败:\n" + traceback.format_exc())
 

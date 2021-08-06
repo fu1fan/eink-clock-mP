@@ -12,5 +12,7 @@ class ListPage(_Page):
         self.content = content
         self.paper.changePage(self.name)
 
-    def show_app(self):
-        pass
+    def showAppList(self):
+        #print("okkkk")
+        print(self.paper.env.apps)
+        
