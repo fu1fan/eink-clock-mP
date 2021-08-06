@@ -226,7 +226,7 @@ class Env:
             self.logger_env.error("The screen is busy!")
             raise RuntimeError("The screen is busy!")
 
-        self.pool = threadpool_mini.ThreadPool(configs["threadpool_size"])
+        self.pool = threadpool_mini.ThreadPool(configs["threadpool_size"], handler=logger_env.warn)
         self.pool.start()
 
         self.touch_handler = touchpad.TouchHandler(self)

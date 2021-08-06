@@ -17,10 +17,7 @@ class TextElement(Element):
         self.font = ImageFont.truetype(
             "resources/fonts/STHeiti_Light.ttc", fontSize)
         self.textColor = textColor
-        if bgcolor == "white":
-            self.background_image = Image.new("RGB", size, (255, 255, 255))
-        elif bgcolor == "black":
-            self.background_image = Image.new("RGB", size, (0, 0, 0))
+        self.background_image = Image.new("RGB", size, bgcolor)
 
     def isVisible(self):
         return self._visible
@@ -62,9 +59,9 @@ class Button(TextElement):
                          textColor, fontSize, *args, **kwargs)
         self.on_clicked = onclick
 
-    def clickedHandler(self):
+    def clickedHandler(self, *args, **kwargs):
         if self._visible and self.inited:
-            self.on_clicked()
+            self.on_clicked(*args, **kwargs)
 
     def init(self):
         super().init()
@@ -76,6 +73,7 @@ class Button(TextElement):
 
 
 class Label(TextElement):
-    def __init__(self, xy, paper: PaperDynamic, text, size=(50, 30), bgcolor="black", textColor="white", fontSize=20, *args, **kwargs):
-        super().__init__(xy, paper, text, size=size, bgcolor=bgcolor, textColor=textColor, fontSize=fontSize, *args, **kwargs)
-    
+    def __init__(self, xy, paper: PaperDynamic, text, size=(50, 30), bgcolor="black", textColor="white", fontSize=20
+                 , *args, **kwargs):
+        super().__init__(xy, paper, text, size=size, bgcolor=bgcolor, textColor=textColor, fontSize=fontSize
+                         , *args, **kwargs)

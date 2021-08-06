@@ -45,7 +45,7 @@ class TextClock(graphics.Element):
 
 def build(env: environment):
     paper = graphics.PaperTheme(env)
-    #refreshBtn = sdk.graphics.lib.Button((0, 0), paper, "刷新", paper.refresh)
+    # refreshBtn = sdk.graphics.lib.Button((0, 0), paper, "刷新", paper.refresh)
     textLabel = sdk.graphics.lib.Label((0, 90), paper, "标签1")
 
     def changeTheTextOfLabal():
@@ -53,11 +53,11 @@ def build(env: environment):
 
     # testBtn = sdk.graphics.lib.Button(
     #    (60, 90), paper, "测试", changeTheTextOfLabal)
-    #text_clock = TextClock((0, 0), paper)
-    #paper.addElement("mainPage", text_clock)
-    #paper.addElement("mainPage", refreshBtn)
-    #paper.addElement("mainPage", textLabel)
-    #paper.addElement("mainPage", testBtn)
+    # text_clock = TextClock((0, 0), paper)
+    # paper.addElement("mainPage", text_clock)
+    # paper.addElement("mainPage", refreshBtn)
+    # paper.addElement("mainPage", textLabel)
+    # paper.addElement("mainPage", testBtn)
     keyboardList = [["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
                     ["A", "S", "D", "F", "G", "H", "J", "K", "L", "←"],
                     ["↑", "Z", "X", "C", "V", "B", "N", "M", ",", "."]]
@@ -66,15 +66,14 @@ def build(env: environment):
     textInput = sdk.graphics.lib.Label((0, 0), paper, "请点按键盘 ：）", (295, 30))
     paper.addElement("mainPage", textInput)
 
-    def addChar():
-        pass
-        # textInput.setText(textInput.getText()+char)
-    
+    def addChar(char):
+        textInput.setText(textInput.getText()+char)
+
     for i in range(3):
         for j in range(10):
             nowChar = keyboardList[i][j]
             keyboard[nowChar] = sdk.graphics.lib.Button(
-                (j*29+3, i*30+36), paper, nowChar, addChar, (28, 29))
+                (j * 29 + 3, i * 30 + 36), paper, nowChar, addChar, (28, 29), char=nowChar)
             paper.addElement("mainPage", keyboard[nowChar])
 
     return paper

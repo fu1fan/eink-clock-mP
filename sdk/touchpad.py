@@ -28,8 +28,8 @@ class TouchHandler:
 
     def add_clicked(self, area, func, *args, **kwargs):
         """
-        添加一个触摸元件
-        :param func:
+        添加一个触摸元件，⚠️：所有的回调函数必须能接收 *args, **kwargs
+        :param func: 回调函数
         :param area: (x1, x2, y1, y2)
         :return: None
         """

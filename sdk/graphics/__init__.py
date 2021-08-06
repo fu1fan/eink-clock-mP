@@ -219,7 +219,7 @@ class _Docker(Element):
         self.__active = False
         self.inited = False
 
-    def clicked_handler(self):
+    def clicked_handler(self, *args, **kwargs):
         if self.paper.nowPage == self.page and not self.__active and self.inited:
             self.__active = True
         self.paper.update_async(self.page)
@@ -228,7 +228,7 @@ class _Docker(Element):
         self.paper.update(self.page)
 
     def init(self):
-        self.paper.env.touch_handler.add_clicked((0, 296, 0, 60), self.clicked_handler)
+        self.paper.env.touch_handler.add_clicked((0, 296, 0, 30), self.clicked_handler)
         self.inited = True
 
     def exit(self):
