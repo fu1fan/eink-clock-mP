@@ -18,7 +18,9 @@ class ListPage(_Page):
 
     def show(self, content=[]):
         self.content = content
-
+        #self.paper.pause_update()
+        self.labels[0].setText("23333")
+        #self.paper.recover_update()
         self.paper.changePage(self.name)
 
     def showAppList(self):
