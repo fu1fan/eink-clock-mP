@@ -76,7 +76,7 @@ class Page(list):  # page是对list的重写，本质为添加一个构造器
 
     def addElement(self, element):
         self.append(element)
-        element.page = self.name
+        element.page = self
 
     def init(self):
         for i in self:
@@ -131,7 +131,7 @@ class PaperDynamic(Paper):
 
     def addElement(self, target: str, element):
         self.pages[target].append(element)
-        element.page = target
+        element.page = self.pages[target]
 
     def changePage(self, name, refresh=None):
         if name in self.pages:

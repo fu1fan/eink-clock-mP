@@ -7,16 +7,19 @@ import sdk.graphics.element_lib
 class ListPage(_Page):
     def __init__(self, paper, name):
         super().__init__(paper, name)
-
-        self.content = []
+        self.addElement(_ImageElement(
+            (0, 0), self.paper, "resources/images/list.jpg"))
+        self.labels = (
+            sdk.graphics.element_lib.Label((5, 5), self.paper, "测试"),
+        )
+        for label in self.labels:
+            self.addElement(label)
+        self.content = []   # [[text, image, func]]
 
     def show(self, content=[]):
         self.content = content
+
         self.paper.changePage(self.name)
-        self.addElement(_ImageElement(
-            (0, 0), self.paper, "resources/images/list.jpg"))
-        self.addElement(sdk.graphics.element_lib.Label(
-            (5, 5), self.paper, "测试"))
 
     def showAppList(self):
         appList = []
