@@ -1,5 +1,6 @@
 import sdk.graphics
 import sdk.graphics.element_lib
+import sdk.graphics.paper_lib
 
 import requests
 import json
@@ -12,7 +13,7 @@ paper = None
 codeLabel = None
 
 def build(env):
-    paper = sdk.graphics.PaperDynamic(env)
+    paper = sdk.graphics.paper_lib.PaperApp(env)
     codeLabel = sdk.graphics.element_lib.Label(
     (0, 90), paper, str(random.randint(100000,999999)), (296, 30), bgcolor="black", textColor="white", fontSize=30)
 
