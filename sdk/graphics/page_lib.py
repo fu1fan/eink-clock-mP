@@ -48,6 +48,10 @@ class ListPage(_Page):
         for listText in self.listTexts:
             self.addElement(listText)
 
+        self.more_items_dots = sdk.graphics.element_lib.Label((35,122), self.paper, "...",(100,6))
+
+        self.addElement(self.more_items_dots)
+
         self.total_pages_of_content = 0
         self.current_page_of_content = 0
 
@@ -60,7 +64,7 @@ class ListPage(_Page):
         """
 
     def defaultOnclickEvent(self):
-        print("Clicked!")
+        print("\nClicked!")
 
     def close(self):
         self.paper.changePage("mainPage")
@@ -83,7 +87,7 @@ class ListPage(_Page):
 
             else:
                 self.listTexts[i].setText("")
-                self.icons[i].setImage("resources/images/None20px.jpg")
+                self.icons[i].setImage("resources/images/None1px.jpg")
 
     def goPrev(self):
         if (self.current_page_of_content > 1):
