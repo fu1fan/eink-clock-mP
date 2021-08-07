@@ -21,11 +21,13 @@ class ListPage(_Page):
         self.addElement(_ImageElement(
             (0, 0), self.paper, "resources/images/list.jpg"))
 
-
         self.icons = (
-            sdk.graphics.element_lib.ImageElement((8,36),self.paper,"resources/images/None20px.jpg"),
-            sdk.graphics.element_lib.ImageElement((8,66),self.paper,"resources/images/None20px.jpg"),
-            sdk.graphics.element_lib.ImageElement((8,96),self.paper,"resources/images/None20px.jpg")
+            sdk.graphics.element_lib.ImageElement(
+                (8, 36), self.paper, "resources/images/None20px.jpg"),
+            sdk.graphics.element_lib.ImageElement(
+                (8, 66), self.paper, "resources/images/None20px.jpg"),
+            sdk.graphics.element_lib.ImageElement(
+                (8, 96), self.paper, "resources/images/None20px.jpg")
         )
 
         for icon in self.icons:
@@ -48,15 +50,15 @@ class ListPage(_Page):
 
         self.total_pages_of_content = 0
         self.current_page_of_content = 0
-        
-        self.content = []   
+
+        self.content = []
         # 格式为：[[text, image, func]]
         """
         示例：
         [["app1", None, self.close], ["app2", "resources/images/None18px.jpg", self.close], [
             "app3", None, self.close], ["app4", "resources/images/None18px.jpg", self.close]]
         """
-    
+
     def defaultOnclickEvent(self):
         print("Clicked!")
 
@@ -71,16 +73,17 @@ class ListPage(_Page):
         index_of_the_first = (self.current_page_of_content-1)*3
         for i in range(0, 3):
             if index_of_the_first + i < len(self.content):
-                self.listTexts[i].setText(self.content[index_of_the_first + i][0])
+                self.listTexts[i].setText(
+                    self.content[index_of_the_first + i][0])
                 if self.content[index_of_the_first + i][1] != None:
-                    self.icons[i].setImage(self.content[index_of_the_first + i][1])
+                    self.icons[i].setImage(
+                        self.content[index_of_the_first + i][1])
                 else:
                     self.icons[i].setImage("resources/images/None20px.jpg")
 
             else:
                 self.listTexts[i].setText("")
                 self.icons[i].setImage("resources/images/None20px.jpg")
-            
 
     def goPrev(self):
         if (self.current_page_of_content > 1):
@@ -111,6 +114,13 @@ class ListPage(_Page):
 
     def showAppList(self):
         appList = []
+        """
         for key in self.paper.env.apps:
             appList.append(key)
+        """
+
+        # 下面一行为调试用
+        appList = [["app1", None, self.close], ["app2", "resources/images/None18px.jpg", self.close], [
+            "app3", None, self.close], ["app4", "resources/images/None18px.jpg", self.close]]
+
         self.show(appList)
