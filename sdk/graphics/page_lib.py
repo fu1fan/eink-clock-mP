@@ -83,22 +83,20 @@ class ListPage(_Page):
             
 
     def goPrev(self):
-        if self.current_page_of_content > 1:
+        if (self.current_page_of_content > 1):
             self.paper.pause_update()  # 上锁，防止setText重复刷新屏幕
             self.current_page_of_content -= 1
             self.showItems()
             self.paper.recover_update()  # 解锁
 
     def goNext(self):
-        if self.current_page_of_content < self.total_pages_of_content:
+        if (self.current_page_of_content < self.total_pages_of_content):
             self.paper.pause_update()  # 上锁，防止setText重复刷新屏幕
             self.current_page_of_content += 1
             self.showItems()
             self.paper.recover_update()  # 解锁
 
-    def show(self, content=None):
-        if content is None:
-            content = []
+    def show(self, content=[]):
         self.content = content
 
         self.total_pages_of_content = len(self.content) // 3 + 1
