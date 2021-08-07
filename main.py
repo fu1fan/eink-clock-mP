@@ -110,7 +110,23 @@ if __name__ == "__main__":  # 主线程：UI管理
             for plugin_ in theme_info["depended-plugins"]:
                 if plugin_ not in plugins:
                     raise DependenceError("No plugin named %s!" % plugin_)
-            theme = importlib.import_module("modules.themes.%s.index" % theme_name)
+            try:
+                if theme_info["icon_18px"]:
+                    file = open(theme_info["icon_18px"])
+                    icon_18px = Image.open(theme_info["icon"], "rb")
+                else:
+                    icon_18px = None
+            except:
+                icon_18px = None
+            try:
+                if theme_info["icon_20px"]:
+                    file = open(theme_info["icon_20px"])
+                    icon_20px = Image.open(theme_info["icon"], "rb")
+                else:
+                    icon_20px = None
+            except:
+                icon_20px = None
+            theme = [importlib.import_module("modules.themes.%s.index" % theme_name), (icon_18px, icon_20px)]
         except FileNotFoundError and json.JSONDecodeError and DependenceError:
             logger_main.error("主题[%s]加载失败:\n" + traceback.format_exc())
             try:
@@ -121,7 +137,7 @@ if __name__ == "__main__":  # 主线程：UI管理
                 logger_main.error("默认主题加载失败:\n%s程序已退出" % traceback.format_exc())
                 raise e
 
-        enable_apps = configurator_main.read("enable_apps", raise_error=True)  # 加载程序 TODO:添加applogo
+        enable_apps = configurator_main.read("enable_apps", raise_error=True)  # 加载程序
         for app_name in enable_apps:
             try:
                 file = open("modules/apps/%s/index.json" % app_name)
@@ -133,13 +149,29 @@ if __name__ == "__main__":  # 主线程：UI管理
                 for plugin_ in app_info["depended-plugins"]:
                     if plugin_ not in plugins:
                         raise DependenceError("No plugin named %s!" % plugin_)
-                apps[app_name] = importlib.import_module("modules.apps.%s.index" % app_name)
+                try:
+                    if app_info["icon_18px"]:
+                        file = open(app_info["icon_18px"])
+                        icon_18px = Image.open(app_info["icon"], "rb")
+                    else:
+                        icon_18px = None
+                except:
+                    icon_18px = None
+                try:
+                    if app_info["icon_20px"]:
+                        file = open(app_info["icon_20px"])
+                        icon_20px = Image.open(app_info["icon"], "rb")
+                    else:
+                        icon_20px = None
+                except:
+                    icon_20px = None
+                apps[app_name] = [importlib.import_module("modules.apps.%s.index" % app_name), (icon_18px, icon_20px)]
             except FileNotFoundError and json.JSONDecodeError and DependenceError:
                 logger_main.error("程序[%s]加载失败:\n" + traceback.format_exc())
 
         load_lock.wait()
         ### 主程序开始
-        env.init(theme.build(env), plugins, apps)
+        env.init(theme[0].build(env), plugins, apps)
 
         while 1:    # 据说 while 1 的效率比 while True 高
             env.touchpad_driver.ICNT_Scan(touch_recoder_new, touch_recoder_old)
