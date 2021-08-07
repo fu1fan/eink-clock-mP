@@ -47,5 +47,4 @@ class TextClock(graphics.Element):
 def build(env):
     paper = graphics.PaperDynamic(env)
     paper.addElement("mainPage", TextClock((0, 0), paper))
-    print("hello world!")
     return paper
