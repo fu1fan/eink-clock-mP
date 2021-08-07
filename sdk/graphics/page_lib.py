@@ -144,7 +144,7 @@ class ListPage(_Page):
             appList.append(key)
         """
 
-        # 下面一行为调试用
+        # 下面有点bug
         for appName, appContent in self.paper.env.apps.items():
             def warp():
                 self.paper.env.changePaper(appContent[0].build(self.paper.env))
@@ -154,7 +154,6 @@ class ListPage(_Page):
 
 
 # keyboardPage 还未完成哦
-"""
 class keyboardPage(_Page):
     def __init__(self, paper, textHandler, pageName="keyboardPage"):
         super().__init__(paper, pageName)
@@ -180,4 +179,3 @@ class keyboardPage(_Page):
 
     def show(self, inputType="text"):
         pass
-"""
