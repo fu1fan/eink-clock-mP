@@ -85,6 +85,9 @@ class Button(TextElement):
         if self._visible and self.inited:
             self.on_clicked(*args, **kwargs)
 
+    def setOnclick(self,onclickFunc):
+        self.on_clicked = onclickFunc
+
     def init(self):
         super().init()
         self.paper.env.touch_handler.add_clicked((self.xy[0], self.xy[0] + self.size[0],
