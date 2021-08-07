@@ -153,9 +153,29 @@ class ListPage(_Page):
         self.show(appList)
 
 
+# keyboardPage 还未完成哦
 class keyboardPage(_Page):
     def __init__(self, paper, textHandler, pageName="keyboardPage"):
         super().__init__(paper, pageName)
+        self.keyboardList = [["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+                             ["A", "S", "D", "F", "G", "H", "J", "K", "L", "←"],
+                             ["↑", "Z", "X", "C", "V", "B", "N", "M", ",", "."]]
+        self.keyboard = {}
 
-    def show(self,inputType="text"):
+        self.textInput = sdk.graphics.element_lib.Label(
+            (0, 0), paper, "请点按键盘 ：）", (295, 30))
+        self.addElement(self.textInput)
+
+    def showKeyboard(self):
+        for i in range(3):
+            for j in range(10):
+                nowChar = self.keyboardList[i][j]
+                self.keyboard[nowChar] = sdk.graphics.element_lib.Button(
+                    (j * 29 + 3, i * 30 + 36), self.paper, nowChar, self.addChar, (28, 29), char=nowChar)
+                self.addElement(self.keyboard[nowChar])
+
+    def addChar(self, char):
+        self.textInput.setText(self.textInput.getText()+char)
+
+    def show(self, inputType="text"):
         pass
