@@ -51,8 +51,11 @@ def build(env: environment):
     
     # testBtn = sdk.graphics.lib.Button(
     #    (60, 90), paper, "测试", changeTheTextOfLabal)
+    """
     text_clock = TextClock((0, 0), paper)
     paper.addElement("mainPage", text_clock)
+    """
+
     # paper.addElement("mainPage", refreshBtn)
     # paper.addElement("mainPage", textLabel)
     # paper.addElement("mainPage", testBtn)

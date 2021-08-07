@@ -154,6 +154,7 @@ class ListPage(_Page):
 
 
 # keyboardPage 还未完成哦
+"""
 class keyboardPage(_Page):
     def __init__(self, paper, textHandler, pageName="keyboardPage"):
         super().__init__(paper, pageName)
@@ -179,3 +180,4 @@ class keyboardPage(_Page):
 
     def show(self, inputType="text"):
         pass
+"""
