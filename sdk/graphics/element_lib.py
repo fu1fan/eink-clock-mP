@@ -8,13 +8,23 @@ from sdk.graphics import Element, PaperDynamic
 class ImageElement(Element):
     def __init__(self, xy: tuple, paper: PaperDynamic, image_path: str):
         super().__init__(xy, paper)
+        self._setImage(image_path)
+
+    def _setImage(self,image_path):
         try:
             file = open(image_path, "rb")
             self.image = Image.open(file)
             self.size = (self.image.size[0], self.image.size[1])
         except:
             self.image = None
-            paper.env.logger_env.error(traceback.format_exc())
+            self.paper.env.logger_env.error(traceback.format_exc())
+
+    def setImage(self,new_image_path):
+        self._setImage(new_image_path)
+        self.paper.update(self.page.name)
+
+    def getImage(self) -> Image:
+        return self.image
 
     def build(self) -> Image:
         return self.image

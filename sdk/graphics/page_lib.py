@@ -21,17 +21,27 @@ class ListPage(_Page):
         self.addElement(_ImageElement(
             (0, 0), self.paper, "resources/images/list.jpg"))
 
+
+        self.icons = (
+            sdk.graphics.element_lib.ImageElement((8,36),self.paper,"resources/images/None20px.jpg"),
+            sdk.graphics.element_lib.ImageElement((8,66),self.paper,"resources/images/None20px.jpg"),
+            sdk.graphics.element_lib.ImageElement((8,96),self.paper,"resources/images/None20px.jpg")
+        )
+
+        for icon in self.icons:
+            self.addElement(icon)
+
         self.label_of_page = sdk.graphics.element_lib.Label(
             (50, 0), self.paper, "", (150, 28))
         self.addElement(self.label_of_page)
 
         self.labels = (
             sdk.graphics.element_lib.Label(
-                (45, 32), self.paper, "", (296, 28)),
+                (35, 32), self.paper, "", (296, 28)),
             sdk.graphics.element_lib.Label(
-                (45, 62), self.paper, "", (296, 28)),
+                (35, 62), self.paper, "", (296, 28)),
             sdk.graphics.element_lib.Label(
-                (45, 92), self.paper, "", (296, 28)),
+                (35, 92), self.paper, "", (296, 28))
         )
         for label in self.labels:
             self.addElement(label)
@@ -46,6 +56,7 @@ class ListPage(_Page):
         for i in range(0, 3):
             if (index_of_the_first + i < len(self.content)):
                 self.labels[i].setText(self.content[index_of_the_first + i][0])
+                #self.icons[i].
             else:
                 self.labels[i].setText("")
             
