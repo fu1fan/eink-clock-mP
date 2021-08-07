@@ -3,5 +3,7 @@
   "version": 1,
   "adapted-version": "all",
   "depended-wheels": [],
-  "depended-plugins": []
+  "depended-plugins": [],
+  "icon_18px": null,
+  "icon_20px": null
 }

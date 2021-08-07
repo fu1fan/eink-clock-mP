@@ -122,7 +122,9 @@ class ListPage(_Page):
             self.showItems()
             self.paper.recover_update()  # 解锁
 
-    def show(self, content=[]):
+    def show(self, content=None):
+        if content is None:
+            content = []
         self.content = content
 
         self.total_pages_of_content = len(self.content) // 3 + 1
@@ -143,8 +145,10 @@ class ListPage(_Page):
         """
 
         # 下面一行为调试用
-        appList = [["app1", None, None], ["app2", "resources/images/None18px.jpg", self.close], [
-            "app3", None, self.testOnclickEvent], ["app4", "resources/images/None18px.jpg", self.testOnclickEvent]]
+        for appName, appContent in self.paper.env.apps.items():
+            def warp():
+                self.paper.env.changePaper(appContent[0].build(self.paper.env))
+            appList.append([appName, appContent[1][0], warp])
 
         self.show(appList)
 
