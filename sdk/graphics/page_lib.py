@@ -56,7 +56,9 @@ class ListPage(_Page):
         for i in range(0, 3):
             if (index_of_the_first + i < len(self.content)):
                 self.labels[i].setText(self.content[index_of_the_first + i][0])
-                #self.icons[i].
+                if self.content[index_of_the_first + i][1]:
+                    self.icons[i].setImage(self.content[index_of_the_first + i][1])
+
             else:
                 self.labels[i].setText("")
             
