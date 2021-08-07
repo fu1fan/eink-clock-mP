@@ -66,6 +66,9 @@ class ListPage(_Page):
     def defaultOnclickEvent(self):
         print("\nClicked!")
 
+    def testOnclickEvent(self):
+        print("\nTest Clicked!")
+
     def close(self):
         self.paper.changePage("mainPage")
 
@@ -77,18 +80,25 @@ class ListPage(_Page):
         index_of_the_first = (self.current_page_of_content-1)*3
         for i in range(0, 3):
             if index_of_the_first + i < len(self.content):
+                #设置item的文字
                 self.listTexts[i].setText(
                     self.content[index_of_the_first + i][0])
+                #设置item的图标
                 if self.content[index_of_the_first + i][1] != None:
                     self.icons[i].setImage(
                         self.content[index_of_the_first + i][1])
                 else:
                     self.icons[i].setImage("resources/images/None20px.jpg")
+                #设置item的点击事件
+                if self.content[index_of_the_first + i][2] != None:
+                    self.listTexts[i].setOnclick(self.content[index_of_the_first + i][2])
+                else:
+                    self.listTexts[i].setOnclick(self.defaultOnclickEvent)
 
             else:
                 self.listTexts[i].setText("")
                 self.icons[i].setImage("resources/images/None1px.jpg")
-               # sel
+                self.listTexts[i].setOnclick(self.defaultOnclickEvent)
 
     def goPrev(self):
         if (self.current_page_of_content > 1):
