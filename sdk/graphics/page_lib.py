@@ -79,7 +79,8 @@ class ListPage(_Page):
             "第 %d 页/共 %d 页" % (self.current_page_of_content, self.total_pages_of_content))
 
         if self.current_page_of_content < self.total_pages_of_content:
-            self.more_items_dots.setImage("resources/images/more_items_dots.jpg")
+            self.more_items_dots.setImage(
+                "resources/images/more_items_dots.jpg")
         else:
             self.more_items_dots.setImage("resources/images/None1px.jpg")
 
@@ -146,3 +147,11 @@ class ListPage(_Page):
             "app3", None, self.testOnclickEvent], ["app4", "resources/images/None18px.jpg", self.testOnclickEvent]]
 
         self.show(appList)
+
+
+class keyboardPage(_Page):
+    def __init__(self, paper, textHandler, pageName="keyboardPage"):
+        super().__init__(paper, pageName)
+
+    def show(self,inputType="text"):
+        pass
