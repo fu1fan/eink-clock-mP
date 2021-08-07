@@ -13,7 +13,7 @@ from PIL import Image
 
 example_config = {
     "main": {
-        "enable_plugins": [],
+        "enable_plugins": ["hello_world"],
         "enable_theme": "default",
         "enable_apps": ["hello_world"],
         "opening_images": [
@@ -32,7 +32,7 @@ example_config = {
     "plugins": {},
     "themes": {},
     "apps": {},
-    "update_0bd89j4": 1
+    "update_089j4": 1
 }
 
 
@@ -94,10 +94,19 @@ if __name__ == "__main__":  # 主线程：UI管理
                 for wheel_ in plugin_info["depended-wheels"]:
                     if wheel_ not in wheels_name:
                         raise DependenceError("No wheel named %s!" % wheel_)
-                plugins[plugin_name] = importlib.import_module("modules.plugins.%s.index")
+                plugins[plugin_name] = importlib.import_module("modules.plugins.%s.index" % plugin_name)
 
             except FileNotFoundError and json.JSONDecodeError and DependenceError:
                 logger_main.error("插件[%s]加载失败:\n" + traceback.format_exc())
+
+        plugin_init_lock = threading.Barrier(len(plugins) + 1)
+
+        def plugin_init(plugin):
+            plugin.init(env)
+            plugin_init_lock.wait()
+
+        for value in plugins.values():
+            env.pool.add(plugin_init, value)
 
         theme_name = configurator_main.read("enable_theme", raise_error=True)  # 加载主题
         try:
@@ -169,11 +178,12 @@ if __name__ == "__main__":  # 主线程：UI管理
             except FileNotFoundError and json.JSONDecodeError and DependenceError:
                 logger_main.error("程序[%s]加载失败:\n" + traceback.format_exc())
 
+        plugin_init_lock.wait(timeout=5)
         load_lock.wait()
         ### 主程序开始
         env.init(theme[0].build(env), plugins, apps)
 
-        while 1:    # 据说 while 1 的效率比 while True 高
+        while 1:  # 据说 while 1 的效率比 while True 高
             env.touchpad_driver.ICNT_Scan(touch_recoder_new, touch_recoder_old)
             env.touch_handler.handle(touch_recoder_new, touch_recoder_old)
             """
