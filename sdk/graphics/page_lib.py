@@ -52,15 +52,22 @@ class ListPage(_Page):
         self.paper.changePage("mainPage")
 
     def showItems(self):
+        
+        self.label_of_page.setText(
+            "第 %d 页/共 %d 页" % (self.current_page_of_content, self.total_pages_of_content))
+
         index_of_the_first = (self.current_page_of_content-1)*3
         for i in range(0, 3):
-            if (index_of_the_first + i < len(self.content)):
+            if index_of_the_first + i < len(self.content):
                 self.labels[i].setText(self.content[index_of_the_first + i][0])
-                if self.content[index_of_the_first + i][1]:
+                if self.content[index_of_the_first + i][1] != None:
                     self.icons[i].setImage(self.content[index_of_the_first + i][1])
+                else:
+                    self.icons[i].setImage("resources/images/None20px.jpg")
 
             else:
                 self.labels[i].setText("")
+                self.icons[i].setImage("resources/images/None20px.jpg")
             
 
     def goPrev(self):
@@ -81,16 +88,13 @@ class ListPage(_Page):
         self.content = content
 
         # 下面这行为临时测试用，图片处理还没解决好↓
-        self.content = [["app1", "img1", self.close], ["app2", "img2", self.close], [
-            "app3", "app3", self.close], ["app4", "img4", self.close]]
+        self.content = [["app1", None, self.close], ["app2", "resources/images/None18px.jpg", self.close], [
+            "app3", None, self.close], ["app4", "resources/images/None18px.jpg", self.close]]
 
         self.total_pages_of_content = len(self.content) // 3 + 1
         self.current_page_of_content = 1
 
         self.paper.pause_update()  # 上锁，防止setText重复刷新屏幕
-
-        self.label_of_page.setText(
-            "第 %d 页/共 %d 页" % (self.current_page_of_content, self.total_pages_of_content))
 
         self.showItems()
 
