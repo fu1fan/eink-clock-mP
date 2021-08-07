@@ -135,7 +135,7 @@ class ListPage(_Page):
         """
 
         # 下面一行为调试用
-        appList = [["app1", None, self.close], ["app2", "resources/images/None18px.jpg", self.close], [
-            "app3", None, self.close], ["app4", "resources/images/None18px.jpg", self.close]]
+        appList = [["app1", None, None], ["app2", "resources/images/None18px.jpg", self.close], [
+            "app3", None, self.testOnclickEvent], ["app4", "resources/images/None18px.jpg", self.testOnclickEvent]]
 
         self.show(appList)
