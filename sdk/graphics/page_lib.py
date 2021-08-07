@@ -49,8 +49,8 @@ class ListPage(_Page):
             self.addElement(listText)
 
         self.more_items_dots = sdk.graphics.element_lib.ImageElement(
-            (35, 122), self.paper, "resources/images/more_items_dots.jpg")
-        
+            (105, 122), self.paper, "resources/images/more_items_dots.jpg")
+
         self.addElement(self.more_items_dots)
 
         self.total_pages_of_content = 0
@@ -77,6 +77,11 @@ class ListPage(_Page):
 
         self.label_of_page.setText(
             "第 %d 页/共 %d 页" % (self.current_page_of_content, self.total_pages_of_content))
+
+        if self.current_page_of_content < self.total_pages_of_content:
+            self.more_items_dots.setImage("resources/images/more_items_dots.jpg")
+        else:
+            self.more_items_dots.setImage("resources/images/None1px.jpg")
 
         index_of_the_first = (self.current_page_of_content-1)*3
         for i in range(0, 3):
