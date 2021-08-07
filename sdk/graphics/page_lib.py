@@ -35,38 +35,47 @@ class ListPage(_Page):
             (50, 0), self.paper, "", (150, 28))
         self.addElement(self.label_of_page)
 
-        self.labels = (
-            sdk.graphics.element_lib.Label(
-                (35, 32), self.paper, "", (296, 28)),
-            sdk.graphics.element_lib.Label(
-                (35, 62), self.paper, "", (296, 28)),
-            sdk.graphics.element_lib.Label(
-                (35, 92), self.paper, "", (296, 28))
+        self.listTexts = (
+            sdk.graphics.element_lib.Button(
+                (35, 32), self.paper, "", self.defaultOnclickEvent, (260, 28)),
+            sdk.graphics.element_lib.Button(
+                (35, 62), self.paper, "", self.defaultOnclickEvent, (260, 28)),
+            sdk.graphics.element_lib.Button(
+                (35, 92), self.paper, "", self.defaultOnclickEvent, (260, 28))
         )
-        for label in self.labels:
-            self.addElement(label)
+        for listText in self.listTexts:
+            self.addElement(listText)
 
-        self.content = []   # [[text, image, func]]
+        self.content = []   
+        # 格式为：[[text, image, func]]
+        """
+        示例：
+        [["app1", None, self.close], ["app2", "resources/images/None18px.jpg", self.close], [
+            "app3", None, self.close], ["app4", "resources/images/None18px.jpg", self.close]]
+        """
+    
+    def defaultOnclickEvent(self):
+        print("Clicked!")
 
     def close(self):
         self.paper.changePage("mainPage")
 
     def showItems(self):
-        
+
         self.label_of_page.setText(
             "第 %d 页/共 %d 页" % (self.current_page_of_content, self.total_pages_of_content))
 
         index_of_the_first = (self.current_page_of_content-1)*3
         for i in range(0, 3):
             if index_of_the_first + i < len(self.content):
-                self.labels[i].setText(self.content[index_of_the_first + i][0])
+                self.listTexts[i].setText(self.content[index_of_the_first + i][0])
                 if self.content[index_of_the_first + i][1] != None:
                     self.icons[i].setImage(self.content[index_of_the_first + i][1])
                 else:
                     self.icons[i].setImage("resources/images/None20px.jpg")
 
             else:
-                self.labels[i].setText("")
+                self.listTexts[i].setText("")
                 self.icons[i].setImage("resources/images/None20px.jpg")
             
 
@@ -86,10 +95,6 @@ class ListPage(_Page):
 
     def show(self, content=[]):
         self.content = content
-
-        # 下面这行为临时测试用，图片处理还没解决好↓
-        self.content = [["app1", None, self.close], ["app2", "resources/images/None18px.jpg", self.close], [
-            "app3", None, self.close], ["app4", "resources/images/None18px.jpg", self.close]]
 
         self.total_pages_of_content = len(self.content) // 3 + 1
         self.current_page_of_content = 1
