@@ -7,27 +7,45 @@ import json
 import threading
 import time
 
+import sdk.configurator
+
 paper = None
 
 codeLabel = None
 
+configurator = None
+
 paircode = 0
+
+
+def backToMain():
+    paper.changePage("mainPage")
 
 
 def nextStep():
     result = requests.post(
         "https://pi.simplebytes.cn/api/getPairInfo.php", {"paircode": paircode}).text
-    
+
     result = json.loads(result)
+
     if (result["msg"] != "WAIT_PAIRING"):
-        msg = result["username"]
+        msg = "已绑定："+result["username"]
+        configurator.set("user/name", result["username"])
+        configurator.set("user/token", result["usertoken"])
+
     else:
-        msg = "还没配对呢"
+        msg = "输完配对码后再点下一步哦"
 
     paper.addElement("nextPage", sdk.graphics.element_lib.Label(
-        (0, 30), paper, msg, (296, 30)))
+        (0, 30), paper, msg, (296, 30), "black", "white"))
+    paper.addElement("nextPage", sdk.graphics.element_lib.Button(
+        (0, 70), paper, "返回首页", backToMain, (296, 30), "white", "black"))
 
     paper.changePage("nextPage")
+
+
+def logout():
+    configurator.delete("user")
 
 
 def pair():
@@ -50,16 +68,27 @@ def pair():
 
 def build(env):
     global paper
+    global configurator
+    configurator = sdk.configurator.Configurator(
+        env.logger_env, "configs/account.json", auto_save=True)
+
     paper = sdk.graphics.paper_lib.PaperApp(env)
 
     paper.addElement("mainPage", sdk.graphics.element_lib.Label(
         (100, 0), paper, "账号管理", (150, 30), bgcolor="black", textColor="white"))
 
-    paper.addElement("mainPage", sdk.graphics.element_lib.Label(
-        (0, 35), paper, "暂未绑定账号", (296, 30), bgcolor="black", textColor="white"))
+    if (configurator.read("user/name")):
+        paper.addElement("mainPage", sdk.graphics.element_lib.Label(
+            (0, 35), paper, "你好，"+configurator.read("user/name"), (296, 30), bgcolor="black", textColor="white"))
 
-    paper.addElement("mainPage", sdk.graphics.element_lib.Button(
-        (50, 95), paper, "点击绑定账号", pair, (85, 30), "white", "black"))
+        paper.addElement("mainPage", sdk.graphics.element_lib.Button(
+            (50, 95), paper, "点击退出账号", logout, (85, 30), "white", "black"))
+    else:
+        paper.addElement("mainPage", sdk.graphics.element_lib.Label(
+            (0, 35), paper, "暂未绑定账号", (296, 30), bgcolor="black", textColor="white"))
+
+        paper.addElement("mainPage", sdk.graphics.element_lib.Button(
+            (50, 95), paper, "点击绑定账号", pair, (85, 30), "white", "black"))
 
     paper.addPage("pairPage")
     paper.addPage("nextPage")
