@@ -11,6 +11,9 @@ from sdk import logger
 from sdk import configurator
 from PIL import Image
 
+# TODO：添加保存paper保持的功能，避免init函数被反复执行（添加pause和recover方法）
+# TODO：添加themeApp的状态栏
+
 example_config = {
     "main": {
         "enable_plugins": ["hello_world"],
@@ -32,6 +35,7 @@ example_config = {
     "plugins": {},
     "themes": {},
     "apps": {},
+    "updater": {},
     "update_0aokkkd4": 1
 }
 
@@ -47,7 +51,7 @@ if __name__ == "__main__":  # 主线程：UI管理
     configurator_main.check(example_config, True)
     configurator_main.change_path("/main")
 
-    env = environment.Env(configurator_main.read("env_configs"), logger_main)
+    env = environment.Env(configurator_main.read("env_configs"), logger_main)   # TODO:修改为main
 
     opening_images = []  # 准备开屏动画
     opening_images_path = configurator_main.read("opening_images")

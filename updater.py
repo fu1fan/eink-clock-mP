@@ -9,6 +9,7 @@ from sdk import logger
 from sdk import graphics
 from sdk import environment
 from PIL import Image
+from sdk import configurator
 
 branch = "develop"
 version = 1
@@ -72,13 +73,13 @@ class VersionCtrl:
                 self.logger.error(traceback.format_exc(), "获取分支信息失败")
                 return False
 
-
 if __name__ == "__main__":
     epd_lock = threading.RLock()
     logger_updater = logger.Logger(logger.DEBUG, tag="updater")
-    env = environment.Env()
-    epd = env.epd_driver(logger_updater, threading.RLock())
-    paper = graphics.Paper(epd, threading.Lock())
+    env = environment.Env(dict(auto_sleep_time=30, refresh_time=43200, refresh_interval=30, threadpool_size=20),
+                          logger_updater)
+    epd = env.epd_driver
+    paper = graphics.Paper(env)
     if epd.IsBusy():
         logger_updater.error("The screen is busy!")
         os.system("python3 main.py &")
@@ -93,7 +94,7 @@ if __name__ == "__main__":
         logger_updater.info("已重置")
     elif os.path.exists("update"):
         logger_updater.info("update")
-        paper.background_image = Image.open(open("resources/images/updating.jpg", mode="rb"))   # TODO:使用更精美的图像
+        paper.background_image = Image.open(open("resources/images/updating.jpg", mode="rb"))
         paper.init()
         # logger = Logger(0, tag="updater")
         result = os.popen("git pull")

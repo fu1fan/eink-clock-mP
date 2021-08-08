@@ -236,11 +236,13 @@ class Env:
         self.plugins = None
         self.apps = None
         self.inited = False
+        self.theme = None
 
     def init(self, paper, plugins, apps):
         if self.inited:
             return
         self.inited = True
+        self.theme = paper
         self.paper = paper
         self.plugins = plugins
         self.apps = apps
