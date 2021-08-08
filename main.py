@@ -15,7 +15,7 @@ example_config = {
     "main": {
         "enable_plugins": ["hello_world"],
         "enable_theme": "default",
-        "enable_apps": ["hello_world", "账号管理"],
+        "enable_apps": ["hello_world", "账号管理", "简单清单", "系统设置", "随机数生成器", "祖安宝典"],
         "opening_images": [
             "resources/images/raspberry.jpg",
             "resources/images/github.jpg",
@@ -32,7 +32,7 @@ example_config = {
     "plugins": {},
     "themes": {},
     "apps": {},
-    "update_0beee0j4": 1
+    "update_0aokkkd4": 1
 }
 
 

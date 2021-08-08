@@ -1,4 +1,5 @@
 import time
+import math
 
 import sdk
 from sdk.graphics import Page as _Page
@@ -39,11 +40,11 @@ class ListPage(_Page):
 
         self.listTexts = (
             sdk.graphics.element_lib.Button(
-                (35, 32), self.paper, "", self.defaultOnclickEvent, (260, 28), "white", "black"),
+                (35, 32), self.paper, "", self.itemOnclickHandler, (260, 28), "white", "black", index=0),
             sdk.graphics.element_lib.Button(
-                (35, 62), self.paper, "", self.defaultOnclickEvent, (260, 28), "white", "black"),
+                (35, 62), self.paper, "", self.itemOnclickHandler, (260, 28), "white", "black", index=1),
             sdk.graphics.element_lib.Button(
-                (35, 92), self.paper, "", self.defaultOnclickEvent, (260, 28), "white", "black")
+                (35, 92), self.paper, "", self.itemOnclickHandler, (260, 28), "white", "black", index=2)
         )
         for listText in self.listTexts:
             self.addElement(listText)
@@ -58,15 +59,20 @@ class ListPage(_Page):
 
         self.content = []
         # 格式为：[[text, image, func]]
-        """
-        示例：
-        [["app1", None, self.close], ["app2", "resources/images/None18px.jpg", self.close], [
-            "app3", None, self.close], ["app4", "resources/images/None18px.jpg", self.close]]
-        """
+        # 其中 func 会收到一个index参数，来知道自己是第几个(以0开始)
 
-    def defaultOnclickEvent(self):
-        print("\nClicked!")
+    def itemOnclickHandler(self, index=None):
+        if index != None:
+            indexInList = (self.current_page_of_content-1)*3+index
+            if indexInList < len(self.content):
+                self.content[indexInList][2](indexInList) #传入index
 
+
+    def openAppByIndex(self, index):
+        if index>=0:
+            self.paper.env.changePaper(list(self.paper.env.apps.values())[index][0].build(self.paper.env))
+
+    
     def testOnclickEvent(self):
         print("\nTest Clicked!")
 
@@ -96,17 +102,12 @@ class ListPage(_Page):
                         self.content[index_of_the_first + i][1])
                 else:
                     self.icons[i].setImage("resources/images/None20px.jpg")
-                # 设置item的点击事件
-                if self.content[index_of_the_first + i][2] != None:
-                    self.listTexts[i].setOnclick(
-                        self.content[index_of_the_first + i][2])
-                else:
-                    self.listTexts[i].setOnclick(self.defaultOnclickEvent)
+                # 不必在此更改点击事件
 
             else:
                 self.listTexts[i].setText("")
                 self.icons[i].setImage("resources/images/None1px.jpg")
-                self.listTexts[i].setOnclick(self.defaultOnclickEvent)
+                # 也不必在此更改点击事件了
 
     def goPrev(self):
         if (self.current_page_of_content > 1):
@@ -127,7 +128,7 @@ class ListPage(_Page):
             content = []
         self.content = content
 
-        self.total_pages_of_content = len(self.content) // 3 + 1
+        self.total_pages_of_content = math.ceil(len(self.content) / 3)
         self.current_page_of_content = 1
 
         self.paper.pause_update()  # 上锁，防止setText重复刷新屏幕
@@ -139,16 +140,9 @@ class ListPage(_Page):
 
     def showAppList(self):
         appList = []
-        """
-        for key in self.paper.env.apps:
-            appList.append(key)
-        """
 
-        # 下面有点bug
         for appName, appContent in self.paper.env.apps.items():
-            def warp():
-                self.paper.env.changePaper(appContent[0].build(self.paper.env))
-            appList.append([appName, appContent[1][0], warp])
+            appList.append([appName, appContent[1][0], self.openAppByIndex])
 
         self.show(appList)
 
