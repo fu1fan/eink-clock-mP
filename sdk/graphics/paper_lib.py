@@ -74,7 +74,6 @@ class PaperTheme(PaperDynamic):
 class PaperApp(PaperDynamic):
     def __init__(self, env):
         super().__init__(env)
-        self.pages["appList"] = page_lib.ListPage(self, "appList")
         self.first_init = True
 
     def init(self):

@@ -5,7 +5,7 @@ import importlib
 import time
 import traceback
 
-from sdk import environment_dev as environment
+from sdk import environment
 
 from sdk import logger
 from sdk import configurator
@@ -21,8 +21,6 @@ example_config = {
         "enable_apps": ["hello_world", "账号管理", "简单清单", "系统设置", "随机数生成器", "祖安宝典"],
         "opening_images": [
             "resources/images/raspberry.jpg",
-            "resources/images/github.jpg",
-            "resources/images/simplebytes.jpg"
         ],
         "loading_image": "resources/images/loading.jpg",
         "env_configs": {
@@ -36,7 +34,7 @@ example_config = {
     "themes": {},
     "apps": {},
     "updater": {},
-    "update_0aokkkd4": 1
+    "update_0aokkd4": 1
 }
 
 
