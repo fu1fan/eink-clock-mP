@@ -13,6 +13,6 @@ def build(env):
 
     zuan = requests.get("https://api.shadiao.app/nmsl?level=min").text
     zuan = json.loads(zuan)["data"]["text"]
-    paper.addElement(0, 30, element_lib.Label((0, 35), paper, zuan, size=(296, 30)))
+    paper.addElement("mainPage", element_lib.Label((0, 35), paper, zuan, size=(296, 30)))
 
     return paper
