@@ -55,7 +55,7 @@ class appBackButton(element_lib.Button):  # 先做个临时的返回按钮哦
         super().__init__((0, 0), paper, "返回", self.goBack, bgcolor="white", textColor="black")
 
     def goBack(self):
-        self.paper.pages["appList"].showAppList()
+        self.paper.env.changePaper(self.paper.env.theme)
 
 
 class PaperTheme(PaperDynamic):
