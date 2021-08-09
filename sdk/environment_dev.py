@@ -11,6 +11,10 @@ from sdk import threadpool_mini
 
 import tkinter
 
+
+DEV = True
+
+
 class Simulator:
     def SIM_touch(self,x,y,ICNT_Dev: touchpad.TouchRecoder, ICNT_Old: touchpad.TouchRecoder):
         

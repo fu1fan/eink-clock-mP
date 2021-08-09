@@ -12,6 +12,9 @@ from sdk import graphics
 config = icnt86.config
 
 
+DEV = False
+
+
 class EpdController(epd2in9_V2.EPD_2IN9_V2):
     """
     用这个类来显示图片可能会被阻塞（当多个线程尝试访问屏幕时）
