@@ -5,7 +5,8 @@ import importlib
 import time
 import traceback
 
-from sdk import environment
+#from sdk import environment #真机环境
+from sdk import environment_dev as environment #调试环境
 
 from sdk import logger
 from sdk import configurator
