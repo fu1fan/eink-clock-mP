@@ -35,8 +35,12 @@ class ListPage(_Page):
             self.addElement(icon)
 
         self.label_of_page = sdk.graphics.element_lib.Label(
-            (50, 0), self.paper, "", (150, 28))
+            (155, 0), self.paper, "", (55, 28))
         self.addElement(self.label_of_page)
+
+        self.title_of_list = sdk.graphics.element_lib.Label(
+            (40, 0), self.paper, "", (115, 28))
+        self.addElement(self.title_of_list)
 
         self.listTexts = (
             sdk.graphics.element_lib.Button(
@@ -82,7 +86,7 @@ class ListPage(_Page):
     def showItems(self):
 
         self.label_of_page.setText(
-            "第 %d 页/共 %d 页" % (self.current_page_of_content, self.total_pages_of_content))
+            "%d/%d" % (self.current_page_of_content, self.total_pages_of_content))
 
         if self.current_page_of_content < self.total_pages_of_content:
             self.more_items_dots.setImage(
@@ -123,7 +127,7 @@ class ListPage(_Page):
             self.showItems()
             self.paper.recover_update()  # 解锁
 
-    def show(self, content=None):
+    def show(self, content=None, listTitle=""):
         if content is None:
             content = []
         self.content = content
@@ -133,9 +137,10 @@ class ListPage(_Page):
 
         self.paper.pause_update()  # 上锁，防止setText重复刷新屏幕
 
+        self.paper.changePage(self.name)
+        self.title_of_list.setText(listTitle)
         self.showItems()
 
-        self.paper.changePage(self.name)
         self.paper.recover_update()  # 解锁
 
     def showAppList(self):
@@ -144,7 +149,7 @@ class ListPage(_Page):
         for appName, appContent in self.paper.env.apps.items():
             appList.append([appName, appContent[1][0], self.openAppByIndex])
 
-        self.show(appList)
+        self.show(appList, "应用列表")
 
 
 # keyboardPage 还未完成哦
