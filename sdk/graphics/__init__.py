@@ -40,9 +40,9 @@ class Paper:
         return self.background_image
 
     def init(self):
-        self.display(self.build())
         self.inited = True
         self.active = True
+        self.display(self.build())
         return True
 
     def exit(self):
@@ -118,7 +118,7 @@ class PaperDynamic(Paper):
     def exit(self):
         for page in self.pages.values():
             page.exit()
-        super().__init__()
+        super().__init__(env)
 
     def pause(self):
         self.pages[self.nowPage].pause()
@@ -127,6 +127,7 @@ class PaperDynamic(Paper):
     def recover(self):
         self.pages[self.nowPage].recover()
         self.active = True
+        self.display(self.build())
 
     def build(self) -> Image:
         new_image = self.background_image.copy()
