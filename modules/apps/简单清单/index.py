@@ -8,7 +8,7 @@ def build(env):
     paper = paper_lib.PaperApp(env)
 
     def bindAccount():
-        paper.env.changePaper(paper.env.apps["账号管理"][0].build(paper.env))
+        paper.env.openApp("账号管理")
 
     config = sdk.configurator.Configurator(
         env.logger_env, "configs/account.json", auto_save=True)

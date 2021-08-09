@@ -248,10 +248,39 @@ class Env:
         self.apps = apps
         self.paper.init()
 
-    def changePaper(self, paper):
+    def changePaper(self, paper, exit_paper=False):
         if not self.inited:
             return
         self.touch_handler.clear()
-        self.paper.exit()
+        if exit_paper:
+            self.paper.exit()
+        else:
+            self.paper.init()
         self.paper = paper
-        self.paper.init()
+        if paper.inited:
+            self.paper.recover()
+        else:
+            self.paper.init()
+
+    def openApp(self, appName):
+        if not self.inited:
+            return
+        if appName in self.apps:
+            self.paper.exit()
+            if self.apps[appName][2] is None:
+                self.apps[appName][2] = self.apps[0].build()
+            self.changePaper(self.apps[appName][2])
+
+    def backHome(self, exit_paper=False):
+        if not self.inited:
+            return
+        self.touch_handler.clear()
+        if exit_paper:
+            self.paper.exit()
+        else:
+            self.paper.init()
+        self.paper = self.theme
+        if self.theme.inited:
+            self.paper.recover()
+        else:
+            self.paper.init()

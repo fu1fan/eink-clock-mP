@@ -5,14 +5,13 @@ import importlib
 import time
 import traceback
 
-#from sdk import environment #真机环境
-from sdk import environment_dev as environment #调试环境
+# from sdk import environment # 真机环境
+from sdk import environment_dev as environment  # 调试环境
 
 from sdk import logger
 from sdk import configurator
 from PIL import Image
 
-# TODO：添加保存paper保持的功能，避免init函数被反复执行（添加pause和recover方法）
 # TODO：添加themeApp的状态栏
 
 example_config = {
@@ -35,7 +34,7 @@ example_config = {
     "themes": {},
     "apps": {},
     "updater": {},
-    "update_0aokkd4": 1
+    "update_0okkd4": 1
 }
 
 
@@ -177,7 +176,7 @@ if __name__ == "__main__":  # 主线程：UI管理
                         icon_20px = None
                 except:
                     icon_20px = None
-                apps[app_name] = [importlib.import_module("modules.apps.%s.index" % app_name), (icon_18px, icon_20px)]
+                apps[app_name] = [importlib.import_module("modules.apps.%s.index" % app_name), (icon_18px, icon_20px), None]
             except FileNotFoundError and json.JSONDecodeError and DependenceError:
                 logger_main.error("程序[%s]加载失败:\n" + traceback.format_exc())
 

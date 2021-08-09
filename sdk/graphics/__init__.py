@@ -12,6 +12,7 @@ class Paper:
     def __init__(self,
                  env,
                  background_image=Image.new("RGB", (296, 128), (255, 255, 255))):
+        self.active = False
         self.inited = False
         self.background_image = background_image
         self.epd = env.epd_driver
@@ -19,7 +20,7 @@ class Paper:
         self.update_lock = threading.Lock()
 
     def __del__(self):
-        if self.inited:
+        if self.active:
             self.exit()
 
     def display(self, image: Image):
@@ -41,19 +42,21 @@ class Paper:
     def init(self):
         self.display(self.build())
         self.inited = True
+        self.active = True
         return True
 
     def exit(self):
+        self.active = False
         self.inited = False
 
     def refresh(self):
-        if not self.inited:
+        if not self.active:
             return
         self.display(self.image_old)
         return True
 
     def update_background(self, image, refresh=None):
-        if not self.inited:
+        if not self.active:
             return
         self.background_image = image
         if self.update_lock.acquire(blocking=False):
@@ -115,6 +118,15 @@ class PaperDynamic(Paper):
     def exit(self):
         for page in self.pages.values():
             page.exit()
+        super().__init__()
+
+    def pause(self):
+        self.pages[self.nowPage].pause()
+        self.active = False
+
+    def recover(self):
+        self.pages[self.nowPage].recover()
+        self.active = True
 
     def build(self) -> Image:
         new_image = self.background_image.copy()
@@ -133,6 +145,8 @@ class PaperDynamic(Paper):
     def addElement(self, target: str, element):
         self.pages[target].append(element)
         element.page = self.pages[target]
+        if self.active:
+            element.init()
 
     def changePage(self, name, refresh=None):
         if name in self.pages:
@@ -170,7 +184,7 @@ class PaperDynamic(Paper):
             self.epd.release()
 
     def update(self, page_name: str, refresh=None):
-        if not (self.inited and page_name == self.nowPage):
+        if not (self.active and page_name == self.nowPage):
             return
         self._update(refresh)
 
@@ -203,6 +217,7 @@ class Element:
         self.paper = paper
         self.pool = paper.env.pool
         self.inited = False
+        self.active = False
         self.page = None
         self.background = background
 
@@ -211,15 +226,17 @@ class Element:
 
     def init(self):  # 初始化函数，当被添加到动态Paper时被调用
         self.inited = True
+        self.active = True
 
     def exit(self):  # 退出时调用
         self.inited = False
+        self.active = False
 
     def pause(self):    # 切换出page时调用
-        pass
+        self.active = False
 
     def recover(self):  # 切换回page时调用
-        pass
+        self.active = True
 
     def build(self) -> Image:  # 当页面刷新时被调用，须返回一个图像
         return self.background
