@@ -17,6 +17,11 @@ class _Docker(Element):
             self.paper.pages["appList"].show()
             self.__active = False
 
+    def settings_click_handler(self):
+        if self.__active:
+            self.paper.env.changePaper(self.paper.env.apps["系统设置"][0].build(self.paper.env))
+            self.__active = False
+
     def clicked_handler(self):
         time.sleep(0.1)
         if (self.paper.nowPage != self.page.name) or self.__active or (not self.inited):
@@ -32,6 +37,9 @@ class _Docker(Element):
             (0, 296, 0, 30), self.clicked_handler)
         self.paper.env.touch_handler.add_clicked(
             (60, 100, 0, 30), self.appbox_click_handler)
+        self.paper.env.touch_handler.add_clicked(
+            (195, 235, 0, 30), self.settings_click_handler)
+
         self.inited = True
 
     def recover(self):
@@ -39,6 +47,10 @@ class _Docker(Element):
             (0, 296, 0, 30), self.clicked_handler)
         self.paper.env.touch_handler.add_clicked(
             (60, 100, 0, 30), self.appbox_click_handler)
+        self.paper.env.touch_handler.add_clicked(
+            (195, 235, 0, 30), self.settings_click_handler)
+
+        
 
     def exit(self):
         self.inited = False

@@ -39,7 +39,7 @@ class ListPage(_Page):
         self.addElement(self.label_of_page)
 
         self.title_of_list = sdk.graphics.element_lib.Label(
-            (40, 0), self.paper, "", (115, 28))
+            (50, 0), self.paper, "", (105, 28))
         self.addElement(self.title_of_list)
 
         self.listTexts = (

@@ -22,7 +22,7 @@ def build(env):
 
 
     paper.pages["mainPage"] = page_lib.ListPage(paper, "mainPage")
-    paper.pages["mainPage"].show(settings)
-    paper.addPage["wifi"]
+    paper.pages["mainPage"].show(settings,"系统设置")
+    #paper.addPage["wifi"]
 
     return paper
