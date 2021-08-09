@@ -19,7 +19,7 @@ class _Docker(Element):
 
     def settings_click_handler(self):
         if self.__active:
-            self.paper.env.changePaper(self.paper.env.apps["系统设置"][0].build(self.paper.env))
+            self.paper.env.openApp("系统设置")
             self.__active = False
 
     def clicked_handler(self):
@@ -67,7 +67,7 @@ class appBackButton(element_lib.Button):  # 先做个临时的返回按钮哦
         super().__init__((0, 0), paper, "返回", self.goBack, bgcolor="white", textColor="black")
 
     def goBack(self):
-        self.paper.env.changePaper(self.paper.env.theme)
+        self.paper.env.backHome()
 
 
 class PaperTheme(PaperDynamic):

@@ -97,6 +97,7 @@ class Button(TextElement):
                                                  **self.kwargs)
 
     def recover(self):
+        super().recover()
         self.paper.env.touch_handler.add_clicked((self.xy[0], self.xy[0] + self.size[0],
                                                   self.xy[1], self.xy[1] + self.size[1]),
                                                  self.clickedHandler,
