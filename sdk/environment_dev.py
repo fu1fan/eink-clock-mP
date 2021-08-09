@@ -1,13 +1,67 @@
 import threading
 import time
 
-from PIL import Image
+from PIL import Image,ImageTk
 
 from sdk import logger
 from sdk import touchpad
 from sdk import graphics
 from sdk import timing_task
 from sdk import threadpool_mini
+
+import tkinter
+
+class Simulator:
+    def SIM_touch(self,x,y,ICNT_Dev: touchpad.TouchRecoder, ICNT_Old: touchpad.TouchRecoder):
+        
+        ICNT_Old.Touch = ICNT_Dev.Touch
+        ICNT_Old.TouchGestureId = ICNT_Dev.TouchGestureId
+        ICNT_Old.TouchCount = ICNT_Dev.TouchCount
+        ICNT_Old.TouchEvenId = ICNT_Dev.TouchEvenId
+        ICNT_Old.X = ICNT_Dev.X.copy()
+        ICNT_Old.Y = ICNT_Dev.Y.copy()
+        ICNT_Old.P = ICNT_Dev.P.copy()
+        if x is None or y is None:
+            ICNT_Dev.Touch = 0
+        else:
+            ICNT_Dev.Touch = 1
+            ICNT_Dev.X[0] = x
+            ICNT_Dev.Y[0] = y
+
+
+    def clickHandler(self,event):
+        print("x:%d,y:%d" % (event.x,event.y))
+        self.SIM_touch(event.x,event.y,self.touch_recoder_new, self.touch_recoder_old)
+        self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
+
+        self.SIM_touch(None,None,self.touch_recoder_new, self.touch_recoder_old)
+        self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
+
+    def open(self,env) -> None:
+
+        self.env = env
+
+        self.touch_recoder_new = touchpad.TouchRecoder()  # 触摸
+        self.touch_recoder_old = touchpad.TouchRecoder()
+
+        self.window=tkinter.Tk()
+
+        self.window.title('水墨屏模拟器 by xuanzhi33')
+ 
+        self.window.geometry('296x128')
+
+        pilImage = Image.new("RGB", (296, 128), "white")
+        tkImage = ImageTk.PhotoImage(image=pilImage)
+
+        self.display = tkinter.Label(self.window,image=tkImage)
+        self.display.bind("<Button-1>",self.clickHandler)
+        self.display.pack()
+        self.window.mainloop()
+
+    def updateImage(self,PILImg):
+        tkImage = ImageTk.PhotoImage(image=PILImg)
+        self.display.configure(image=tkImage)
+        self.display.image=tkImage
 
 
 class EpdController:
@@ -16,6 +70,7 @@ class EpdController:
     """
 
     def __init__(self,
+                 simulator: Simulator,
                  logger_: logger.Logger,
                  lock: threading.RLock,
                  init=True,
@@ -23,6 +78,9 @@ class EpdController:
                  refresh_time=3600,
                  refresh_interval=20):
         super().__init__()
+
+        self.simulator = simulator
+
         self.last_update = time.time()
         self.partial_time = 0
         self.refresh_time = refresh_time
@@ -69,21 +127,30 @@ class EpdController:
 
     def display(self, image: Image.Image, timeout=-1):
         self.lock.acquire(timeout=timeout)
-        image.show()
+        #image.show()
+
+        self.simulator.updateImage(image)
+
         self.lock.release()
         self.last_update = time.time()
         self.partial_time = 0
 
     def display_Base(self, image, timeout=-1):
         self.lock.acquire()
-        image.show()
+        #image.show()
+
+        self.simulator.updateImage(image)
+
         self.lock.release()
         self.last_update = time.time()
         self.partial_time = 0
 
     def display_Partial(self, image, timeout=-1):
         self.lock.acquire(timeout=timeout)
-        image.show()
+        #image.show()
+
+        self.simulator.updateImage(image)
+        
         self.lock.release()
         self.last_update = time.time()
         self.partial_time += 1
@@ -98,7 +165,10 @@ class EpdController:
 
     def display_Partial_Wait(self, image, timeout=-1):
         self.lock.acquire(timeout=timeout)
-        image.show()
+        #image.show()
+
+        self.simulator.updateImage(image)
+
         self.lock.release()
         self.last_update = time.time()
         self.partial_time += 1
@@ -175,10 +245,14 @@ class TouchDriver:
 
 
 class Env:
-    def __init__(self, configs, logger_env: logger.Logger):
+    def __init__(self, configs, logger_env: logger.Logger, simulator):
+        
+        self.simulator=simulator
+
         self.logger_env = logger_env
         self.epd_lock = threading.RLock()
-        self.epd_driver = EpdController(self.logger_env,
+        self.epd_driver = EpdController(self.simulator,
+                                        self.logger_env,
                                         self.epd_lock, True,
                                         auto_sleep_time=configs["auto_sleep_time"],
                                         refresh_time=configs["refresh_time"],

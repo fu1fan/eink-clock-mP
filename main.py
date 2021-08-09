@@ -43,14 +43,7 @@ class DependenceError(Exception):
     pass
 
 
-if __name__ == "__main__":  # 主线程：UI管理
-    logger_main = logger.Logger(logger.DEBUG)  # 日志
-
-    configurator_main = configurator.Configurator(logger_main)  # 配置
-    configurator_main.check(example_config, True)
-    configurator_main.change_path("/main")
-
-    env = environment.Env(configurator_main.read("env_configs"), logger_main)   # TODO:修改为main
+def mainThread():  # 主线程：UI管理（现在不是了哦23333）
 
     opening_images = []  # 准备开屏动画
     opening_images_path = configurator_main.read("opening_images")
@@ -186,15 +179,17 @@ if __name__ == "__main__":  # 主线程：UI管理
         ### 主程序开始
         env.init(theme[0].build(env), plugins, apps)
 
+        """
         while 1:  # 据说 while 1 的效率比 while True 高
             env.touchpad_driver.ICNT_Scan(touch_recoder_new, touch_recoder_old)
             env.touch_handler.handle(touch_recoder_new, touch_recoder_old)
-            """
+            
             #调试用
             env.touchpad_driver.ICNT_Scan(touch_recoder_new, touch_recoder_old)
             env.touch_handler.handle(touch_recoder_new, touch_recoder_old)
             time.sleep(100000)
-            """
+            
+        """
 
     except KeyboardInterrupt:
         print("ctrl+c")
@@ -203,3 +198,21 @@ if __name__ == "__main__":  # 主线程：UI管理
     finally:
         env.epd_driver.sleep()
         env.epd_driver.exit()
+
+
+if __name__ == "__main__":
+
+    simulator = environment.Simulator() #我是一个模拟器
+
+    logger_main = logger.Logger(logger.DEBUG)  # 日志
+
+    configurator_main = configurator.Configurator(logger_main)  # 配置
+    configurator_main.check(example_config, True)
+    configurator_main.change_path("/main")
+
+    env = environment.Env(configurator_main.read("env_configs"), logger_main, simulator)   # TODO:修改为main
+
+    mainThrd = threading.Thread(target=mainThread,daemon=True)
+    mainThrd.start()
+    
+    simulator.open(env)
