@@ -69,19 +69,11 @@ class ListPage(_Page):
         if index != None:
             indexInList = (self.current_page_of_content-1)*3+index
             if indexInList < len(self.content):
-                self.content[indexInList][2](indexInList) #传入index
-
-
-    def openAppByIndex(self, index):
-        if index>=0:
-            self.paper.env.changePaper(list(self.paper.env.apps.values())[index][0].build(self.paper.env))
-
-    
-    def testOnclickEvent(self):
-        print("\nTest Clicked!")
+                self.content[indexInList][2](indexInList)  # 传入index
 
     def close(self):
-        self.paper.changePage("mainPage")
+        if self.closeEvent != None:
+            self.closeEvent()
 
     def showItems(self):
 
@@ -127,10 +119,12 @@ class ListPage(_Page):
             self.showItems()
             self.paper.recover_update()  # 解锁
 
-    def show(self, content=None, listTitle=""):
+    def show(self, content=None, listTitle="", closeEvent=None):
         if content is None:
             content = []
         self.content = content
+
+        self.closeEvent = closeEvent
 
         self.total_pages_of_content = math.ceil(len(self.content) / 3)
         self.current_page_of_content = 1
@@ -143,13 +137,23 @@ class ListPage(_Page):
 
         self.paper.recover_update()  # 解锁
 
-    def showAppList(self):
+
+class appListPage(ListPage):
+    def openAppByIndex(self, index):
+        if index >= 0:
+            self.paper.env.changePaper(list(self.paper.env.apps.values())[
+                                       index][0].build(self.paper.env))
+
+    def backToMainPage(self):
+        self.paper.changePage("mainPage")
+
+    def show(self):
         appList = []
 
         for appName, appContent in self.paper.env.apps.items():
             appList.append([appName, appContent[1][0], self.openAppByIndex])
 
-        self.show(appList, "应用列表")
+        super().show(appList, "应用列表", self.backToMainPage)
 
 
 # keyboardPage 还未完成哦

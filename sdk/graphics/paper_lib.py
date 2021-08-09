@@ -14,7 +14,7 @@ class _Docker(Element):
 
     def appbox_click_handler(self):
         if self.__active:
-            self.paper.pages["appList"].showAppList()
+            self.paper.pages["appList"].show()
             self.__active = False
 
     def clicked_handler(self):
@@ -61,7 +61,7 @@ class appBackButton(element_lib.Button):  # 先做个临时的返回按钮哦
 class PaperTheme(PaperDynamic):
     def __init__(self, env):
         super().__init__(env)
-        self.pages["appList"] = page_lib.ListPage(self, "appList")
+        self.pages["appList"] = page_lib.appListPage(self, "appList")
         self.first_init = True
 
     def init(self):
