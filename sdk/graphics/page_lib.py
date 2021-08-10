@@ -141,8 +141,8 @@ class ListPage(_Page):
 class appListPage(ListPage):
     def openAppByIndex(self, index):
         if index >= 0:
-            self.paper.env.changePaper(list(self.paper.env.apps.values())[
-                                       index][0].build(self.paper.env))
+            self.paper.env.openApp(list(self.paper.env.apps.keys())[index])
+            
 
     def backToMainPage(self):
         self.paper.changePage("mainPage")
@@ -151,7 +151,7 @@ class appListPage(ListPage):
         appList = []
 
         for appName, appContent in self.paper.env.apps.items():
-            appList.append([appName, appContent[1][0], self.openAppByIndex])
+            appList.append([appName, appContent[1][1], self.openAppByIndex])
 
         super().show(appList, "应用列表", self.backToMainPage)
 

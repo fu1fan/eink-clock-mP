@@ -307,7 +307,7 @@ class Env:
         if appName in self.apps:
             self.paper.exit()
             if self.apps[appName][2] is None:
-                self.apps[appName][2] = self.apps[0].build()
+                self.apps[appName][2] = self.apps[appName][0].build(self)
             self.changePaper(self.apps[appName][2])
 
     def backHome(self, exit_paper=False):

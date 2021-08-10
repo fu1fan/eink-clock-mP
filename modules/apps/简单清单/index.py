@@ -1,4 +1,4 @@
-from sdk.graphics import paper_lib, element_lib
+from sdk.graphics import page_lib, paper_lib, element_lib
 import sdk.configurator
 import requests
 
@@ -10,6 +10,12 @@ def build(env):
     def bindAccount():
         paper.env.openApp("账号管理")
 
+    def showTodo():
+        todoListPage = page_lib.ListPage(paper,"todoList")
+        paper.addPage("todoList", todoListPage)
+        paper.changePage("todoList")
+        todoListPage.show([["测试",None,None]], "简单清单", paper.env.backHome)
+
     config = sdk.configurator.Configurator(
         env.logger_env, "configs/account.json", auto_save=True)
 
@@ -19,6 +25,9 @@ def build(env):
     username = config.read("user/name")
     usertoken = config.read("user/token")
     if (username and username):
+        paper.addElement("mainPage", element_lib.Button(
+            (0, 35), paper, "显示“待办”清单", showTodo, (296, 30), "white", "black"
+        ))
         print(requests.post("https://pi.simplebytes.cn/api/todo.php",
               {"name": username, "token": usertoken}).text)
         

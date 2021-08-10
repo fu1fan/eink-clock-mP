@@ -13,6 +13,7 @@ from sdk import configurator
 from PIL import Image
 
 # TODO：添加themeApp的状态栏
+# TODO：简化main.py
 
 example_config = {
     "main": {
@@ -34,7 +35,7 @@ example_config = {
     "themes": {},
     "apps": {},
     "updater": {},
-    "update_0okkd4": 1
+    "update_0OOkkd4": 1
 }
 
 
@@ -112,16 +113,14 @@ if environment.DEV:
                         raise DependenceError("No plugin named %s!" % plugin_)
                 try:
                     if theme_info["icon_18px"]:
-                        file = open(theme_info["icon_18px"])
-                        icon_18px = Image.open(theme_info["icon"], "rb")
+                        icon_18px = theme_info["icon_18px"]
                     else:
                         icon_18px = None
                 except:
                     icon_18px = None
                 try:
                     if theme_info["icon_20px"]:
-                        file = open(theme_info["icon_20px"])
-                        icon_20px = Image.open(theme_info["icon"], "rb")
+                        icon_20px = theme_info["icon_20px"]
                     else:
                         icon_20px = None
                 except:
@@ -151,16 +150,14 @@ if environment.DEV:
                             raise DependenceError("No plugin named %s!" % plugin_)
                     try:
                         if app_info["icon_18px"]:
-                            file = open(app_info["icon_18px"])
-                            icon_18px = Image.open(app_info["icon"], "rb")
+                            icon_18px = app_info["icon_18px"]
                         else:
                             icon_18px = None
                     except:
                         icon_18px = None
                     try:
                         if app_info["icon_20px"]:
-                            file = open(app_info["icon_20px"])
-                            icon_20px = Image.open(app_info["icon"], "rb")
+                            icon_20px = app_info["icon_20px"]
                         else:
                             icon_20px = None
                     except:
@@ -212,29 +209,6 @@ if environment.DEV:
 
         simulator.open(env)
 else:
-    example_config = {
-        "main": {
-            "enable_plugins": ["hello_world"],
-            "enable_theme": "default",
-            "enable_apps": ["hello_world", "账号管理", "简单清单", "系统设置", "随机数生成器", "祖安宝典"],
-            "opening_images": [
-                "resources/images/raspberry.jpg",
-            ],
-            "loading_image": "resources/images/loading.jpg",
-            "env_configs": {
-                "auto_sleep_time": 30,
-                "refresh_time": 43200,
-                "refresh_interval": 30,
-                "threadpool_size": 20
-            }
-        },
-        "plugins": {},
-        "themes": {},
-        "apps": {},
-        "updater": {},
-        "update_0aokkd4": 1
-    }
-
 
     class DependenceError(Exception):
         pass
@@ -323,16 +297,14 @@ else:
                         raise DependenceError("No plugin named %s!" % plugin_)
                 try:
                     if theme_info["icon_18px"]:
-                        file = open(theme_info["icon_18px"])
-                        icon_18px = Image.open(theme_info["icon"], "rb")
+                        icon_18px = theme_info["icon_18px"]
                     else:
                         icon_18px = None
                 except:
                     icon_18px = None
                 try:
                     if theme_info["icon_20px"]:
-                        file = open(theme_info["icon_20px"])
-                        icon_20px = Image.open(theme_info["icon"], "rb")
+                        icon_20px = theme_info["icon_20px"]
                     else:
                         icon_20px = None
                 except:
@@ -362,16 +334,14 @@ else:
                             raise DependenceError("No plugin named %s!" % plugin_)
                     try:
                         if app_info["icon_18px"]:
-                            file = open(app_info["icon_18px"])
-                            icon_18px = Image.open(app_info["icon"], "rb")
+                            icon_18px = app_info["icon_18px"]
                         else:
                             icon_18px = None
                     except:
                         icon_18px = None
                     try:
                         if app_info["icon_20px"]:
-                            file = open(app_info["icon_20px"])
-                            icon_20px = Image.open(app_info["icon"], "rb")
+                            icon_20px = app_info["icon_20px"]
                         else:
                             icon_20px = None
                     except:
