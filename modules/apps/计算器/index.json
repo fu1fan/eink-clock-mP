@@ -1,0 +1,9 @@
+{
+    "author": "xuanzhi33",
+    "version": 1,
+    "adapted-version": "all",
+    "depended-wheels": [],
+    "depended-plugins": [],
+    "icon_18px": null,
+    "icon_20px": "resources/images/calculator.png"
+  }

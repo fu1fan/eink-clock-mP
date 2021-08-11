@@ -13,13 +13,13 @@ from sdk import configurator
 from PIL import Image
 
 # TODO：添加themeApp的状态栏
-# TODO：简化main.py
+
 
 example_config = {
     "main": {
         "enable_plugins": ["hello_world"],
         "enable_theme": "default",
-        "enable_apps": ["hello_world", "账号管理", "简单清单", "系统设置", "随机数生成器", "祖安宝典"],
+        "enable_apps": ["hello_world", "计算器", "简单清单",  "账号管理", "随机数生成器", "祖安宝典", "系统设置"],
         "opening_images": [
             "resources/images/raspberry.jpg",
         ],
@@ -35,8 +35,11 @@ example_config = {
     "themes": {},
     "apps": {},
     "updater": {},
-    "update_0OOkkd4": 1
+    "update_0kdads4": 1
 }
+
+class DependenceError(Exception):
+    pass
 
 
 def mainThread():  # 主线程：UI管理（如果有模拟器就不是主线程了）
@@ -192,9 +195,6 @@ def mainThread():  # 主线程：UI管理（如果有模拟器就不是主线程
         env.epd_driver.sleep()
         env.epd_driver.exit()
 
-
-class DependenceError(Exception):
-    pass
 
 
 if __name__ == "__main__":

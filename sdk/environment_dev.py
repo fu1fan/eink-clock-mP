@@ -34,7 +34,7 @@ class Simulator:
 
 
     def clickHandler(self,event):
-        print("x:%d,y:%d" % (event.x,event.y))
+        print("(x, y) = (%d, %d)" % (event.x,event.y))
         self.SIM_touch(event.x,event.y,self.touch_recoder_new, self.touch_recoder_old)
         self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
 
@@ -294,7 +294,7 @@ class Env:
         if exit_paper:
             self.paper.exit()
         else:
-            self.paper.init()
+            self.paper.pause() # FIXME:改成pause？
         self.paper = paper
         if paper.inited:
             self.paper.recover()
