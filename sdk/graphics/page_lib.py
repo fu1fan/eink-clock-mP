@@ -137,17 +137,12 @@ class ListPage(_Page):
 
         self.paper.recover_update()  # 解锁
 
-    def recover(self):
+    def recover(self): 
 
-        self.paper.pause_update()  # 上锁，防止setText重复刷新屏幕
+        self.paper.changePage("mainPage") # FIXME 只能先这么解决了
+        
 
-        self.paper.changePage(self.name)
-        self.title_of_list.setText(self.listTitle)
-        self.showItems()
 
-        self.paper.recover_update()  # 解锁
-
-        super().recover()
 
 class appListPage(ListPage):
     def openAppByIndex(self, index):
