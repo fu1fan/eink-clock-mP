@@ -123,7 +123,7 @@ class ListPage(_Page):
         if content is None:
             content = []
         self.content = content
-
+        self.listTitle = listTitle
         self.closeEvent = closeEvent
 
         self.total_pages_of_content = math.ceil(len(self.content) / 3)
@@ -132,11 +132,22 @@ class ListPage(_Page):
         self.paper.pause_update()  # 上锁，防止setText重复刷新屏幕
 
         self.paper.changePage(self.name)
-        self.title_of_list.setText(listTitle)
+        self.title_of_list.setText(self.listTitle)
         self.showItems()
 
         self.paper.recover_update()  # 解锁
 
+    def recover(self):
+
+        self.paper.pause_update()  # 上锁，防止setText重复刷新屏幕
+
+        self.paper.changePage(self.name)
+        self.title_of_list.setText(self.listTitle)
+        self.showItems()
+
+        self.paper.recover_update()  # 解锁
+
+        super().recover()
 
 class appListPage(ListPage):
     def openAppByIndex(self, index):
