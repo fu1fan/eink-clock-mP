@@ -23,32 +23,18 @@
 ##### 如果有树莓派Zero W和微雪水墨屏
 
 1.  ssh连接树莓派
-2.  clone本仓库
+2.  clone本仓库的`master`分支
 3.  运行：`python3 main.py`
 
 ##### 如果没有相关硬件，仍想体验或开发
 
-1. clone本仓库
+1. clone本仓库的`develop`分支
 
-2.  在main.py第8、9行这个位置，找到：
-
-    ```python
-    from sdk import environment # 真机环境
-    ```
-    
-    改为：
-    
-    ```python
-    from sdk import environment_dev as environment  # 调试环境
-    ```
-    
-    
-
-3. 这时候再运行`python3 main.py`，这时候就可以通过由 @[xuanzhi33]([xuanzhi33 (xuanzhi33) - Gitee.com](https://gitee.com/xuanzhi33))开发的**水墨屏模拟器**进行体验和调试
+2. 运行`python3 main.py`，这时候就可以通过由 @[xuanzhi33]([xuanzhi33 (xuanzhi33) - Gitee.com](https://gitee.com/xuanzhi33))开发的**水墨屏模拟器**进行体验和调试
 
 #### 使用说明
 
-1.  运行后点击屏幕上方即可唤起Docker栏，这时候就可以进入应用列表或系统设置了
+运行后点击屏幕上方即可唤起Docker栏，这时候就可以进入应用列表或系统设置了
 
 
 
