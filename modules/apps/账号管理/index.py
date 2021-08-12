@@ -1,3 +1,4 @@
+import threading
 import sdk.graphics
 import sdk.graphics.element_lib
 import sdk.graphics.paper_lib
@@ -13,6 +14,7 @@ paper = None
 configurator = None
 infoLabel = None
 actionButton = None
+paircode = 0
 
 def backToMain():
     paper.pause_update()  # 上锁，防止setText重复刷新屏幕
@@ -22,28 +24,6 @@ def backToMain():
     
     paper.recover_update()  # 解锁
 
-
-def nextStep(paircode=0):
-    result = requests.post(
-        "https://pi.simplebytes.cn/api/getPairInfo.php", {"paircode": paircode}).text
-
-    result = json.loads(result)
-
-    if (result["msg"] != "WAIT_PAIRING"):
-        msg = "已绑定："+result["username"]
-        configurator.set("user/name", result["username"])
-        configurator.set("user/token", result["usertoken"])
-
-    else:
-        msg = "输完配对码后再点下一步哦"
-
-    paper.addElement("nextPage", sdk.graphics.element_lib.Label(
-        (0, 30), paper, msg, (296, 30), "black", "white"))
-    paper.addElement("nextPage", sdk.graphics.element_lib.Button(
-        (0, 70), paper, "返回首页", backToMain, (296, 30), "white", "black"))
-
-
-    paper.changePage("nextPage")
 
 
 def logout():
@@ -65,10 +45,46 @@ def refreshMain():
 
 
 def pair():
-    paircode = json.loads(requests.get(
-        "https://pi.simplebytes.cn/api/getPairCode.php").text)["paircode"]
+
     codeLabel = sdk.graphics.element_lib.Label(
-        (0, 90), paper, str(paircode), (169, 30), bgcolor="black", textColor="white", fontSize=30)
+        (0, 88), paper, "请稍等...", (169, 40), bgcolor="black", textColor="white", fontSize=30)
+    paper.addElement("pairPage", codeLabel)
+    
+    def getPairCode():
+        global paircode
+        paircode = json.loads(requests.get(
+            "https://pi.simplebytes.cn/api/getPairCode.php").text)["paircode"]
+        codeLabel.setText(str(paircode))
+    getPairCodeThread = threading.Thread(target=getPairCode)
+    getPairCodeThread.start()
+
+    def nextStep():
+        resultLabel = sdk.graphics.element_lib.Label(
+            (0, 30), paper, "请稍等片刻...", (296, 30), "black", "white")
+        def getResult():
+            result = requests.post(
+                "https://pi.simplebytes.cn/api/getPairInfo.php", {"paircode": paircode}).text
+            result = json.loads(result)
+            if (result["msg"] != "WAIT_PAIRING"):
+               msg = "已绑定："+result["username"]
+               configurator.set("user/name", result["username"])
+               configurator.set("user/token", result["usertoken"])
+
+            else:
+                msg = "输完配对码后再点下一步哦"
+            
+            resultLabel.setText(msg)
+        
+        paper.addElement("nextPage", resultLabel)
+
+        paper.addElement("nextPage", sdk.graphics.element_lib.Button(
+            (0, 70), paper, "返回首页", backToMain, (296, 30), "white", "black"))
+
+        getResultThread = threading.Thread(target=getResult)
+        getResultThread.start()
+
+        paper.changePage("nextPage")
+
     paper.addElement("pairPage", sdk.graphics.element_lib.Label(
         (100, 0), paper, "绑定账号", (150, 30), bgcolor="black", textColor="white"))
     paper.addElement("pairPage", sdk.graphics.element_lib.Label(
@@ -76,8 +92,8 @@ def pair():
     paper.addElement("pairPage", sdk.graphics.element_lib.Label(
         (0, 60), paper, "登录后，输入下方的配对码", (296, 30), bgcolor="black", textColor="white"))
     paper.addElement("pairPage", sdk.graphics.element_lib.Button(
-        (170, 90), paper, "下一步", nextStep, (85, 35), "white", "black", fontSize=24, paircode=paircode))
-    paper.addElement("pairPage", codeLabel)
+        (170, 90), paper, "下一步", nextStep, (85, 35), "white", "black", fontSize=24))
+    
     paper.changePage("pairPage")
 
 
