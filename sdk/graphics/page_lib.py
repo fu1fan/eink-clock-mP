@@ -136,11 +136,6 @@ class ListPage(_Page):
 
         self.paper.recover_update()  # 解锁
 
-    def recover(self): 
-        super().recover()
-
-        # self.paper.changePage("mainPage") # FIXME 只能先这么解决了
-        
 
 
 
