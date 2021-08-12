@@ -265,14 +265,13 @@ class Env:
         else:
             self.paper.init()
 
-    def openApp(self, appName):
+    def openApp(self, appName, exit_paper=False):
         if not self.inited:
             return
         if appName in self.apps:
-            self.paper.exit()
             if self.apps[appName][2] is None:
                 self.apps[appName][2] = self.apps[appName][0].build(self)
-            self.changePaper(self.apps[appName][2])
+            self.changePaper(self.apps[appName][2], exit_paper=exit_paper)
 
     def backHome(self, exit_paper=False):
         if not self.inited:
