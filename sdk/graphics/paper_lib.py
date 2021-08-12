@@ -29,8 +29,9 @@ class _Docker(Element):
         self.__active = True
         self.paper.update(self.page.name)
         time.sleep(10)
-        self.__active = False
-        self.paper.update(self.page.name)
+        if self.__active:  # 这样估计就可以了
+            self.__active = False
+            self.paper.update(self.page.name)
 
     def init(self):
         self.paper.env.touch_handler.add_clicked(
