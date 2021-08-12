@@ -14,6 +14,7 @@ class _Docker(Element):
 
     def appbox_click_handler(self):
         if self.__active:
+            self.paper.changePage("appList")
             self.paper.pages["appList"].show()
             self.__active = False
 

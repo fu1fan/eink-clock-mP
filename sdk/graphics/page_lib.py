@@ -131,7 +131,6 @@ class ListPage(_Page):
 
         self.paper.pause_update()  # 上锁，防止setText重复刷新屏幕
 
-        self.paper.changePage(self.name)
         self.title_of_list.setText(self.listTitle)
         self.showItems()
 

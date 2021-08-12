@@ -88,21 +88,20 @@ class Button(TextElement):
     def setOnclick(self,onclickFunc):
         self.on_clicked = onclickFunc
 
-    def init(self):
-        super().init()
+    def _addButtonClicked(self):
         self.paper.env.touch_handler.add_clicked((self.xy[0], self.xy[0] + self.size[0],
                                                   self.xy[1], self.xy[1] + self.size[1]),
-                                                 self.clickedHandler,
-                                                 *self.args,
-                                                 **self.kwargs)
+                                                  self.clickedHandler,
+                                                  *self.args,
+                                                  **self.kwargs)
+
+    def init(self):
+        self._addButtonClicked()
+        super().init()
 
     def recover(self):
+        self._addButtonClicked()
         super().recover()
-        self.paper.env.touch_handler.add_clicked((self.xy[0], self.xy[0] + self.size[0],
-                                                  self.xy[1], self.xy[1] + self.size[1]),
-                                                 self.clickedHandler,
-                                                 *self.args,
-                                                 **self.kwargs)
 
 
 class Label(TextElement):
