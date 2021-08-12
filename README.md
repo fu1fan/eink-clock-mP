@@ -30,7 +30,7 @@
 
 1. clone本仓库的`develop`分支
 
-2. 运行`python3 main.py`，这时候就可以通过由 @[xuanzhi33]([xuanzhi33 (xuanzhi33) - Gitee.com](https://gitee.com/xuanzhi33))开发的**水墨屏模拟器**进行体验和调试
+2. 运行`python3 main.py`，这时候就可以通过由 @[xuanzhi33](https://gitee.com/xuanzhi33) 开发的**水墨屏模拟器**进行体验和调试
 
 #### 使用说明
 
