@@ -19,7 +19,7 @@ example_config = {
     "main": {
         "enable_plugins": ["hello_world"],
         "enable_theme": "default",
-        "enable_apps": ["hello_world", "计算器", "简单清单",  "账号管理", "随机数生成器", "祖安宝典", "系统设置"],
+        "enable_apps": ["简单清单", "简单计算器",  "账号管理", "随机数生成器", "祖安宝典", "系统设置", "hello_world"],
         "opening_images": [
             "resources/images/raspberry.jpg",
         ],
@@ -35,7 +35,7 @@ example_config = {
     "themes": {},
     "apps": {},
     "updater": {},
-    "update_0kdads4": 1
+    "update_tddadf7": 1
 }
 
 class DependenceError(Exception):

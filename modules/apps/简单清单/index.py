@@ -1,42 +1,77 @@
 from sdk.graphics import page_lib, paper_lib, element_lib
 import sdk.configurator
 import requests
+import threading
+import json
 
+
+mainBtn = None
+listJson = None
 
 def build(env):
+    global mainBtn
 
     paper = paper_lib.PaperApp(env)
+
+    config = sdk.configurator.Configurator(
+        env.logger_env, "configs/account.json", auto_save=True)
+    username = config.read("user/name")
+    usertoken = config.read("user/token")
+    
+    def showTodo():
+
+        def loadTodo():
+            global listJson
+            todoListPage = page_lib.ListPage(paper,"todoList")
+            paper.addPage("todoList", todoListPage)
+            listJson = requests.post("https://pi.simplebytes.cn/api/todo.php",
+                {"name": username, "token": usertoken}).text
+            listJson = json.loads(listJson)
+            todoListTitle = listJson[0]["title"]
+            todoListContent = []
+            def todoItemClickHandler():
+                pass
+
+            for item in listJson[0]["content"]:
+                if not item["finished"]:
+                    imgpath = "resources/images/unfinished.png"
+                    todoListContent.append([item["name"], imgpath, todoItemClickHandler])
+
+            for item in listJson[0]["content"]:
+                if item["finished"]:
+                    imgpath = "resources/images/ok.png"
+                    todoListContent.append([item["name"], imgpath, todoItemClickHandler])
+
+
+            todoListPage.show(todoListContent, todoListTitle, backToMain)
+            paper.changePage("todoList")
+
+        mainBtn.setText("加载中...")
+        loadTodoThread = threading.Thread(target=loadTodo)
+        loadTodoThread.start()
 
     def bindAccount():
         paper.env.openApp("账号管理")
 
+    if (username and usertoken):
+        mainBtn = element_lib.Button(
+            (0, 35), paper, "显示您第一个清单", showTodo, (296, 30), "white", "black"
+        )
+    else:
+        mainBtn = element_lib.Button(
+            (0, 35), paper, "点击绑定账号", bindAccount, (296, 30), "white", "black"
+        )
+    
+
+
     def backToMain():
+        mainBtn.setText("显示您第一个清单")
         paper.changePage("mainPage")
-
-    def showTodo():
-        todoListPage = page_lib.ListPage(paper,"todoList")
-        paper.addPage("todoList", todoListPage)
-        #print(requests.post("https://pi.simplebytes.cn/api/todo.php",
-        #    {"name": username, "token": usertoken}).text)
-        paper.changePage("todoList")
-        todoListPage.show([["测试",None,None]], "简单清单", backToMain)
-
-    config = sdk.configurator.Configurator(
-        env.logger_env, "configs/account.json", auto_save=True)
+        
 
     paper.addElement("mainPage", element_lib.Label(
         (100, 0), paper, "简单清单", (150, 30), bgcolor="black", textColor="white"))
 
-    username = config.read("user/name")
-    usertoken = config.read("user/token")
-    if (username and username):
-        paper.addElement("mainPage", element_lib.Button(
-            (0, 35), paper, "显示“待办”清单", showTodo, (296, 30), "white", "black"
-        ))
-        
-    else:
-        paper.addElement("mainPage", element_lib.Button(
-            (0, 35), paper, "点击绑定账号", bindAccount, (296, 30), "white", "black"
-        ))
+    paper.addElement("mainPage", mainBtn)
 
     return paper
