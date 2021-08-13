@@ -18,6 +18,7 @@ class TouchHandler:
     def __init__(self, env):
         self.pool = env.pool
         self.clicked = []  # 当对象被点击并松开后调用指定函数                      ((x1, x2, y1, y2), func, args, kwargs)
+        self.clicked_with_time = []  # 当对象被点击并松开且从未中后调用指定函数并返回触摸时间（float） ((x1, x2, y1, y2), func)
         self.touched = []  # 当对象被按下后调用指定函数，直到松开后再次调用另一指定函数 ((x1, x2, y1, y2), func1, func2, args, kwargs)
         self.slide_x = []  # 当屏幕从指定区域被横向滑动后调用指定函数               ((x1, x2, y1, y2), func, args, kwargs)
         self.slide_y = []  # 当屏幕从指定区域被纵向滑动后调用指定函数               ((x1, x2, y1, y2), func, args, kwargs)
@@ -43,7 +44,7 @@ class TouchHandler:
         self.clicked.append([area, func, args, kwargs, False])
         self.signal_1 = False
 
-    def remove_clicked(self, func) -> bool:     # 未测试
+    def remove_clicked(self, func) -> bool:  # 未测试
         self.signal_1 = True
         while True:
             if not self.signal_2:
@@ -61,6 +62,45 @@ class TouchHandler:
             return False
         for i in remove_list:
             del self.clicked[i - counter]
+            counter += 1
+        self.signal_1 = False
+        return True
+
+    def add_clicked_with_time(self, area, func):
+        """
+        添加一个触摸元件，⚠️：所有的回调函数必须能接收 *args, **kwargs
+        :param func: 回调函数
+        :param area: (x1, x2, y1, y2)
+        :return: None
+        """
+        if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
+            raise ValueError("Area out of range!")
+        self.signal_1 = True
+        while True:
+            if not self.signal_2:
+                break
+            time.sleep(0.1)
+        self.clicked_with_time.append([area, func, None])
+        self.signal_1 = False
+
+    def remove_clicked_with_time(self, func) -> bool:  # 未测试
+        self.signal_1 = True
+        while True:
+            if not self.signal_2:
+                break
+            time.sleep(0.1)
+        counter = 0
+        remove_list = []
+        for i in self.clicked_with_time:
+            if i[1] == func:
+                remove_list.append(counter)
+            counter += 1
+        counter = 0
+        if len(remove_list) == 0:
+            self.signal_1 = False
+            return False
+        for i in remove_list:
+            del self.clicked_with_time[i - counter]
             counter += 1
         self.signal_1 = False
         return True
@@ -85,7 +125,7 @@ class TouchHandler:
         counter = 0
         remove_list = []
         for i in self.touched:
-            if i[1] == func:    # 只对func1进行匹配
+            if i[1] == func:  # 只对func1进行匹配
                 remove_list.append(counter)
             counter += 1
         counter = 0
@@ -171,6 +211,7 @@ class TouchHandler:
                 break
             time.sleep(0.1)
         self.clicked = []
+        self.clicked_with_time = []
         self.touched = []
         self.slide_x = []
         self.slide_y = []
@@ -195,6 +236,11 @@ class TouchHandler:
                             self.pool.add(i[2], *i[3], **i[4])  # 如果没有被点击，且标记为True，则执行func2
                             i[-1] = False
 
+                for i in self.clicked_with_time:
+                    if i[-1]:
+                        if not (i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]):
+                            i[-1] = None
+
         elif ICNT_Dev.Touch and (not ICNT_Old.Touch):  # 如果开始触摸
             self.logger_touch.debug("触摸事件开始：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
             for i in self.touched:  # 扫描touch
@@ -205,6 +251,10 @@ class TouchHandler:
             for i in self.clicked:
                 if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
                     i[-1] = True
+
+            for i in self.clicked_with_time:
+                if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
+                    i[-1] = time.time()
 
             for i in self.slide_x:
                 if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
@@ -227,6 +277,12 @@ class TouchHandler:
                     if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
                         self.pool.add(i[1], *i[2], **i[3])
                     i[-1] = False
+
+            for i in self.clicked_with_time:
+                if i[-1]:
+                    if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
+                        self.pool.add(i[1], time.time() - i[-1])
+                    i[-1] = None
 
             for i in self.slide_x:  # ⚠️参数需要经过测试后调整
                 if i[-1] is not None:

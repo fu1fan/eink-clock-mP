@@ -11,8 +11,6 @@ from sdk import logger
 from sdk import configurator
 from PIL import Image
 
-# TODO：添加themeApp的状态栏
-
 
 example_config = {
     "main": {
