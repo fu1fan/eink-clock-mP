@@ -178,7 +178,9 @@ def mainThread():  # 主线程：UI管理（如果有模拟器就不是主线程
         load_lock.wait()
         # 主程序开始
         env.init(theme[0].build(env), plugins, apps)
-
+        while 1:  # 据说 while 1 的效率比 while True 高
+            env.touchpad_driver.ICNT_Scan(touch_recoder_new, touch_recoder_old)
+            env.touch_handler.handle(touch_recoder_new, touch_recoder_old)
 
     except KeyboardInterrupt:
         print("ctrl+c")
