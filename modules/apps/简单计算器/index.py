@@ -10,7 +10,7 @@ def build(env):
     numberLabel = element_lib.Label(
         (50, 0), paper, "", (246, 30), bgcolor="black", textColor="white")
 
-    paper.addElement("mainPage", numberLabel)
+    paper.addElement(numberLabel, "mainPage")
     
     keyboardList = [["AC", "7", "8", "9", "←", "*"],
                     [".", "4", "5", "6", "-", "/"],
@@ -49,7 +49,7 @@ def build(env):
             nowChar = keyboardList[i][j]
             keyboard[nowChar] = element_lib.Button(
                 (j * 49 + 2, i * 30 + 36), paper, nowChar, addChar, (48, 29), "white", "black",  char=nowChar)
-            paper.addElement("mainPage", keyboard[nowChar])
+            paper.addElement(keyboard[nowChar], "mainPage")
 
    
     return paper

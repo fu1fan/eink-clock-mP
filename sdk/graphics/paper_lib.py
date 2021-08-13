@@ -82,7 +82,7 @@ class PaperTheme(PaperDynamic):
 
     def init(self):
         if self.first_init:
-            self.addElement("mainPage", _Docker(self))
+            self.addElement(_Docker(self), "mainPage")
             self.first_init = False
         super().init()
 
@@ -96,6 +96,6 @@ class PaperApp(PaperDynamic):
 
     def init(self):
         if self.first_init:
-            self.addElement("mainPage", appBackButton(self))
+            self.addElement(appBackButton(self), "mainPage")
             self.first_init = False
         super().init()

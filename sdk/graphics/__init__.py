@@ -142,7 +142,7 @@ class PaperDynamic(Paper):
             page = Page(self, name)
         self.pages[name] = page
 
-    def addElement(self, target: str, element):
+    def addElement(self, element, target: str = "mainPage"):
         self.pages[target].append(element)
         element.page = self.pages[target]
         if self.active:
