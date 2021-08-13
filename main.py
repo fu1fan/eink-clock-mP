@@ -208,3 +208,4 @@ if __name__ == "__main__":
     mainThrd.start()  # 原来的主线程就得让位了~
 
     simulator.open(env)  # 打开模拟器
+
