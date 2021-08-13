@@ -66,7 +66,7 @@ class TouchHandler:
         self.signal_1 = False
         return True
 
-    def add_clicked_with_time(self, area, func, *args, **kwargs):
+    def add_clicked_with_time(self, area, func):
         """
         添加一个触摸元件，⚠️：所有的回调函数必须能接收 *args, **kwargs
         :param func: 回调函数
@@ -80,10 +80,10 @@ class TouchHandler:
             if not self.signal_2:
                 break
             time.sleep(0.1)
-        self.clicked_with_time.append([area, func, args, kwargs, None])
+        self.clicked_with_time.append([area, func, None])
         self.signal_1 = False
 
-    def remove_clicked(self, func) -> bool:     # 未测试
+    def remove_clicked_with_time(self, func) -> bool:     # 未测试
         self.signal_1 = True
         while True:
             if not self.signal_2:
