@@ -72,11 +72,10 @@ def build(env):
     def backToMain():
         mainBtn.setText("显示您第一个清单")
         paper.changePage("mainPage")
-        
 
-    paper.addElement("mainPage", element_lib.Label(
-        (100, 0), paper, "简单清单", (150, 30), bgcolor="black", textColor="white"))
+    paper.addElement(element_lib.Label(
+        (100, 0), paper, "简单清单", (150, 30), bgcolor="black", textColor="white"), "mainPage")
 
-    paper.addElement("mainPage", mainBtn)
+    paper.addElement(mainBtn, "mainPage")
 
     return paper

@@ -111,8 +111,8 @@ def build(env):
     
     paper = sdk.graphics.paper_lib.PaperApp(env)
 
-    paper.addElement("mainPage", sdk.graphics.element_lib.Label(
-        (100, 0), paper, "账号管理", (150, 30), bgcolor="black", textColor="white"))
+    paper.addElement(sdk.graphics.element_lib.Label(
+        (100, 0), paper, "账号管理", (150, 30), bgcolor="black", textColor="white"), "mainPage")
 
     if (configurator.read("user/name")):
         infoLabel = sdk.graphics.element_lib.Label(
@@ -127,9 +127,8 @@ def build(env):
         actionButton =  sdk.graphics.element_lib.Button(
             (0, 95), paper, "点击绑定账号", pair, (296, 30), "white", "black")
 
-
-    paper.addElement("mainPage", infoLabel)
-    paper.addElement("mainPage", actionButton)
+    paper.addElement(infoLabel, "mainPage")
+    paper.addElement(actionButton, "mainPage")
 
     paper.addPage("pairPage")
     paper.addPage("nextPage")

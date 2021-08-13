@@ -10,9 +10,9 @@ def build(env):
 
     def changeText():
         text_label.setText("Button Clicked!")
-    
-    paper.addElement("mainPage", text_label)
-    paper.addElement("mainPage", element_lib.Button(
-        (100, 80), paper, "I'm a button", changeText, (150, 30), bgcolor="black", textColor="white"))
+
+    paper.addElement(text_label, "mainPage")
+    paper.addElement(element_lib.Button(
+        (100, 80), paper, "I'm a button", changeText, (150, 30), bgcolor="black", textColor="white"), "mainPage")
     
     return paper

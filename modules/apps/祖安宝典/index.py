@@ -13,18 +13,16 @@ def build(env):
         zuan = requests.get("https://api.shadiao.app/nmsl?level=min").text
         zuan = json.loads(zuan)["data"]["text"]
         zuanLabel.setText(zuan)
-        
-        
 
-    paper.addElement("mainPage", element_lib.Label(
-        (100, 0), paper, "祖安宝典", (150, 30), bgcolor="black", textColor="white"))
+    paper.addElement(element_lib.Label(
+        (100, 0), paper, "祖安宝典", (150, 30), bgcolor="black", textColor="white"), "mainPage")
 
-    paper.addElement("mainPage", zuanLabel)
+    paper.addElement(zuanLabel, "mainPage")
 
     getThread = threading.Thread(target=getZuAn) # 使用子线程请求api
     getThread.start() # 启动子线程
 
-    paper.addElement("mainPage",element_lib.Button((100, 98), paper, "换一个", getZuAn, (75, 30), "white", "black"))
+    paper.addElement(element_lib.Button((100, 98), paper, "换一个", getZuAn, (75, 30), "white", "black"), "mainPage")
 
 
     return paper

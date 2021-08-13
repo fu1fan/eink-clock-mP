@@ -7,15 +7,13 @@ def build(env):
 
     paper = paper_lib.PaperApp(env)
 
-
-
-    paper.addElement("mainPage", element_lib.Label(
-        (80, 0), paper, "随机数生成器", (150, 30), bgcolor="black", textColor="white"))
+    paper.addElement(element_lib.Label(
+        (80, 0), paper, "随机数生成器", (150, 30), bgcolor="black", textColor="white"), "mainPage")
     numberLabel = element_lib.Label((115, 35), paper, "0", (100, 50), "black", "white", 50)
     infoLabel = element_lib.Label((0, 95), paper, "当前范围：1-100", (160, 45), "black", "white")
 
-    paper.addElement("mainPage", numberLabel)
-    paper.addElement("mainPage",infoLabel)
+    paper.addElement(numberLabel, "mainPage")
+    paper.addElement(infoLabel, "mainPage")
     def randomNum():
         numberLabel.setText(str(random.randint(1, maxN)))
 
@@ -24,10 +22,17 @@ def build(env):
         maxN = maxnum
         infoLabel.setText("当前范围：1-%d" % maxN)
 
-    paper.addElement("mainPage", element_lib.Button((231, 0), paper, "1-6", setMaxNum, (65,30), bgcolor="white", textColor="black", maxnum=6))
-    paper.addElement("mainPage", element_lib.Button((231, 32), paper, "1-10", setMaxNum, (65,30), bgcolor="white", textColor="black", maxnum=10))
-    paper.addElement("mainPage", element_lib.Button((231, 64), paper, "1-100", setMaxNum, (65,30), bgcolor="white", textColor="black", maxnum=100))
+    paper.addElement(
+        element_lib.Button((231, 0), paper, "1-6", setMaxNum, (65, 30), bgcolor="white", textColor="black", maxnum=6),
+        "mainPage")
+    paper.addElement(
+        element_lib.Button((231, 32), paper, "1-10", setMaxNum, (65, 30), bgcolor="white", textColor="black",
+                           maxnum=10), "mainPage")
+    paper.addElement(
+        element_lib.Button((231, 64), paper, "1-100", setMaxNum, (65, 30), bgcolor="white", textColor="black",
+                           maxnum=100), "mainPage")
 
-    paper.addElement("mainPage", element_lib.Button((231, 98), paper, "生成", randomNum, (65,30), bgcolor="white", textColor="black"))
+    paper.addElement(
+        element_lib.Button((231, 98), paper, "生成", randomNum, (65, 30), bgcolor="white", textColor="black"), "mainPage")
 
     return paper

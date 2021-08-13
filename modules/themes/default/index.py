@@ -53,7 +53,7 @@ def build(env: environment):
     #    (60, 90), paper, "测试", changeTheTextOfLabal)
  
     text_clock = TextClock((0, 0), paper)
-    paper.addElement("mainPage", text_clock)
+    paper.addElement(text_clock, "mainPage")
 
     # paper.addElement("mainPage", refreshBtn)
     # paper.addElement("mainPage", textLabel)
