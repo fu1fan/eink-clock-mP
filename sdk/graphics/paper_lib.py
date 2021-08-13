@@ -24,7 +24,7 @@ class _Docker(Element):
             self.__active = False
 
     def clicked_handler(self):
-        time.sleep(0.1)
+        time.sleep(0.05)
         if (self.paper.nowPage != self.page.name) or self.__active or (not self.inited):
             return
         self.__active = True
@@ -37,12 +37,7 @@ class _Docker(Element):
         self.paper.update(self.page.name)
 
     def init(self):
-        self.paper.env.touch_handler.add_clicked(
-            (0, 296, 0, 30), self.clicked_handler)
-        self.paper.env.touch_handler.add_clicked(
-            (60, 100, 0, 30), self.appbox_click_handler)
-        self.paper.env.touch_handler.add_clicked(
-            (195, 235, 0, 30), self.settings_click_handler)
+        self.recover()
 
         self.inited = True
 
@@ -53,8 +48,6 @@ class _Docker(Element):
             (60, 100, 0, 30), self.appbox_click_handler)
         self.paper.env.touch_handler.add_clicked(
             (195, 235, 0, 30), self.settings_click_handler)
-
-        
 
     def exit(self):
         self.inited = False
@@ -87,6 +80,65 @@ class PaperTheme(PaperDynamic):
         super().init()
 
 
+class AppControlBar(Element):
+    def __init__(self, paper):
+        super().__init__((0, 0), paper, (296, 30))
+        self.__active = False
+        self.image = Image.open(open("resources/images/app_control.jpg", "rb"))
+        self.more_event = None
+        self.args = []
+        self.kwargs = {}
+
+    def back_click_handler(self, long):
+        if self.__active:
+            if long >= 1:
+                self.paper.env.backHome()
+            else:
+                self.paper.env.back()
+
+    def close_click_handler(self):
+        if self.__active:
+            self.paper.env.backHome(True)
+
+    def more_click_handler(self):
+        if self.__active:
+            if self.more_event:
+                self.more_event(*self.args, **self.kwargs)
+
+    def clicked_handler(self):
+        time.sleep(0.05)
+        if self.__active or (not self.inited):
+            return
+        self.__active = True
+        self.paper.update(self.page.name)
+        for i in range(5):
+            time.sleep(1)
+            if not self.__active:
+                return
+        self.__active = False
+        self.paper.update(self.page.name)
+
+    def init(self):
+        self.recover()
+
+        self.inited = True
+
+    def recover(self):
+        self.paper.env.touch_handler.add_clicked(
+            (0, 30, 0, 30), self.clicked_handler)
+        self.paper.env.touch_handler.add_clicked(
+            (60, 30, 0, 30), self.back_click_handler)
+        self.paper.env.touch_handler.add_clicked_with_time(
+            (266, 296, 0, 30), self.close_click_handler)
+
+    def exit(self):
+        self.inited = False
+
+    def build(self) -> Image:
+        if self.__active:
+            return self.image
+        else:
+            return
 
 
 class PaperApp(PaperDynamic):
@@ -96,6 +148,6 @@ class PaperApp(PaperDynamic):
 
     def init(self):
         if self.first_init:
-            self.addElement(appBackButton(self), "mainPage")
+            self.addElement(AppControlBar)
             self.first_init = False
         super().init()

@@ -236,6 +236,7 @@ class Env:
         self.touchpad_driver = TouchDriver(self.logger_env)
         self.touchpad_driver.ICNT_Init()
         self.paper = None
+        self.paper_old = None
         self.plugins = None
         self.apps = None
         self.inited = False
@@ -247,6 +248,7 @@ class Env:
         self.inited = True
         self.theme = paper
         self.paper = paper
+        self.paper_old = paper
         self.plugins = plugins
         self.apps = apps
         self.paper.init()
@@ -259,6 +261,7 @@ class Env:
             self.paper.exit()
         else:
             self.paper.pause() # pause()能暂停页面
+        self.paper_old = paper
         self.paper = paper
         if paper.inited:
             self.paper.recover()
@@ -276,13 +279,9 @@ class Env:
     def backHome(self, exit_paper=False):
         if not self.inited:
             return
-        self.touch_handler.clear()
-        if exit_paper:
-            self.paper.exit()
-        else:
-            self.paper.pause() # pause()能暂停页面
-        self.paper = self.theme
-        if self.theme.inited:
-            self.paper.recover()
-        else:
-            self.paper.init()
+        self.changePaper(self.theme, exit_paper)
+
+    def back(self, exit_paper=False):
+        if not self.inited:
+            return
+        self.changePaper(self.paper_old, exit_paper)
