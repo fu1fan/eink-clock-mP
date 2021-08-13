@@ -261,8 +261,7 @@ class Env:
             self.paper.exit()
         else:
             self.paper.pause() # pause()能暂停页面
-        self.paper_old = paper
-        self.paper = paper
+        self.paper_old , self.paper = self.paper, paper
         if paper.inited:
             self.paper.recover()
         else:
