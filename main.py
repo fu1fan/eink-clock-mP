@@ -5,8 +5,7 @@ import importlib
 import time
 import traceback
 
-# from sdk import environment # 真机环境
-from sdk import environment_dev as environment  # 调试环境
+from sdk import environment
 
 from sdk import logger
 from sdk import configurator
@@ -205,16 +204,6 @@ if __name__ == "__main__":
     configurator_main.check(example_config, True)
     configurator_main.change_path("/main")
 
-    if environment.DEV: #判断环境
-        simulator = environment.Simulator()  # 我是一个模拟器
-        env = environment.Env(configurator_main.read(
-            "env_configs"), logger_main, simulator)  # 有模拟器的env
-        mainThrd = threading.Thread(target=mainThread, daemon=True) # 因为模拟器必须得是主线程
-        mainThrd.start() # 原来的主线程就得让位了~
-
-        simulator.open(env) # 打开模拟器
-
-    else:
-        env = environment.Env(configurator_main.read(
-            "env_configs"), logger_main)  # 真机env
-        mainThread() #主线程
+    env = environment.Env(configurator_main.read(
+        "env_configs"), logger_main)  # 真机env
+    mainThread() #主线程
