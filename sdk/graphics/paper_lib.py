@@ -1,6 +1,6 @@
 import time
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from sdk.graphics import Element, PaperDynamic, element_lib, page_lib
 
@@ -80,74 +80,78 @@ class PaperTheme(PaperDynamic):
         super().init()
 
 
-class AppControlBar(Element):
-    def __init__(self, paper):
-        super().__init__((0, 0), paper, (296, 30))
-        self.__active = False
-        self.image = Image.open(open("resources/images/app_control.jpg", "rb"))
-        self.more_event = None
-        self.args = []
-        self.kwargs = {}
-
-    def back_click_handler(self, long):
-        if self.__active:
-            if long >= 1:
-                self.paper.env.backHome()
-            else:
-                self.paper.env.back()
-
-    def close_click_handler(self):
-        if self.__active:
-            self.paper.env.backHome(True)
-
-    def more_click_handler(self):
-        if self.__active:
-            if self.more_event:
-                self.more_event(*self.args, **self.kwargs)
-
-    def clicked_handler(self):
-        time.sleep(0.05)
-        if self.__active or (not self.inited):
-            return
-        self.__active = True
-        self.paper.update(self.page.name)
-        for i in range(5):
-            time.sleep(1)
-            if not self.__active:
-                return
-        self.__active = False
-        self.paper.update(self.page.name)
-
-    def init(self):
-        self.recover()
-
-        self.inited = True
-
-    def recover(self):
-        self.paper.env.touch_handler.add_clicked(
-            (0, 30, 0, 30), self.clicked_handler)
-        self.paper.env.touch_handler.add_clicked(
-            (60, 30, 0, 30), self.back_click_handler)
-        self.paper.env.touch_handler.add_clicked_with_time(
-            (266, 296, 0, 30), self.close_click_handler)
-
-    def exit(self):
-        self.inited = False
-
-    def build(self) -> Image:
-        if self.__active:
-            return self.image
-        else:
-            return
-
 
 class PaperApp(PaperDynamic):
     def __init__(self, env):
         super().__init__(env)
         self.first_init = True
 
+        self.__bar_active = False
+        self.bar_image = Image.open(open("resources/images/app_control.jpg", "rb"))
+        self.more_event = None
+        self.args = []
+        self.kwargs = {}
+
+    def back_click_handler(self, long):
+        if self.__bar_active:
+            if long >= 1:
+                self.env.backHome()
+            else:
+                self.env.back()
+
+    def close_click_handler(self):
+        if self.__bar_active:
+            self.env.backHome(True)
+
+    def more_click_handler(self):
+        if self.__bar_active:
+            if self.more_event:
+                self.more_event(*self.args, **self.kwargs)
+
+    def clicked_handler(self):
+        time.sleep(0.05)
+        if self.__bar_active or (not self.inited):
+            return
+        self.__bar_active = True
+        self._update()
+        for _ in range(5):
+            time.sleep(1)
+            if not self.__bar_active:
+                return
+        self.__bar_active = False
+        self._update()
+
     def init(self):
         if self.first_init:
-            self.addElement(AppControlBar)
             self.first_init = False
+        self.env.touch_handler.add_clicked(
+            (0, 30, 0, 30), self.clicked_handler)
+        self.env.touch_handler.add_clicked_with_time(
+            (0, 30, 0, 30), self.back_click_handler)
+        self.env.touch_handler.add_clicked(
+            (266, 296, 0, 30), self.close_click_handler)
         super().init()
+    
+    def recover(self):
+        super().recover()
+        self.env.touch_handler.add_clicked(
+            (0, 30, 0, 30), self.clicked_handler)
+        self.env.touch_handler.add_clicked_with_time(
+            (0, 30, 0, 30), self.back_click_handler)
+        self.env.touch_handler.add_clicked(
+            (266, 296, 0, 30), self.close_click_handler)
+
+    def set_more_func(self, func, *args, **kwargs):
+        self.more_event = func
+        self.args = args
+        self.kwargs = kwargs
+
+    def build(self) -> Image:
+        new_image = self.background_image.copy()
+        for element in self.pages[self.nowPage]:
+            element_image = element.build()
+            if element_image:
+                new_image.paste(element_image, (element.xy[0], element.xy[1]))
+        if self.__bar_active:
+            new_image.paste(self.bar_image, (0, 0))
+        return new_image
