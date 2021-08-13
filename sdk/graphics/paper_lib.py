@@ -92,6 +92,14 @@ class PaperApp(PaperDynamic):
         self.args = []
         self.kwargs = {}
 
+    def _add_control_bar_touch(self):
+        self.env.touch_handler.add_clicked(
+            (0, 30, 0, 30), self.clicked_handler)
+        self.env.touch_handler.add_clicked_with_time(
+            (0, 30, 0, 30), self.back_click_handler)
+        self.env.touch_handler.add_clicked(
+            (266, 296, 0, 30), self.close_click_handler)
+
     def back_click_handler(self, long):
         if self.__bar_active:
             if long >= 1:
@@ -124,22 +132,12 @@ class PaperApp(PaperDynamic):
     def init(self):
         if self.first_init:
             self.first_init = False
-        self.env.touch_handler.add_clicked(
-            (0, 30, 0, 30), self.clicked_handler)
-        self.env.touch_handler.add_clicked_with_time(
-            (0, 30, 0, 30), self.back_click_handler)
-        self.env.touch_handler.add_clicked(
-            (266, 296, 0, 30), self.close_click_handler)
+        self._add_control_bar_touch()
         super().init()
-    
+
     def recover(self):
         super().recover()
-        self.env.touch_handler.add_clicked(
-            (0, 30, 0, 30), self.clicked_handler)
-        self.env.touch_handler.add_clicked_with_time(
-            (0, 30, 0, 30), self.back_click_handler)
-        self.env.touch_handler.add_clicked(
-            (266, 296, 0, 30), self.close_click_handler)
+        self._add_control_bar_touch()
 
     def set_more_func(self, func, *args, **kwargs):
         self.more_event = func
@@ -155,3 +153,7 @@ class PaperApp(PaperDynamic):
         if self.__bar_active:
             new_image.paste(self.bar_image, (0, 0))
         return new_image
+
+    def changePage(self, name, refresh=None):
+        super().changePage(name, refresh)
+        self._add_control_bar_touch()
