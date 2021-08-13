@@ -12,8 +12,6 @@ from sdk import configurator
 from PIL import Image
 from pathlib import Path
 
-# TODO：添加themeApp的状态栏
-
 
 example_config = {
     "main": {

@@ -44,7 +44,7 @@ class TouchHandler:
         self.clicked.append([area, func, args, kwargs, False])
         self.signal_1 = False
 
-    def remove_clicked(self, func) -> bool:     # 未测试
+    def remove_clicked(self, func) -> bool:  # 未测试
         self.signal_1 = True
         while True:
             if not self.signal_2:
@@ -83,7 +83,7 @@ class TouchHandler:
         self.clicked_with_time.append([area, func, None])
         self.signal_1 = False
 
-    def remove_clicked_with_time(self, func) -> bool:     # 未测试
+    def remove_clicked_with_time(self, func) -> bool:  # 未测试
         self.signal_1 = True
         while True:
             if not self.signal_2:
@@ -105,7 +105,6 @@ class TouchHandler:
         self.signal_1 = False
         return True
 
-
     def add_touched(self, area, func1, func2, *args, **kwargs):  # TODO:添加批量导入
         if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
             raise ValueError("Area out of range!")
@@ -126,7 +125,7 @@ class TouchHandler:
         counter = 0
         remove_list = []
         for i in self.touched:
-            if i[1] == func:    # 只对func1进行匹配
+            if i[1] == func:  # 只对func1进行匹配
                 remove_list.append(counter)
             counter += 1
         counter = 0
@@ -282,7 +281,7 @@ class TouchHandler:
             for i in self.clicked_with_time:
                 if i[-1]:
                     if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
-                        self.pool.add(i[1], time.time()-i[-1])
+                        self.pool.add(i[1], time.time() - i[-1])
                     i[-1] = None
 
             for i in self.slide_x:  # ⚠️参数需要经过测试后调整
