@@ -62,6 +62,9 @@ class ListPage(_Page):
         self.current_page_of_content = 0
 
         self.content = []
+
+        self.listTitle = ""
+        self.closeEvent = None
         # 格式为：[[text, image, func]]
         # 其中 func 会收到一个index参数，来知道自己是第几个(以0开始)
 
@@ -72,8 +75,10 @@ class ListPage(_Page):
                 self.content[indexInList][2](indexInList)  # 传入index
 
     def close(self):
-        if self.closeEvent != None:
+        if self.closeEvent is not None:
             self.closeEvent()
+        self.content = []
+        self.listTitle = ""
 
     def showItems(self):
 
@@ -93,7 +98,7 @@ class ListPage(_Page):
                 self.listTexts[i].setText(
                     self.content[index_of_the_first + i][0])
                 # 设置item的图标
-                if self.content[index_of_the_first + i][1] != None:
+                if self.content[index_of_the_first + i][1] is not None:
                     self.icons[i].setImage(
                         self.content[index_of_the_first + i][1])
                 else:
@@ -106,14 +111,14 @@ class ListPage(_Page):
                 # 也不必在此更改点击事件了
 
     def goPrev(self):
-        if (self.current_page_of_content > 1):
+        if self.current_page_of_content > 1:
             self.paper.pause_update()  # 上锁，防止setText重复刷新屏幕
             self.current_page_of_content -= 1
             self.showItems()
             self.paper.recover_update()  # 解锁
 
     def goNext(self):
-        if (self.current_page_of_content < self.total_pages_of_content):
+        if self.current_page_of_content < self.total_pages_of_content:
             self.paper.pause_update()  # 上锁，防止setText重复刷新屏幕
             self.current_page_of_content += 1
             self.showItems()
