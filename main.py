@@ -184,9 +184,6 @@ def mainThread():  # 主线程：UI管理（如果有模拟器就不是主线程
         print("ctrl+c")
     except:  # ⚠️只在生产环境使用 会影响调试结果！！！
         logger_main.error(traceback.format_exc())
-    finally:
-        env.epd_driver.sleep()
-        env.epd_driver.exit()
 
 
 if __name__ == "__main__":
