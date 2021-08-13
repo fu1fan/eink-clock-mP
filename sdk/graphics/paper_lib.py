@@ -29,7 +29,10 @@ class _Docker(Element):
             return
         self.__active = True
         self.paper.update(self.page.name)
-        time.sleep(10)
+        for i in range(5):
+            time.sleep(1)
+            if not self.__active:
+                return
         self.__active = False
         self.paper.update(self.page.name)
 
@@ -82,6 +85,8 @@ class PaperTheme(PaperDynamic):
             self.addElement("mainPage", _Docker(self))
             self.first_init = False
         super().init()
+
+
 
 
 class PaperApp(PaperDynamic):
