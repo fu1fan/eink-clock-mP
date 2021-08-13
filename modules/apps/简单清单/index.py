@@ -27,20 +27,25 @@ def build(env):
             listJson = requests.post("https://pi.simplebytes.cn/api/todo.php",
                 {"name": username, "token": usertoken}).text
             listJson = json.loads(listJson)
-            todoListTitle = listJson[0]["title"]
-            todoListContent = []
             def todoItemClickHandler():
                 pass
+            if listJson == []:
+                todoListTitle = "暂无清单"
+                todoListContent = [["请前往：","resources/images/unfinished.png",None],
+                ["pi.simplebytes.cn/todo","resources/images/unfinished.png",None]]
+            else:
+                todoListTitle = listJson[0]["title"]
+                todoListContent = []
 
-            for item in listJson[0]["content"]:
-                if not item["finished"]:
-                    imgpath = "resources/images/unfinished.png"
-                    todoListContent.append([item["name"], imgpath, todoItemClickHandler])
+                for item in listJson[0]["content"]:
+                    if not item["finished"]:
+                        imgpath = "resources/images/unfinished.png"
+                        todoListContent.append([item["name"], imgpath, todoItemClickHandler])
 
-            for item in listJson[0]["content"]:
-                if item["finished"]:
-                    imgpath = "resources/images/ok.png"
-                    todoListContent.append([item["name"], imgpath, todoItemClickHandler])
+                for item in listJson[0]["content"]:
+                    if item["finished"]:
+                        imgpath = "resources/images/ok.png"
+                        todoListContent.append([item["name"], imgpath, todoItemClickHandler])
 
 
             todoListPage.show(todoListContent, todoListTitle, backToMain)
