@@ -18,7 +18,7 @@ example_config = {
     "main": {
         "enable_plugins": ["hello_world"],
         "enable_theme": "default",
-        "enable_apps": ["简单清单", "简单计算器",  "账号管理", "随机数生成器", "祖安宝典", "系统设置", "hello_world"],
+        "enable_apps": ["简单清单", "简单计算器", "账号管理", "随机数生成器", "祖安宝典", "系统设置", "hello_world"],
         "opening_images": [
             "resources/images/raspberry.jpg",
         ],
@@ -36,6 +36,7 @@ example_config = {
     "updater": {},
     "update_tddadf7": 1
 }
+
 
 class DependenceError(Exception):
     pass
@@ -178,13 +179,6 @@ def mainThread():  # 主线程：UI管理（如果有模拟器就不是主线程
         # 主程序开始
         env.init(theme[0].build(env), plugins, apps)
 
-        if environment.DEV: # 调试环境
-            pass # 模拟器会处理点击事件，所以就pass掉了
-        else: # 真机环境
-            while 1:  # 据说 while 1 的效率比 while True 高
-                env.touchpad_driver.ICNT_Scan(touch_recoder_new, touch_recoder_old)
-                env.touch_handler.handle(touch_recoder_new, touch_recoder_old)
-
 
     except KeyboardInterrupt:
         print("ctrl+c")
@@ -195,9 +189,7 @@ def mainThread():  # 主线程：UI管理（如果有模拟器就不是主线程
         env.epd_driver.exit()
 
 
-
 if __name__ == "__main__":
-
     logger_main = logger.Logger(logger.DEBUG)  # 日志
 
     configurator_main = configurator.Configurator(logger_main)  # 配置
@@ -206,4 +198,4 @@ if __name__ == "__main__":
 
     env = environment.Env(configurator_main.read(
         "env_configs"), logger_main)  # 真机env
-    mainThread() #主线程
+    mainThread()  # 主线程
