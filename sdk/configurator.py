@@ -2,6 +2,8 @@ import os
 import json
 from sdk import logger
 
+from pathlib import Path
+
 default_config_path = "configs/config.json"
 try:
     os.mkdir("configs")
@@ -21,18 +23,18 @@ class Configurator:  # 没有对多线程进行适配，需要自行加锁
         self.file_path = file_path
         if os.path.exists(file_path):
             try:
-                file = open(file_path, "r")
+                file = open(Path(file_path), "r")
                 self.config = json.load(file)
                 file.close()
             except json.decoder.JSONDecodeError:
                 os.rename(default_config_path, default_config_path + ".bk")
-                file = open(file_path, "w")
+                file = open(Path(file_path), "w")
                 file.write("{}")
                 file.close()
                 self.config = {}
                 logger_config.warn("配置文件不是json文件，已备份到 '%s.bk' 并已创建新的空白文件" % file_path)
         else:
-            file = open(file_path, "w")
+            file = open(Path(file_path), "w")
             file.write("{}")
             file.close()
             self.config = {}
@@ -44,7 +46,7 @@ class Configurator:  # 没有对多线程进行适配，需要自行加锁
         return self.__current_path
 
     def save(self):
-        file = open(self.path, "w")
+        file = open(Path(self.path), "w")
         json.dump(self.config, file, indent=4)
         file.close()
 
@@ -151,7 +153,7 @@ class Configurator:  # 没有对多线程进行适配，需要自行加锁
     def check(self, example: dict, fix=False) -> bool:
         def fix_file():
             os.rename(default_config_path, default_config_path + ".bk")
-            file = open(self.file_path, "w")
+            file = open(Path(self.file_path), "w")
             json.dump(example, file, indent=4)
             file.close()
             self.config = example

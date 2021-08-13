@@ -1,7 +1,10 @@
 import inspect
+from pathlib import Path
 import time
 import os
 import threading
+
+from pathlib import Path
 
 DEBUG = 0
 INFO = 1
@@ -50,9 +53,9 @@ class Logger:
 
         self.lock = threading.Lock()
         if tag is None:
-            self.name = time.strftime("%Y%m%d-%H:%M:%S", time.localtime())
+            self.name = time.strftime("%Y%m%d--%H-%M-%S", time.localtime())
         else:
-            self.name = "[%s]%s" % (tag, time.strftime("%Y%m%d-%H:%M:%S", time.localtime()))
+            self.name = "[%s]%s" % (tag, time.strftime("%Y%m%d--%H-%M-%S", time.localtime()))
         if not os.path.exists(folder):
             os.mkdir(folder)
 
@@ -63,7 +66,7 @@ class Logger:
     def __write(self, level, text, the_name):
         if level >= self.__level:
             self.lock.acquire()
-            file = open(self.folder + self.name,
+            file = open(Path(self.folder + self.name),
                         "a+", encoding="utf-8")
             if len(text) == 0:
                 text = "\n"

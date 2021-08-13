@@ -1,3 +1,4 @@
+from pathlib import Path
 import traceback
 
 from PIL import ImageFont, Image, ImageDraw
@@ -12,7 +13,7 @@ class ImageElement(Element):
 
     def _setImage(self, image_path):
         try:
-            file = open(image_path, "rb")
+            file = open(Path(image_path), "rb")
             self.image = Image.open(file)
             self.size = (self.image.size[0], self.image.size[1])
         except:

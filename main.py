@@ -5,12 +5,12 @@ import importlib
 import time
 import traceback
 
-# from sdk import environment # 真机环境
-from sdk import environment_dev as environment  # 调试环境
+from sdk import environment  # 调试环境
 
 from sdk import logger
 from sdk import configurator
 from PIL import Image
+from pathlib import Path
 
 # TODO：添加themeApp的状态栏
 
@@ -47,7 +47,7 @@ def mainThread():  # 主线程：UI管理（如果有模拟器就不是主线程
     opening_images = []  # 准备开屏动画
     opening_images_path = configurator_main.read("opening_images")
     for path in opening_images_path:
-        file = open(path, "rb")
+        file = open(Path(path), "rb")
         opening_images.append(Image.open(file))
     paperNow = environment.graphics.Paper(env, opening_images[0])
     load_lock = threading.Barrier(2)
@@ -58,7 +58,7 @@ def mainThread():  # 主线程：UI管理（如果有模拟器就不是主线程
             for i in opening_images[1:]:
                 paperNow.update_background(i)
         if load_lock.n_waiting == 0:  # 如果等动画显示完后主线程还没进入等待，则显示Loading画面
-            _file = open(configurator_main.read("loading_image"), "rb")
+            _file = open(Path(configurator_main.read("loading_image")), "rb")
             paperNow.update_background(Image.open(_file))
             _file.close()
         load_lock.wait()
@@ -82,7 +82,7 @@ def mainThread():  # 主线程：UI管理（如果有模拟器就不是主线程
 
         for plugin_name in enable_plugins:  # 加载已注册的插件
             try:
-                file = open("modules/plugins/%s/index.json" % plugin_name)
+                file = open(Path("modules/plugins/%s/index.json" % plugin_name))
                 plugin_info = json.load(file)
                 file.close()
                 for wheel_ in plugin_info["depended-wheels"]:
@@ -106,7 +106,7 @@ def mainThread():  # 主线程：UI管理（如果有模拟器就不是主线程
         theme_name = configurator_main.read(
             "enable_theme", raise_error=True)  # 加载主题
         try:
-            file = open("modules/themes/%s/index.json" % theme_name)
+            file = open(Path("modules/themes/%s/index.json" % theme_name))
             theme_info = json.load(file)
             file.close()
             for wheel_ in theme_info["depended-wheels"]:
@@ -134,7 +134,7 @@ def mainThread():  # 主线程：UI管理（如果有模拟器就不是主线程
         except FileNotFoundError and json.JSONDecodeError and DependenceError:
             logger_main.error("主题[%s]加载失败:\n" + traceback.format_exc())
             try:
-                file = open("module/themes/default/index.json" % theme_name)
+                file = open(Path("module/themes/default/index.json" % theme_name))
                 theme_info = json.load(file)
                 file.close()
             except FileNotFoundError and json.JSONDecodeError and DependenceError as e:
@@ -146,7 +146,7 @@ def mainThread():  # 主线程：UI管理（如果有模拟器就不是主线程
             "enable_apps", raise_error=True)  # 加载程序
         for app_name in enable_apps:
             try:
-                file = open("modules/apps/%s/index.json" % app_name)
+                file = open(Path("modules/apps/%s/index.json" % app_name))
                 app_info = json.load(file)
                 file.close()
                 for wheel_ in app_info["depended-wheels"]:
@@ -205,16 +205,10 @@ if __name__ == "__main__":
     configurator_main.check(example_config, True)
     configurator_main.change_path("/main")
 
-    if environment.DEV: #判断环境
-        simulator = environment.Simulator()  # 我是一个模拟器
-        env = environment.Env(configurator_main.read(
-            "env_configs"), logger_main, simulator)  # 有模拟器的env
-        mainThrd = threading.Thread(target=mainThread, daemon=True) # 因为模拟器必须得是主线程
-        mainThrd.start() # 原来的主线程就得让位了~
+    simulator = environment.Simulator()  # 我是一个模拟器
+    env = environment.Env(configurator_main.read(
+        "env_configs"), logger_main, simulator)  # 有模拟器的env
+    mainThrd = threading.Thread(target=mainThread, daemon=True) # 因为模拟器必须得是主线程
+    mainThrd.start() # 原来的主线程就得让位了~
 
-        simulator.open(env) # 打开模拟器
-
-    else:
-        env = environment.Env(configurator_main.read(
-            "env_configs"), logger_main)  # 真机env
-        mainThread() #主线程
+    simulator.open(env) # 打开模拟器
