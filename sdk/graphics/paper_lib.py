@@ -148,6 +148,7 @@ class PaperTheme(PaperDynamic):
             self.env.touch_handler.add_clicked(
                 (0, 296, 0, 30), self.docker_clicked_handler)
 
+
 class PaperApp(PaperDynamic):
     def __init__(self, env):
         super().__init__(env)
