@@ -66,6 +66,16 @@ class TouchHandler:
         self.signal_1 = False
         return True
 
+    def set_clicked(self, content: list):
+        self.signal_1 = True
+        while True:
+            if not self.signal_2:
+                break
+            time.sleep(0.1)
+        self.clicked = content
+        self.signal_1 = False
+        return True
+
     def add_clicked_with_time(self, area, func):
         """
         添加一个触摸元件，⚠️：所有的回调函数必须能接收 *args, **kwargs
@@ -105,7 +115,17 @@ class TouchHandler:
         self.signal_1 = False
         return True
 
-    def add_touched(self, area, func1, func2, *args, **kwargs):  # TODO:添加批量导入
+    def set_clicked_with_time(self, content: list):
+        self.signal_1 = True
+        while True:
+            if not self.signal_2:
+                break
+            time.sleep(0.1)
+        self.clicked_with_time = content
+        self.signal_1 = False
+        return True
+
+    def add_touched(self, area, func1, func2, *args, **kwargs):
         if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
             raise ValueError("Area out of range!")
         self.signal_1 = True
@@ -135,6 +155,16 @@ class TouchHandler:
         for i in remove_list:
             del self.touched[i - counter]
             counter += 1
+        self.signal_1 = False
+        return True
+
+    def set_touched(self, content: list):
+        self.signal_1 = True
+        while True:
+            if not self.signal_2:
+                break
+            time.sleep(0.1)
+        self.touched = content
         self.signal_1 = False
         return True
 
@@ -171,6 +201,16 @@ class TouchHandler:
         self.signal_1 = False
         return True
 
+    def set_slide_x(self, content: list):
+        self.signal_1 = True
+        while True:
+            if not self.signal_2:
+                break
+            time.sleep(0.1)
+        self.slide_x = content
+        self.signal_1 = False
+        return True
+
     def add_slide_y(self, area, func):
         if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
             raise ValueError("Area out of range!")
@@ -201,6 +241,16 @@ class TouchHandler:
         for i in remove_list:
             del self.slide_y[i - counter]
             counter += 1
+        self.signal_1 = False
+        return True
+
+    def set_slide_y(self, content: list):
+        self.signal_1 = True
+        while True:
+            if not self.signal_2:
+                break
+            time.sleep(0.1)
+        self.slide_y = content
         self.signal_1 = False
         return True
 
