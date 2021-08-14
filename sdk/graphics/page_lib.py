@@ -149,7 +149,9 @@ class ListPage(_Page):
 
         self.paper.recover_update()  # 解锁
 
-
+    def exit(self):
+        super().exit()
+        self.paper.changePage("mainPage")
 
 
 class appListPage(ListPage):
