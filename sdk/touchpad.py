@@ -267,6 +267,15 @@ class TouchHandler:
         self.slide_y = []
         self.signal_1 = False
 
+    def backup(self) -> list:
+        suspended = list()
+        suspended.append(self.clicked.copy())
+        suspended.append(self.clicked_with_time.copy())
+        suspended.append(self.touched.copy())
+        suspended.append(self.slide_x.copy())
+        suspended.append(self.slide_y.copy())
+        return suspended
+
     def suspend(self) -> list:
         self.signal_1 = True
         while True:
