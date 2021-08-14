@@ -22,6 +22,10 @@ class ListPage(_Page):
         self.addElement(_ImageElement(
             (0, 0), self.paper, "resources/images/list.jpg"))
 
+
+        self.closeBtnCover = sdk.graphics.element_lib.Label((0, 0), self.paper, "")
+        self.addElement(self.closeBtnCover)
+
         self.icons = (
             sdk.graphics.element_lib.ImageElement(
                 (8, 36), self.paper, "resources/images/None20px.jpg"),
@@ -124,7 +128,7 @@ class ListPage(_Page):
             self.showItems()
             self.paper.recover_update()  # 解锁
 
-    def show(self, content=None, listTitle="", closeEvent=None):
+    def show(self, content=None, listTitle="", closeEvent=None, closeBtn = None):
         if content is None:
             content = []
         self.content = content
@@ -138,6 +142,10 @@ class ListPage(_Page):
 
         self.title_of_list.setText(self.listTitle)
         self.showItems()
+        if closeBtn:
+            self.closeBtnCover.setVisible(False)
+        else:
+            self.closeBtnCover.setVisible(True)
 
         self.paper.recover_update()  # 解锁
 
@@ -159,7 +167,7 @@ class appListPage(ListPage):
         for appName, appContent in self.paper.env.apps.items():
             appList.append([appName, appContent[1][1], self.openAppByIndex])
 
-        super().show(appList, "应用列表", self.backToMainPage)
+        super().show(appList, "应用列表", self.backToMainPage, True)
 
 
 # keyboardPage 还未完成哦

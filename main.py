@@ -12,7 +12,6 @@ from sdk import configurator
 from PIL import Image
 from pathlib import Path
 
-# TODO:解决app内list与controlbar冲突的问题
 # TODO:添加双指双击刷新屏幕的功能
 
 
