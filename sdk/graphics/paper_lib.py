@@ -42,6 +42,7 @@ class _Docker(Element):
         self.inited = True
 
     def recover(self):
+        self.paper.env.clear()
         self.paper.env.touch_handler.add_clicked(
             (0, 296, 0, 30), self.clicked_handler)
         self.paper.env.touch_handler.add_clicked(
@@ -71,15 +72,81 @@ class PaperTheme(PaperDynamic):
     def __init__(self, env):
         super().__init__(env)
         self.pages["appList"] = page_lib.appListPage(self, "appList")
-        self.first_init = True
+        self.dock_image = Image.open(open("resources/images/docker.jpg", "rb"))
+        self.__docker_active = False
+        self.inited = False
+        self.suspended_touchpad = None
+
+    def appbox_click_handler(self):
+        if self.__docker_active:
+            self.suspended_touchpad = None
+            self.__docker_active = False
+            self.changePage("appList")
+            self.pages["appList"].show()
+
+    def settings_click_handler(self):
+        if self.__docker_active:
+            self.suspended_touchpad = None
+            self.__docker_active = False
+            self.env.openApp("系统设置")
+
+    def close_docker(self):
+        if self.__docker_active:
+            if self.suspended_touchpad:
+                self.env.touch_handler.recover(self.suspended_touchpad)
+                self.suspended_touchpad = None
+            self.__docker_active = False
+            self._update()
+
+    def docker_clicked_handler(self):
+        if (self.nowPage != "mainPage") or self.__docker_active or (not self.inited):
+            return
+        self.suspended_touchpad = self.env.touch_handler.suspend()
+        self.env.touch_handler.add_clicked(
+            (60, 100, 0, 30), self.appbox_click_handler)
+        self.env.touch_handler.add_clicked(
+            (195, 235, 0, 30), self.settings_click_handler)
+        self.env.touch_handler.add_clicked(
+            (0, 296, 30, 128), self.close_docker)
+        self.__docker_active = True
+        self._update()
+        for i in range(5):
+            time.sleep(1)
+            if not self.__docker_active:
+                return
+        self.__docker_active = False
+        if self.suspended_touchpad:
+            self.env.touch_handler.recover(self.suspended_touchpad)
+            self.suspended_touchpad = None
+        self._update()
 
     def init(self):
-        if self.first_init:
-            self.addElement(_Docker(self), "mainPage")
-            self.first_init = False
         super().init()
+        self.env.touch_handler.add_clicked(
+            (0, 296, 0, 30), self.docker_clicked_handler)
 
+    def recover(self):
+        super().recover()
+        if self.nowPage == "mainPage":
+            self.env.touch_handler.add_clicked(
+                (0, 296, 0, 30), self.docker_clicked_handler)
 
+    def build(self) -> Image:
+        new_image = self.background_image.copy()
+        for element in self.pages[self.nowPage]:
+            element_image = element.build()
+            if element_image:
+                new_image.paste(element_image, (element.xy[0], element.xy[1]))
+        if self.__docker_active:
+            new_image.paste(self.dock_image, (60, 0))
+        self.image_old = new_image  # TODO:删除image_old
+        return new_image
+
+    def changePage(self, name, refresh=None):
+        super().changePage(name, refresh)
+        if name == "mainPage":
+            self.env.touch_handler.add_clicked(
+                (0, 296, 0, 30), self.docker_clicked_handler)
 
 class PaperApp(PaperDynamic):
     def __init__(self, env):
