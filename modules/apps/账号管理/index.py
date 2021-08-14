@@ -48,7 +48,7 @@ def pair():
 
     codeLabel = sdk.graphics.element_lib.Label(
         (0, 88), paper, "请稍等...", (169, 40), bgcolor="black", textColor="white", fontSize=30)
-    paper.addElement("pairPage", codeLabel)
+    paper.addElement(codeLabel, "pairPage")
     
     def getPairCode():
         global paircode
@@ -75,24 +75,24 @@ def pair():
             
             resultLabel.setText(msg)
         
-        paper.addElement("nextPage", resultLabel)
+        paper.addElement(resultLabel, "nextPage")
 
-        paper.addElement("nextPage", sdk.graphics.element_lib.Button(
-            (0, 70), paper, "返回首页", backToMain, (296, 30), "white", "black"))
+        paper.addElement(sdk.graphics.element_lib.Button(
+            (0, 70), paper, "返回首页", backToMain, (296, 30), "white", "black"), "nextPage")
 
         getResultThread = threading.Thread(target=getResult)
         getResultThread.start()
 
         paper.changePage("nextPage")
 
-    paper.addElement("pairPage", sdk.graphics.element_lib.Label(
-        (100, 0), paper, "绑定账号", (150, 30), bgcolor="black", textColor="white"))
-    paper.addElement("pairPage", sdk.graphics.element_lib.Label(
-        (0, 30), paper, "请访问 pi.simplebytes.cn", (296, 30), bgcolor="black", textColor="white"))
-    paper.addElement("pairPage", sdk.graphics.element_lib.Label(
-        (0, 60), paper, "登录后，输入下方的配对码", (296, 30), bgcolor="black", textColor="white"))
-    paper.addElement("pairPage", sdk.graphics.element_lib.Button(
-        (170, 90), paper, "下一步", nextStep, (85, 35), "white", "black", fontSize=24))
+    paper.addElement(sdk.graphics.element_lib.Label(
+        (100, 0), paper, "绑定账号", (150, 30), bgcolor="black", textColor="white"), "pairPage")
+    paper.addElement(sdk.graphics.element_lib.Label(
+        (0, 30), paper, "请访问 pi.simplebytes.cn", (296, 30), bgcolor="black", textColor="white"), "pairPage")
+    paper.addElement(sdk.graphics.element_lib.Label(
+        (0, 60), paper, "登录后，输入下方的配对码", (296, 30), bgcolor="black", textColor="white"), "pairPage")
+    paper.addElement(sdk.graphics.element_lib.Button(
+        (170, 90), paper, "下一步", nextStep, (85, 35), "white", "black", fontSize=24), "pairPage")
     
     paper.changePage("pairPage")
 
