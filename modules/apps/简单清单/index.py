@@ -48,15 +48,12 @@ def build(env):
                         todoListContent.append([item["name"], imgpath, todoItemClickHandler])
 
 
-            todoListPage.show(todoListContent, todoListTitle, backToMain)
+            todoListPage.show(todoListContent, todoListTitle, None)
             paper.changePage("todoList")
 
         mainBtn.setText("加载中...")
         loadTodoThread = threading.Thread(target=loadTodo)
         loadTodoThread.start()
-
-    def bindAccount():
-        paper.env.openApp("账号管理")
 
     if (username and usertoken):
         mainBtn = element_lib.Button(
@@ -64,14 +61,10 @@ def build(env):
         )
     else:
         mainBtn = element_lib.Button(
-            (0, 35), paper, "点击绑定账号", bindAccount, (296, 30), "white", "black"
+            (0, 35), paper, "请先绑定账号~", None, (296, 30), "white", "black"
         )
     
 
-
-    def backToMain():
-        mainBtn.setText("显示您第一个清单")
-        paper.changePage("mainPage")
 
     paper.addElement(element_lib.Label(
         (100, 0), paper, "简单清单", (150, 30), bgcolor="black", textColor="white"), "mainPage")
