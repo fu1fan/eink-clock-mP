@@ -287,6 +287,22 @@ class TouchHandler:
         self.signal_1 = False
         return suspended
 
+    def recover(self, content: list) -> list:
+        self.signal_1 = True
+        while True:
+            if not self.signal_2:
+                break
+            time.sleep(0.1)
+
+        self.clicked = content[0]
+        self.clicked_with_time = content[1]
+        self.touched = content[2]
+        self.slide_x = content[3]
+        self.slide_y = content[4]
+
+        self.signal_1 = False
+        return True
+
     def handle(self, ICNT_Dev: TouchRecoder, ICNT_Old: TouchRecoder):  # 此函数只可在主线程中运行
         while True:
             if not self.signal_1:
