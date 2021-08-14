@@ -267,6 +267,26 @@ class TouchHandler:
         self.slide_y = []
         self.signal_1 = False
 
+    def suspend(self) -> list:
+        self.signal_1 = True
+        while True:
+            if not self.signal_2:
+                break
+            time.sleep(0.1)
+        suspended = list()
+        suspended.append(self.clicked.copy())
+        self.clicked = []
+        suspended.append(self.clicked_with_time.copy())
+        self.clicked_with_time = []
+        suspended.append(self.touched.copy())
+        self.touched = []
+        suspended.append(self.slide_x.copy())
+        self.slide_x = []
+        suspended.append(self.slide_y.copy())
+        self.slide_y = []
+        self.signal_1 = False
+        return suspended
+
     def handle(self, ICNT_Dev: TouchRecoder, ICNT_Old: TouchRecoder):  # 此函数只可在主线程中运行
         while True:
             if not self.signal_1:
