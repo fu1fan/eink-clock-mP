@@ -1,7 +1,7 @@
 import threading
 import time
 
-from PIL import Image,ImageTk
+from PIL import Image, ImageTk
 
 from sdk import logger
 from sdk import touchpad
@@ -13,8 +13,11 @@ import tkinter
 
 
 class Simulator:
-    def SIM_touch(self,x,y,ICNT_Dev: touchpad.TouchRecoder, ICNT_Old: touchpad.TouchRecoder):
-        
+    def __init__(self):
+        self.touch_recoder_new = None
+        self.touch_recoder_old = None
+
+    def SIM_touch(self, x, y, ICNT_Dev: touchpad.TouchRecoder, ICNT_Old: touchpad.TouchRecoder):
         ICNT_Old.Touch = ICNT_Dev.Touch
         ICNT_Old.TouchGestureId = ICNT_Dev.TouchGestureId
         ICNT_Old.TouchCount = ICNT_Dev.TouchCount
@@ -29,40 +32,39 @@ class Simulator:
             ICNT_Dev.X[0] = x
             ICNT_Dev.Y[0] = y
 
-
-    def clickHandler(self,event):
-        print("(x, y) = (%d, %d)" % (event.x,event.y))
-        self.SIM_touch(event.x,event.y,self.touch_recoder_new, self.touch_recoder_old)
+    def clickHandler(self, event):
+        print("(x, y) = (%d, %d)" % (event.x, event.y))
+        self.SIM_touch(event.x, event.y, self.touch_recoder_new, self.touch_recoder_old)
         self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
 
-        self.SIM_touch(None,None,self.touch_recoder_new, self.touch_recoder_old)
+        self.SIM_touch(None, None, self.touch_recoder_new, self.touch_recoder_old)
         self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
 
-    def open(self,env) -> None:
+    def open(self, env) -> None:
 
         self.env = env
 
         self.touch_recoder_new = touchpad.TouchRecoder()  # 触摸
         self.touch_recoder_old = touchpad.TouchRecoder()
 
-        self.window=tkinter.Tk()
+        self.window = tkinter.Tk()
 
         self.window.title('水墨屏模拟器 by xuanzhi33')
- 
+
         self.window.geometry('296x128')
 
         pilImage = Image.new("RGB", (296, 128), "white")
         tkImage = ImageTk.PhotoImage(image=pilImage)
 
-        self.display = tkinter.Label(self.window,image=tkImage)
-        self.display.bind("<Button-1>",self.clickHandler)
+        self.display = tkinter.Label(self.window, image=tkImage)
+        self.display.bind("<Button-1>", self.clickHandler)
         self.display.pack()
         self.window.mainloop()
 
-    def updateImage(self,PILImg):
+    def updateImage(self, PILImg):
         tkImage = ImageTk.PhotoImage(image=PILImg)
         self.display.configure(image=tkImage)
-        self.display.image=tkImage
+        self.display.image = tkImage
 
 
 class EpdController:
@@ -128,7 +130,7 @@ class EpdController:
 
     def display(self, image: Image.Image, timeout=-1):
         self.lock.acquire(timeout=timeout)
-        #image.show()
+        # image.show()
 
         self.simulator.updateImage(image)
 
@@ -138,7 +140,7 @@ class EpdController:
 
     def display_Base(self, image, timeout=-1):
         self.lock.acquire()
-        #image.show()
+        # image.show()
 
         self.simulator.updateImage(image)
 
@@ -148,10 +150,10 @@ class EpdController:
 
     def display_Partial(self, image, timeout=-1):
         self.lock.acquire(timeout=timeout)
-        #image.show()
+        # image.show()
 
         self.simulator.updateImage(image)
-        
+
         self.lock.release()
         self.last_update = time.time()
         self.partial_time += 1
@@ -166,7 +168,7 @@ class EpdController:
 
     def display_Partial_Wait(self, image, timeout=-1):
         self.lock.acquire(timeout=timeout)
-        #image.show()
+        # image.show()
 
         self.simulator.updateImage(image)
 
@@ -247,8 +249,8 @@ class TouchDriver:
 
 class Env:
     def __init__(self, configs, logger_env: logger.Logger, simulator):
-        
-        self.simulator=simulator
+
+        self.simulator = simulator
 
         self.logger_env = logger_env
         self.epd_lock = threading.RLock()
@@ -293,8 +295,8 @@ class Env:
         if exit_paper:
             self.paper.exit()
         else:
-            self.paper.pause() # pause()能暂停页面
-        self.paper_old , self.paper = self.paper, paper
+            self.paper.pause()  # pause()能暂停页面
+        self.paper_old, self.paper = self.paper, paper
         if paper.inited:
             self.paper.recover()
         else:
