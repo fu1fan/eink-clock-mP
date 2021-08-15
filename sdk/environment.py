@@ -319,3 +319,6 @@ class Env:
         if not self.inited:
             return
         self.changePaper(self.paper_old, exit_paper)
+
+    def notice(self, icon: Image.Image, text: str):
+        pass
