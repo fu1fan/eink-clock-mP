@@ -1,4 +1,4 @@
-from PIL.Image import Image
+from PIL import Image
 
 from sdk.graphics import paper_lib, element_lib
 

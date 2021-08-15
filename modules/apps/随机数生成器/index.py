@@ -1,3 +1,5 @@
+from PIL import Image
+
 from sdk.graphics import paper_lib, element_lib
 import random
 
@@ -5,7 +7,7 @@ maxN = 100
 
 def build(env):
 
-    paper = paper_lib.PaperApp(env)
+    paper = paper_lib.PaperApp(env, background_image=Image.new("RGB", (296, 128), (0, 0, 0)))
 
     paper.addElement(element_lib.Label(
         (80, 0), paper, "随机数生成器", (150, 30), bgcolor="black", textColor="white"), "mainPage")

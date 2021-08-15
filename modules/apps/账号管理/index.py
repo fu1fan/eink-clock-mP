@@ -1,6 +1,6 @@
 import threading
 
-from PIL.Image import Image
+from PIL import Image
 
 import sdk.graphics
 import sdk.graphics.element_lib
