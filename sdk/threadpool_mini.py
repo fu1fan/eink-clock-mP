@@ -32,7 +32,7 @@ class ThreadPool:
         self.running = False
         self.__inited = False
         if handler is None:
-            handler = self.__errorHandler
+            handler = self.__error_handler
         else:
             handler = handler
         self.handler = handler
@@ -50,7 +50,7 @@ class ThreadPool:
                                        self.__thread_finish_work))
 
     @staticmethod
-    def __errorHandler(_):
+    def __error_handler(_):
         pass
 
     def __thread_monitor(self, add=True):
@@ -175,4 +175,3 @@ class Worker(threading.Thread):
             else:
                 if not self.is_running():
                     break
-
