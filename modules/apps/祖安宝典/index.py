@@ -1,4 +1,7 @@
 import threading
+
+from PIL.Image import Image
+
 import sdk.graphics.paper_lib
 from sdk.graphics import element_lib
 import requests
@@ -7,7 +10,7 @@ import json
 
 def build(env):
 
-    paper = sdk.graphics.paper_lib.PaperApp(env)
+    paper = sdk.graphics.paper_lib.PaperApp(env, background_image=Image.new("RGB", (296, 128), (0, 0, 0)))
     zuanLabel = element_lib.LabelWithMultipleLines((5, 35), paper, "加载中...", (282, 80), "black", "white")
     def getZuAn():
         zuan = requests.get("https://api.shadiao.app/nmsl?level=min").text

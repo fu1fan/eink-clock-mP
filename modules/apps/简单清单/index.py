@@ -1,3 +1,5 @@
+from PIL.Image import Image
+
 from sdk.graphics import page_lib, paper_lib, element_lib
 import sdk.configurator
 import requests
@@ -11,7 +13,7 @@ listJson = None
 def build(env):
     global mainBtn
 
-    paper = paper_lib.PaperApp(env)
+    paper = paper_lib.PaperApp(env, background_image=Image.new("RGB", (296, 128), (0, 0, 0)))
 
     config = sdk.configurator.Configurator(
         env.logger_env, "configs/account.json", auto_save=True)

@@ -5,10 +5,9 @@ from PIL import Image, ImageDraw
 from sdk.graphics import Element, PaperDynamic, element_lib, page_lib
 
 
-
 class PaperTheme(PaperDynamic):
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self, env, background_image=Image.new("RGB", (296, 128), (255, 255, 255))):
+        super().__init__(env, background_image)
         self.pages["appList"] = page_lib.appListPage(self, "appList")
         self.dock_image = Image.open(open("resources/images/docker.jpg", "rb"))
         self.__docker_active = False
@@ -88,8 +87,8 @@ class PaperTheme(PaperDynamic):
 
 
 class PaperApp(PaperDynamic):
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self, env, background_image=Image.new("RGB", (296, 128), (255, 255, 255))):
+        super().__init__(env, background_image=background_image)
         self.first_init = True
         self.__bar_active = False
         self.bar_image = Image.open(open("resources/images/app_control.jpg", "rb"))
@@ -158,7 +157,7 @@ class PaperApp(PaperDynamic):
         self.env.touch_handler.add_clicked(
             (0, 30, 0, 30), self.bar_clicked_handler)
 
-    def set_more_func(self, func, *args, **kwargs):     # todo: 改写more list
+    def set_more_func(self, func, *args, **kwargs):  # todo: 改写more list
         self.more_event = func
         self.args = args
         self.kwargs = kwargs

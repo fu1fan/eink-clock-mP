@@ -104,7 +104,7 @@ class Page(list):  # page是对list的重写，本质为添加一个构造器
 class PaperDynamic(Paper):
     def __init__(self,
                  env,
-                 background_image=Image.new("RGB", (296, 128), 1)):
+                 background_image=Image.new("RGB", (296, 128), (255, 255, 255))):
         super().__init__(env, background_image)
         # 实例化各种定时器
         # self.pool = env.pool

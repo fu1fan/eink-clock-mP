@@ -1,3 +1,5 @@
+from PIL.Image import Image
+
 from sdk.graphics import paper_lib, element_lib
 
 
@@ -5,7 +7,7 @@ resultFlag = False
 
 def build(env):
 
-    paper = paper_lib.PaperApp(env)
+    paper = paper_lib.PaperApp(env, background_image=Image.new("RGB", (296, 128), (0, 0, 0)))
 
     numberLabel = element_lib.Label(
         (50, 0), paper, "", (246, 30), bgcolor="black", textColor="white")
