@@ -69,11 +69,7 @@ class PaperTheme(PaperDynamic):
                 (0, 296, 0, 30), self.docker_clicked_handler)
 
     def build(self) -> Image:
-        new_image = self.background_image.copy()
-        for element in self.pages[self.nowPage]:
-            element_image = element.build()
-            if element_image:
-                new_image.paste(element_image, (element.xy[0], element.xy[1]))
+        new_image = super().build()
         if self.__docker_active:
             new_image.paste(self.dock_image, (60, 0))
         self.image_old = new_image  # TODO:删除image_old
@@ -163,11 +159,7 @@ class PaperApp(PaperDynamic):
         self.kwargs = kwargs
 
     def build(self) -> Image:
-        new_image = self.background_image.copy()
-        for element in self.pages[self.nowPage]:
-            element_image = element.build()
-            if element_image:
-                new_image.paste(element_image, (element.xy[0], element.xy[1]))
+        new_image = super().build()
         if self.__bar_active:
             new_image.paste(self.bar_image, (0, 0))
         return new_image

@@ -1,3 +1,4 @@
+import os
 import threading
 import time
 
@@ -249,6 +250,47 @@ class TouchDriver:
             ICNT_Dev.Y[0] = y
 
 
+class PopupControl(graphics.BasicGraphicControl):
+    def __init__(self, env):
+        self.env = env
+        self.notices = LifoQueue()
+        self.notice_now = None
+        self.prompts = LifoQueue()
+        self.prompt_now = None
+        self.choices = LifoQueue()
+        self.choice_now = None
+
+    def notice(self):
+        pass
+
+    def close_notice(self):
+        pass
+
+    def click_notice(self):
+        pass
+
+    def prompt(self):
+        pass
+
+    def close_prompt(self):
+        pass
+
+    def choice(self) -> bool:
+        pass
+
+    def click_choice_a(self):
+        pass
+
+    def click_choice_b(self):
+        pass
+
+    def close_choice(self):
+        pass
+
+    def build(self) -> Image.Image:
+        pass
+
+
 class Env:
     def __init__(self, configs, logger_env: logger.Logger, simulator):
 
@@ -352,3 +394,11 @@ class Env:
 
     def notice(self, icon: Image.Image, text: str):
         pass
+
+    def reboot(self):
+        self.logger_env.info("reboot")
+        os.system("sudo reboot")
+
+    def poweroff(self):
+        self.logger_env.info("poweroff")
+        os.system("sudo poweroff")

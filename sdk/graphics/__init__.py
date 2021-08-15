@@ -1,10 +1,17 @@
+import abc
 import threading
 import traceback
 
 from PIL import Image
 
 
-class Paper:
+class BasicGraphicControl(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def build(self) -> Image.Image:
+        pass
+
+
+class Paper(BasicGraphicControl):
     """
     用于显示静态图像，不支持切换Page
     """
@@ -24,15 +31,15 @@ class Paper:
             self.exit()
 
     def display(self, image: Image):
-        b_image = self.epd.get_buffer(image)
+        b_image = self.epd.render(image)
         self.epd.display_Base(b_image)  # 是这样的吗？？？迷人的驱动
 
     def display_partial(self, image: Image):
-        b_image = self.epd.get_buffer(image)
+        b_image = self.epd.render(image)
         self.epd.display_Partial_Wait(b_image)
 
     def display_auto(self, image: Image):
-        b_image = self.epd.get_buffer(image)
+        b_image = self.epd.render(image)
         self.epd.display_Auto(b_image)
 
     def build(self) -> Image:
@@ -200,8 +207,11 @@ class PaperDynamic(Paper):
         self.pages[self.nowPage].init()
         super().init()
 
+    def clear(self):
+        self.pages = {"mainPage": Page(self, "mainPage")}
 
-class Element:
+
+class Element(BasicGraphicControl):
     def __init__(self, xy: tuple, paper: PaperDynamic, size=(0, 0), background=None):
         self.xy = xy
         self.size = size
@@ -229,5 +239,5 @@ class Element:
     def recover(self):  # 切换回page时调用
         self.active = True
 
-    def build(self) -> Image:  # 当页面刷新时被调用，须返回一个图像
+    def build(self) -> Image.Image:  # 当页面刷新时被调用，须返回一个图像
         return self.background
