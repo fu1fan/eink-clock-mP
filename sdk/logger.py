@@ -1,5 +1,4 @@
 import inspect
-from pathlib import Path
 import time
 import os
 import threading
@@ -35,19 +34,19 @@ class Logger:
 
         # 在线表演💩山代码，但我是在不知道相关的语法🍬
         if debug_handler is None:
-            self.debugHandler = self.__defaultHandler
+            self.debugHandler = self.__default_handler
         else:
             self.debugHandler = debug_handler
         if debug_handler is None:
-            self.infoHandler = self.__defaultHandler
+            self.infoHandler = self.__default_handler
         else:
             self.infoHandler = info_handler
         if debug_handler is None:
-            self.warnHandler = self.__defaultHandler
+            self.warnHandler = self.__default_handler
         else:
             self.warnHandler = warn_handler
         if debug_handler is None:
-            self.errorHandler = self.__defaultHandler
+            self.errorHandler = self.__default_handler
         else:
             self.errorHandler = error_handler
 
@@ -60,51 +59,54 @@ class Logger:
             os.mkdir(folder)
 
     @staticmethod
-    def __defaultHandler(_):
+    def __default_handler(_):
         pass
 
     def __write(self, level, text, the_name):
-        if level >= self.__level:
-            self.lock.acquire()
-            file = open(Path(self.folder + self.name),
-                        "a+", encoding="utf-8")
-            if len(text) == 0:
-                text = "\n"
-            elif "\n" in text:
-                text = "\n%s" % text
-            elif text[-1] != "\n":
-                text = text + "\n"
-            content = "%s%s[%s]%s" % (
-                self.__levelDic[level], time.strftime("[%Y%m%d-%H:%M:%S]", time.localtime()), the_name,
-                text)  # 格式[level][time][name]--event--
-            file.write(content)
-            file.close()
-            print(content, end="")
-            self.lock.release()
+        self.lock.acquire()
+        file = open(Path(self.folder + self.name),
+                    "a+", encoding="utf-8")
+        if len(text) == 0:
+            text = "\n"
+        elif "\n" in text:
+            text = "\n%s" % text
+        elif text[-1] != "\n":
+            text = text + "\n"
+        content = "%s%s[%s]%s" % (
+            self.__levelDic[level], time.strftime("[%Y%m%d-%H:%M:%S]", time.localtime()), the_name,
+            text)  # 格式[level][time][name]--event--
+        file.write(content)
+        file.close()
+        print(content, end="")
+        self.lock.release()
 
     def debug(self, text, info=None) -> None:  # text为写入日志的内容，info为为用户显示的内容，只有当启用Handler时info才会被使用
-        name = get_name(2)
-        self.__write(DEBUG, text, name)
-        if info is not None:
-            self.debugHandler(info)
+        if DEBUG >= self.__level:
+            name = get_name(2)
+            self.__write(DEBUG, text, name)
+            if info is not None:
+                self.debugHandler(info)
 
     def info(self, text, info=None) -> None:
-        name = get_name(2)
-        self.__write(INFO, text, name)
-        if info is not None:
-            self.infoHandler(info)
+        if INFO >= self.__level:
+            name = get_name(2)
+            self.__write(INFO, text, name)
+            if info is not None:
+                self.infoHandler(info)
 
     def warn(self, text, info=None) -> None:
-        name = get_name(2)
-        self.__write(WARNING, text, name)
-        if info is not None:
-            self.warnHandler(info)
+        if WARNING >= self.__level:
+            name = get_name(2)
+            self.__write(WARNING, text, name)
+            if info is not None:
+                self.warnHandler(info)
 
     def error(self, text, info=None) -> None:
-        name = get_name(2)
-        self.__write(ERROR, text, name)
-        if info is not None:
-            self.errorHandler(info)
+        if ERROR >= self.__level:
+            name = get_name(2)
+            self.__write(ERROR, text, name)
+            if info is not None:
+                self.errorHandler(info)
 
-    def setLevel(self, level) -> None:
+    def set_level(self, level) -> None:
         self.__level = level
