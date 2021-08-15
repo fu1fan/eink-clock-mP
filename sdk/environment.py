@@ -8,6 +8,7 @@ from sdk import touchpad
 from sdk import graphics
 from sdk import timing_task
 from sdk import threadpool_mini
+from queue import LifoQueue
 
 import tkinter
 
@@ -191,7 +192,8 @@ class EpdController:
         if self.sleep_status.acquire(blocking=False):
             self.logger_.debug("屏幕休眠")
 
-    def get_buffer(self, image: Image.Image):
+    def render(self, image: Image.Image):
+        pass
         if self.upside_down:
             return image.transpose(Image.ROTATE_180)
         else:
@@ -271,7 +273,8 @@ class Env:
         self.touchpad_driver = TouchDriver(self.logger_env)
         self.touchpad_driver.ICNT_Init()
         self.paper = None
-        self.paper_old = None
+        # self.paper_old = None
+        self.papers = LifoQueue(maxsize=5)
         self.plugins = None
         self.apps = None
         self.inited = False
@@ -283,7 +286,7 @@ class Env:
         self.inited = True
         self.theme = paper
         self.paper = paper
-        self.paper_old = paper
+        self.papers.put(self.paper)
         self.plugins = plugins
         self.apps = apps
         self.paper.init()
@@ -296,7 +299,11 @@ class Env:
             self.paper.exit()
         else:
             self.paper.pause()  # pause()能暂停页面
-        self.paper_old, self.paper = self.paper, paper
+            if self.papers.full():
+                self.paper.get()
+            self.papers.put(self.paper, timeout=1)
+        # self.paper_old, self.paper = self.paper, paper
+        self.paper = paper
         if paper.inited:
             self.paper.recover()
         else:
@@ -309,16 +316,39 @@ class Env:
             if self.apps[appName][2] is None:
                 self.apps[appName][2] = self.apps[appName][0].build(self)
             self.changePaper(self.apps[appName][2], exit_paper=exit_paper)
+        else:
+            raise ModuleNotFoundError
 
     def backHome(self, exit_paper=False):
         if not self.inited:
             return
-        self.changePaper(self.theme, exit_paper)
+        self.touch_handler.clear()
+        if exit_paper:
+            self.paper.exit()
+        else:
+            self.paper.pause()  # pause()能暂停页面
+        self.papers.queue.clear()
+        self.paper = self.theme
+        if self.paper.inited:
+            self.paper.recover()
+        else:
+            self.paper.init()
+        # self.paper_old, self.paper = self.paper, paper
 
     def back(self, exit_paper=False):
         if not self.inited:
             return
-        self.changePaper(self.paper_old, exit_paper)
+        self.touch_handler.clear()
+        if exit_paper:
+            self.paper.exit()
+        else:
+            self.paper.pause()  # pause()能暂停页面
+        # self.paper_old, self.paper = self.paper, paper
+        self.paper = self.papers.get(timeout=1)
+        if self.paper.inited:
+            self.paper.recover()
+        else:
+            self.paper.init()
 
     def notice(self, icon: Image.Image, text: str):
         pass
