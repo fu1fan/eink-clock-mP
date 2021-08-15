@@ -108,7 +108,7 @@ class PaperDynamic(Paper):
         super().__init__(env, background_image)
         # 实例化各种定时器
         # self.pool = env.pool
-        self.pages = {"mainPage": Page(self, "mainPage"), "infoHandler": Page(self, "infoHandler"), "warnHandler": Page(self, "warnHandler"), "errorHandler": Page(self, "errorHandler")}
+        self.pages = {"mainPage": Page(self, "mainPage")}
         # TODO:为Handler页面添加内容
         self.nowPage = "mainPage"
         self.oldPage = "mainPage"
@@ -161,15 +161,6 @@ class PaperDynamic(Paper):
             self._update(refresh)
         else:
             raise ValueError("The specified page does not exist!")
-
-    def infoHandler(self):
-        pass
-
-    def warnHandler(self):
-        pass
-
-    def errorHandler(self):
-        pass
 
     def _update(self, refresh=None):
         if self.update_lock.acquire(blocking=False):
