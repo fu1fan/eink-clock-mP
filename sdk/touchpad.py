@@ -320,7 +320,7 @@ class TouchHandler:
         self.signal_2 = True
         if ICNT_Dev.Touch and ICNT_Old.Touch:  # 如果保持一直触摸不变
             if not (ICNT_Dev.X[0] == ICNT_Old.X[0] and ICNT_Dev.Y[0] == ICNT_Old.Y[0]):
-                self.logger_touch.debug("触摸位置变化：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
+                # self.logger_touch.debug("触摸位置变化：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
                 for i in self.touched:  # 扫描touch
                     if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
                         if not i[-1]:
@@ -337,7 +337,7 @@ class TouchHandler:
                             i[-1] = None
 
         elif ICNT_Dev.Touch and (not ICNT_Old.Touch):  # 如果开始触摸
-            self.logger_touch.debug("触摸事件开始：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
+            # self.logger_touch.debug("触摸事件开始：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
             for i in self.touched:  # 扫描touch
                 if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
                     self.pool.add(i[1], *i[3], **i[4])  # 如果被点击，且标记为False，则执行func1
@@ -360,8 +360,7 @@ class TouchHandler:
                     i[-1] = (ICNT_Dev.X[0], ICNT_Dev.Y[0])
 
         elif (not ICNT_Dev.Touch) and ICNT_Old.Touch:  # 如果停止触摸
-            self.logger_touch.debug("触摸事件终止：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
-
+            # self.logger_touch.debug("触摸事件终止：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
             for i in self.touched:
                 if i[-1]:
                     self.pool.add(i[2], *i[3], **i[4])  # 如果没有被点击，且标记为True，则执行func2
