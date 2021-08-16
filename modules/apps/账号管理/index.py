@@ -47,7 +47,7 @@ def refreshMain():
 
 def pair():
     codeLabel = sdk.graphics.element_lib.Label(
-        (0, 88), paper, "请稍等...", (169, 40), bgcolor="black", textColor="white", fontSize=30)
+        (0, 88), paper, "请稍等...", (169, 40), fontSize=30)
     paper.addElement(codeLabel, "pairPage")
 
     def getPairCode():
@@ -61,7 +61,7 @@ def pair():
 
     def nextStep():
         resultLabel = sdk.graphics.element_lib.Label(
-            (0, 30), paper, "请稍等片刻...", (296, 30), "black", "white")
+            (0, 30), paper, "请稍等片刻...", (296, 30))
 
         def getResult():
             result = requests.post(
@@ -80,7 +80,7 @@ def pair():
         paper.addElement(resultLabel, "nextPage")
 
         paper.addElement(sdk.graphics.element_lib.Button(
-            (0, 70), paper, "返回首页", backToMain, (296, 30), "white", "black"), "nextPage")
+            (0, 70), paper, "返回首页", backToMain, (296, 30)), "nextPage")
 
         getResultThread = threading.Thread(target=getResult)
         getResultThread.start()
@@ -88,13 +88,13 @@ def pair():
         paper.changePage("nextPage")
 
     paper.addElement(sdk.graphics.element_lib.Label(
-        (100, 0), paper, "绑定账号", (150, 30), bgcolor="black", textColor="white"), "pairPage")
+        (100, 0), paper, "绑定账号", (150, 30)), "pairPage")
     paper.addElement(sdk.graphics.element_lib.Label(
-        (0, 30), paper, "请访问 pi.simplebytes.cn", (296, 30), bgcolor="black", textColor="white"), "pairPage")
+        (0, 30), paper, "请访问 pi.simplebytes.cn", (296, 30)), "pairPage")
     paper.addElement(sdk.graphics.element_lib.Label(
-        (0, 60), paper, "登录后，输入下方的配对码", (296, 30), bgcolor="black", textColor="white"), "pairPage")
+        (0, 60), paper, "登录后，输入下方的配对码", (296, 30)), "pairPage")
     paper.addElement(sdk.graphics.element_lib.Button(
-        (170, 90), paper, "下一步", nextStep, (85, 35), "white", "black", fontSize=24), "pairPage")
+        (170, 90), paper, "下一步", nextStep, (85, 35), fontSize=24), "pairPage")
 
     paper.changePage("pairPage")
 
@@ -108,23 +108,23 @@ def build(env):
     configurator = sdk.configurator.Configurator(
         env.logger_env, "configs/account.json", auto_save=True)
 
-    paper = sdk.graphics.paper_lib.PaperApp(env, background_image=Image.new("RGB", (296, 128), (0, 0, 0)))
+    paper = sdk.graphics.paper_lib.PaperApp(env)
 
     paper.addElement(sdk.graphics.element_lib.Label(
-        (100, 0), paper, "账号管理", (150, 30), bgcolor="black", textColor="white"), "mainPage")
+        (100, 0), paper, "账号管理", (150, 30)), "mainPage")
 
     if (configurator.read("user/name")):
         infoLabel = sdk.graphics.element_lib.Label(
-            (0, 35), paper, "你好，" + configurator.read("user/name"), (296, 30), bgcolor="black", textColor="white")
+            (0, 35), paper, "你好，" + configurator.read("user/name"), (296, 30))
 
         actionButton = sdk.graphics.element_lib.Button(
-            (0, 95), paper, "点击退出账号", logout, (296, 30), "white", "black")
+            (0, 95), paper, "点击退出账号", logout, (296, 30))
     else:
         infoLabel = sdk.graphics.element_lib.Label(
-            (0, 35), paper, "暂未绑定账号", (296, 30), bgcolor="black", textColor="white")
+            (0, 35), paper, "暂未绑定账号", (296, 30))
 
         actionButton = sdk.graphics.element_lib.Button(
-            (0, 95), paper, "点击绑定账号", pair, (296, 30), "white", "black")
+            (0, 95), paper, "点击绑定账号", pair, (296, 30))
 
     paper.addElement(infoLabel, "mainPage")
     paper.addElement(actionButton, "mainPage")
