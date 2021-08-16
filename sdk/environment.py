@@ -370,6 +370,7 @@ class Env:
         else:
             self.paper.pause()  # pause()能暂停页面
         self.papers.queue.clear()
+        self.theme.changePage("mainPage")
         self.paper = self.theme
         if self.paper.inited:
             self.paper.recover()
