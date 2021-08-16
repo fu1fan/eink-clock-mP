@@ -10,7 +10,7 @@ def build(env):
     paper = paper_lib.PaperApp(env, background_image=Image.new("RGB", (296, 128), (0, 0, 0)))
 
     numberLabel = element_lib.Label(
-        (50, 0), paper, "", (246, 30), bgcolor="black", textColor="white")
+        (0, 0), paper, "", (246, 30), bgcolor="black", textColor="white")
 
     paper.addElement(numberLabel, "mainPage")
     
