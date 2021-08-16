@@ -125,6 +125,7 @@ class PaperDynamic(Paper):
     def exit(self):
         for page in self.pages.values():
             page.exit()
+        super().exit()
 
     def pause(self):
         self.pages[self.nowPage].pause()
