@@ -2,7 +2,7 @@ import abc
 import threading
 import traceback
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 
 class BasicGraphicControl(metaclass=abc.ABCMeta):
@@ -244,3 +244,62 @@ class Element(BasicGraphicControl):
 
     def build(self) -> Image.Image:  # 当页面刷新时被调用，须返回一个图像
         return self.background
+
+
+class ImgText:  # 来自CSDN
+    def __init__(self, xy, size, font, color="black"):
+        self.xy = xy
+        self.size = size
+        self.width = size[1]
+        self.font = font
+        self.color = color
+
+    def get_duanluo(self, text):
+        txt = Image.new('RGBA', self.size, (255, 255, 255, 0))
+        draw = ImageDraw.Draw(txt)
+        # 所有文字的段落
+        duanluo = ""
+        # 宽度总和
+        sum_width = 0
+        # 几行
+        line_count = 1
+        # 行高
+        line_height = 0
+        for char in text:
+            width, height = draw.textsize(char, self.font)
+            sum_width += width
+            if sum_width > self.width:  # 超过预设宽度就修改段落 以及当前行数
+                line_count += 1
+                sum_width = 0
+                duanluo += '\n'
+            duanluo += char
+            line_height = max(height, line_height)
+        if not duanluo.endswith('\n'):
+            duanluo += '\n'
+        return duanluo, line_height, line_count
+
+    def split_text(self, text):
+        # 按规定宽度分组
+        max_line_height, total_lines = 0, 0
+        allText = []
+        for text in text.split('\n'):
+            duanluo, line_height, line_count = self.get_duanluo(text)
+            max_line_height = max(line_height, max_line_height)
+            total_lines += line_count
+            allText.append((duanluo, line_count))
+        line_height = max_line_height
+        total_height = total_lines * line_height
+        return allText, total_height, line_height
+
+    def draw_text(self, text, id: ImageDraw.ImageDraw):
+        """
+        绘图以及文字
+        :return:
+        """
+        # 左上角开始
+        # 段落 , 行数, 行高
+        x, y = 0+self.xy[0], 0+self.xy[1]
+        duanluo, note_height, line_height = self.split_text(text)
+        for dl, lc in duanluo:
+            id.text((x, y), dl, fill=self.color, font=self.font)
+            y += line_height * lc

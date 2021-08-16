@@ -2,14 +2,16 @@ import os
 import threading
 import time
 
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageFont, ImageDraw
 
 from sdk import logger
 from sdk import touchpad
 from sdk import graphics
+from sdk.graphics import element_lib
 from sdk import timing_task
 from sdk import threadpool_mini
 from queue import LifoQueue
+from pathlib import Path
 
 import tkinter
 
@@ -78,6 +80,7 @@ class EpdController:
                  simulator: Simulator,
                  logger_: logger.Logger,
                  lock: threading.RLock,
+                 popup,
                  init=True,
                  auto_sleep_time=30,
                  refresh_time=3600,
@@ -86,6 +89,7 @@ class EpdController:
 
         self.simulator = simulator
 
+        self.popup = popup
         self.last_update = time.time()
         self.partial_time = 0
         self.refresh_time = refresh_time
@@ -196,9 +200,11 @@ class EpdController:
     def render(self, image: Image.Image):
         pass
         if self.upside_down:
-            return image.transpose(Image.ROTATE_180)
-        else:
-            return image
+            image = image.transpose(Image.ROTATE_180)
+        popup_img = self.popup.build()
+        if popup_img:
+            image.paste(popup_img, (60, 25))
+        return image
 
     def acquire(self, timeout=-1):
         return self.lock.acquire(timeout=timeout)
@@ -250,19 +256,41 @@ class TouchDriver:
             ICNT_Dev.Y[0] = y
 
 
-class PopupControl(graphics.BasicGraphicControl):
+class Popup(graphics.BasicGraphicControl):
     def __init__(self, env):
         self.env = env
-        self.prompts = LifoQueue()
-        self.prompt_now = None  # [image_20px, text]
-        self.choices = LifoQueue()
-        self.choice_now = None  # [image_20px, text, func1, func2]
+        # self.prompts = LifoQueue()
+        # self.prompt_now = None  # [image_20px, title, text]
+        # self.choices = LifoQueue()
+        # self.choice_now = None  # [image_20px, title, text, func1, func2, func_cancle]
+        self.show_now = None
+        self.show_list = LifoQueue()
+        self.font16 = ImageFont.truetype(
+            "resources/fonts/STHeiti_Light.ttc", 16)
+        self.font13 = ImageFont.truetype(
+            "resources/fonts/STHeiti_Light.ttc", 13)
+        self.cho_imgText = graphics.ImgText((7, 24), (35, 162), self.font13)
+        self.pro_imgText = graphics.ImgText((7, 24), (53, 162), self.font13)
+        file1 = open(Path("resources/images/prompt.jpg"), "rb")
+        self.prompt_background = Image.open(file1)
+        file2 = open(Path("resources/images/choice.jpg"), "rb")
+        self.choice_background = Image.open(file2)
 
-    def prompt(self):
-        pass
+    def prompt(self, title, content, image_18px=None):
+        if self.show_now:
+            self.show_list.put(self.show_now)
+        self.show_now = [image_18px, title, content]
+        self.env.touch_handler.add_king_clicked((218, 236, 25, 43), self.close_prompt)
+        self.env.paper.update_anyway()
 
     def close_prompt(self):
-        pass
+        if self.show_now:
+            if len(self.show_now) == 3:
+                if self.show_list.empty():
+                    self.show_now = None
+                else:
+                    self.show_now = self.show_list.get(timeout=1)
+                self.env.paper.update_anyway()
 
     def choice(self) -> bool:
         pass
@@ -276,8 +304,23 @@ class PopupControl(graphics.BasicGraphicControl):
     def close_choice(self):
         pass
 
-    def build(self) -> Image.Image:
-        pass
+    def build(self):
+        if self.show_now:
+            if len(self.show_now) == 3:
+                new_image = self.prompt_background.copy()
+                if self.show_now[0]:
+                    new_image.paste(self.show_now[0], (3, 3))
+                else:
+                    new_image.paste(self.env.Images.none18px, (3, 3))
+                draw = ImageDraw.Draw(new_image)
+                draw.text((26, 5), self.show_now[1], fill="black", font=self.font16)
+                self.pro_imgText.draw_text(self.show_now[2], draw)
+                return new_image
+
+            elif len(self.show_now) == 6:
+                pass
+        else:
+            return None
 
 
 class Env:
@@ -287,9 +330,12 @@ class Env:
 
         self.logger_env = logger_env
         self.epd_lock = threading.RLock()
+        self.popup = Popup(self)
         self.epd_driver = EpdController(self.simulator,
                                         self.logger_env,
-                                        self.epd_lock, True,
+                                        self.epd_lock,
+                                        self.popup,
+                                        True,
                                         auto_sleep_time=configs["auto_sleep_time"],
                                         refresh_time=configs["refresh_time"],
                                         refresh_interval=configs["refresh_interval"])
@@ -310,6 +356,13 @@ class Env:
         self.apps = None
         self.inited = False
         self.theme = None
+
+    class Images:
+        none18px = Image.open("resources/images/None18px.jpg")
+        none20px = Image.open("resources/images/None20px.jpg")
+
+    class Fonts:    # todo: 添加一些常用字体
+        pass
 
     def init(self, paper, plugins, apps):
         if self.inited:
