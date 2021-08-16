@@ -52,6 +52,7 @@ def build(env):
 
             todoListPage.show(todoListContent, todoListTitle, None)
             paper.changePage("todoList")
+            mainBtn.setText("显示您第一个清单")
 
         mainBtn.setText("加载中...")
         loadTodoThread = threading.Thread(target=loadTodo)
