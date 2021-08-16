@@ -13,7 +13,7 @@ listJson = None
 def build(env):
     global mainBtn
 
-    paper = paper_lib.PaperApp(env, background_image=Image.new("RGB", (296, 128), (0, 0, 0)))
+    paper = paper_lib.PaperApp(env)
 
     config = sdk.configurator.Configurator(
         env.logger_env, "configs/account.json", auto_save=True)
@@ -60,17 +60,17 @@ def build(env):
 
     if (username and usertoken):
         mainBtn = element_lib.Button(
-            (0, 35), paper, "显示您第一个清单", showTodo, (296, 30), "white", "black"
+            (0, 35), paper, "显示您第一个清单", showTodo, (296, 30)
         )
     else:
         mainBtn = element_lib.Button(
-            (0, 35), paper, "请先绑定账号~", None, (296, 30), "white", "black"
+            (0, 35), paper, "请先绑定账号~", None, (296, 30)
         )
     
 
 
     paper.addElement(element_lib.Label(
-        (100, 0), paper, "简单清单", (150, 30), bgcolor="black", textColor="white"), "mainPage")
+        (100, 0), paper, "简单清单", (150, 30)), "mainPage")
 
     paper.addElement(mainBtn, "mainPage")
 
