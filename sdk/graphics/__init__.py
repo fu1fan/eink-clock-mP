@@ -158,6 +158,8 @@ class PaperDynamic(Paper):
 
     def changePage(self, name, refresh=None):
         if name in self.pages:
+            if name == self.nowPage:
+                return
             self.env.touch_handler.clear()
             self.pages[self.nowPage].pause()
             self.oldPage = self.nowPage
@@ -166,12 +168,12 @@ class PaperDynamic(Paper):
                 self.pages[name].recover()
             else:
                 self.pages[name].init()
-            self._update(refresh)
+            self.update_anyway(refresh)
         else:
             raise ValueError("The specified page does not exist!")
 
-    def _update(self, refresh=None):
-        if self.update_lock.acquire(blocking=False):
+    def update_anyway(self, refresh=None):
+        if self.update_lock.acquire(blocking=False) and self.active:
             self.epd.acquire()  # 重入锁，保证到屏幕刷新时使用的是最新的 self.build()
             self.update_lock.release()
             if refresh is None:
@@ -185,7 +187,7 @@ class PaperDynamic(Paper):
     def update(self, page_name: str, refresh=None):
         if not (self.active and page_name == self.nowPage):
             return
-        self._update(refresh)
+        self.update_anyway(refresh)
 
     def pause_update(self, timeout=-1):
         if not self.update_lock.acquire(timeout=-1):
@@ -199,7 +201,7 @@ class PaperDynamic(Paper):
                 raise e
             else:
                 self.env.logger_env.warn(traceback.format_exc())
-        self.env.pool.add_immediately(self._update)
+        self.env.pool.add_immediately(self.update_anyway)
 
     def update_async(self, page_name: str, refresh=None):
         self.env.pool.add_immediately(self.update, page_name, refresh)

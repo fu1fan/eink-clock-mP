@@ -33,7 +33,7 @@ class PaperTheme(PaperDynamic):
                 self.env.touch_handler.recover(self.suspended_touchpad)
                 self.suspended_touchpad = None
             self.__docker_active = False
-            self._update()
+            self.update_anyway()
 
     def docker_clicked_handler(self):
         if (self.nowPage != "mainPage") or self.__docker_active or (not self.inited):
@@ -46,7 +46,7 @@ class PaperTheme(PaperDynamic):
         self.env.touch_handler.add_clicked(
             (0, 296, 30, 128), self.close_docker)
         self.__docker_active = True
-        self._update()
+        self.update_anyway()
         for i in range(5):
             time.sleep(1)
             if not self.__docker_active:
@@ -55,7 +55,7 @@ class PaperTheme(PaperDynamic):
         if self.suspended_touchpad:
             self.env.touch_handler.recover(self.suspended_touchpad)
             self.suspended_touchpad = None
-        self._update()
+        self.update_anyway()
 
     def init(self):
         super().init()
@@ -117,7 +117,7 @@ class PaperApp(PaperDynamic):
             if self.suspended_touched:
                 self.env.touch_handler.recover(self.suspended_touched)
                 self.suspended_touched = None
-            self._update()
+            self.update_anyway()
 
     def bar_clicked_handler(self):
         if self.__bar_active or (not self.inited):
@@ -130,7 +130,7 @@ class PaperApp(PaperDynamic):
         self.env.touch_handler.add_clicked(
             (266, 296, 0, 30), self.close_click_handler)
         self.__bar_active = True
-        self._update()
+        self.update_anyway()
         for _ in range(5):
             time.sleep(1)
             if not self.__bar_active:
@@ -139,7 +139,7 @@ class PaperApp(PaperDynamic):
         if self.suspended_touched:
             self.env.touch_handler.recover(self.suspended_touched)
             self.suspended_touched = None
-        self._update()
+        self.update_anyway()
 
     def init(self):
         if self.first_init:
