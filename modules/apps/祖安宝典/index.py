@@ -34,9 +34,9 @@ def build(env):
     getThread = threading.Thread(target=getZuAn) # 使用子线程请求api
     getThread.start() # 启动子线程
 
-    paper.addElement(element_lib.Button((0, 98), paper, "收藏", fav, (75, 30)), "mainPage")
+    paper.addElement(element_lib.Button((0, 98), paper, "收藏", fav, (50, 30)), "mainPage")
     paper.addElement(element_lib.Button((100, 98), paper, "换一个", getZuAn, (75, 30)), "mainPage")
-    paper.addElement(element_lib.Button((226, 98), paper, "收藏夹", myFav, (75, 30)), "mainPage")
+    paper.addElement(element_lib.Button((221, 98), paper, "收藏夹", myFav, (75, 30)), "mainPage")
 
 
     return paper

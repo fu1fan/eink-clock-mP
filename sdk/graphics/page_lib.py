@@ -48,11 +48,11 @@ class ListPage(_Page):
 
         self.listTexts = (
             sdk.graphics.element_lib.Button(
-                (35, 32), self.paper, "", self.itemOnclickHandler, (260, 28), "white", "black", index=0),
+                (35, 32), self.paper, "", self.itemOnclickHandler, (260, 28), outline=None, index=0),
             sdk.graphics.element_lib.Button(
-                (35, 62), self.paper, "", self.itemOnclickHandler, (260, 28), "white", "black", index=1),
+                (35, 62), self.paper, "", self.itemOnclickHandler, (260, 28), outline=None, index=1),
             sdk.graphics.element_lib.Button(
-                (35, 92), self.paper, "", self.itemOnclickHandler, (260, 28), "white", "black", index=2)
+                (35, 92), self.paper, "", self.itemOnclickHandler, (260, 28), outline=None, index=2)
         )
         for listText in self.listTexts:
             self.addElement(listText)

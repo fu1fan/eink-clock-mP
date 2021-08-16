@@ -25,16 +25,16 @@ def build(env):
         infoLabel.setText("当前范围：1-%d" % maxN)
 
     paper.addElement(
-        element_lib.Button((231, 0), paper, "1-6", setMaxNum, (65, 30), maxnum=6),
+        element_lib.Button((230, 1), paper, "1-6", setMaxNum, (65, 30), maxnum=6),
         "mainPage")
     paper.addElement(
-        element_lib.Button((231, 32), paper, "1-10", setMaxNum, (65, 30),
+        element_lib.Button((230, 33), paper, "1-10", setMaxNum, (65, 30),
                            maxnum=10), "mainPage")
     paper.addElement(
-        element_lib.Button((231, 64), paper, "1-100", setMaxNum, (65, 30),
+        element_lib.Button((230, 65), paper, "1-100", setMaxNum, (65, 30),
                            maxnum=100), "mainPage")
 
     paper.addElement(
-        element_lib.Button((231, 98), paper, "生成", randomNum, (65, 30)), "mainPage")
+        element_lib.Button((230, 97), paper, "生成", randomNum, (65, 30)), "mainPage")
 
     return paper

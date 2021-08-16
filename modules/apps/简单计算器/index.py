@@ -50,7 +50,7 @@ def build(env):
         for j in range(6):
             nowChar = keyboardList[i][j]
             keyboard[nowChar] = element_lib.Button(
-                (j * 49 + 2, i * 30 + 36), paper, nowChar, addChar, (48, 29), "white", "black",  char=nowChar)
+                (j * 49 + 2, i * 30 + 36), paper, nowChar, addChar, (48, 29), outline=None,  char=nowChar)
             paper.addElement(keyboard[nowChar], "mainPage")
 
    

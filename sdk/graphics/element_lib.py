@@ -72,11 +72,12 @@ class TextElement(Element):
 
 
 class Button(TextElement):
-    def __init__(self, xy, paper: PaperDynamic, text, onclick, size=(50, 30), bgcolor="black", textColor="white",
-                 fontSize=20, *args, **kwargs):
+    def __init__(self, xy, paper: PaperDynamic, text, onclick, size=(50, 30), bgcolor="white", textColor="black",
+                 fontSize=20, outline="black", *args, **kwargs):
         super().__init__(xy, paper, text, size, bgcolor,
                          textColor, fontSize, *args, **kwargs)
         self.on_clicked = onclick
+        self.outline = outline
 
     def clickedHandler(self, *args, **kwargs):
         if self._visible and self.inited:
@@ -99,6 +100,19 @@ class Button(TextElement):
     def recover(self):
         self._addButtonClicked()
         super().recover()
+
+    def build(self) -> Image:
+        if self.inited and self._visible:
+            image = self.background_image.copy()
+            image_draw = ImageDraw.ImageDraw(image)
+            if self.outline != None:
+                image_draw.rectangle(
+                    (0, 0, self.size[0]-1, self.size[1]-1), outline=self.outline, width=2)
+            image_draw.text((5, 5), self.text,
+                            font=self.font, fill=self.textColor)
+            return image
+        elif not self._visible:
+            return None
 
 
 class Label(TextElement):
@@ -127,7 +141,6 @@ class LabelWithMultipleLines(TextElement):
 
         elif not self._visible:
             return None
-
 
     def get_duanluo(self, text):
         txt = Image.new('RGBA', self.size, (255, 255, 255, 0))
