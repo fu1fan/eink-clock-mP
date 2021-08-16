@@ -13,6 +13,7 @@ from PIL import Image
 from pathlib import Path
 
 # TODO:添加双指双击刷新屏幕的功能
+# TODO:全局更换RGBA
 
 
 example_config = {
