@@ -5,6 +5,7 @@ import sdk.configurator
 import requests
 import threading
 import json
+from pathlib import Path
 
 
 mainBtn = None
@@ -33,20 +34,20 @@ def build(env):
                 pass
             if listJson == []:
                 todoListTitle = "暂无清单"
-                todoListContent = [["请前往：","resources/images/unfinished.png",None],
-                ["pi.simplebytes.cn/todo","resources/images/unfinished.png",None]]
+                todoListContent = [["请前往：",Path("resources/images/unfinished.png)",None],
+                [Path("pi.simplebytes.cn/todo"),Path("resources/images/unfinished.png"),None]]
             else:
                 todoListTitle = listJson[0]["title"]
                 todoListContent = []
 
                 for item in listJson[0]["content"]:
                     if not item["finished"]:
-                        imgpath = "resources/images/unfinished.png"
+                        imgpath = Path("resources/images/unfinished.png")
                         todoListContent.append([item["name"], imgpath, todoItemClickHandler])
 
                 for item in listJson[0]["content"]:
                     if item["finished"]:
-                        imgpath = "resources/images/ok.png"
+                        imgpath = Path("resources/images/ok.png")
                         todoListContent.append([item["name"], imgpath, todoItemClickHandler])
 
 

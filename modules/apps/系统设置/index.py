@@ -1,5 +1,7 @@
 from sdk.graphics import paper_lib, element_lib, page_lib
 
+from pathlib import Path
+
 
 def build(env):
     paper = paper_lib.PaperApp(env)
@@ -12,7 +14,7 @@ def build(env):
             paper.changePage["wifi"]
 
     settings = [
-        ["账号管理", "resources/images/settings.png", settingItemOncick],
+        ["账号管理", Path("resources/images/settings.png"), settingItemOncick],
         ["网络设置（暂未完工）", None, None],
     ]
 

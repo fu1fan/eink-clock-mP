@@ -1,4 +1,5 @@
 from sdk.graphics import paper_lib, element_lib, page_lib
+from pathlib import Path
 
 
 def build(env):
@@ -13,9 +14,9 @@ def build(env):
             paper.env.openApp("祖安宝典")
 
     tools = [
-        ["随机数生成器", "resources/images/random.png", toolsItemOncick],
-        ["简单计算器", "resources/images/calculator.png", toolsItemOncick],
-        ["祖安宝典", "resources/images/zuan.png",toolsItemOncick]
+        ["随机数生成器", Path("resources/images/random.png"), toolsItemOncick],
+        ["简单计算器", Path("resources/images/calculator.png"), toolsItemOncick],
+        ["祖安宝典", Path("resources/images/zuan.png"),toolsItemOncick]
     ]
 
     toolsList = page_lib.ListPage(paper,"mainPage")
