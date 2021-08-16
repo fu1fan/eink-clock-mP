@@ -253,21 +253,10 @@ class TouchDriver:
 class PopupControl(graphics.BasicGraphicControl):
     def __init__(self, env):
         self.env = env
-        self.notices = LifoQueue()
-        self.notice_now = None
         self.prompts = LifoQueue()
-        self.prompt_now = None
+        self.prompt_now = None  # [image_20px, text]
         self.choices = LifoQueue()
-        self.choice_now = None
-
-    def notice(self):
-        pass
-
-    def close_notice(self):
-        pass
-
-    def click_notice(self):
-        pass
+        self.choice_now = None  # [image_20px, text, func1, func2]
 
     def prompt(self):
         pass
@@ -370,7 +359,7 @@ class Env:
         else:
             self.paper.pause()  # pause()能暂停页面
         self.papers.queue.clear()
-        self.theme.changePage("mainPage")
+        self.theme.nowPage = "mainPage"
         self.paper = self.theme
         if self.paper.inited:
             self.paper.recover()
