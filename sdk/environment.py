@@ -20,6 +20,8 @@ class Simulator:
     def __init__(self):
         self.touch_recoder_new = None
         self.touch_recoder_old = None
+        self.lastX = None
+        self.lastY = None
 
     def SIM_touch(self, x, y, ICNT_Dev: touchpad.TouchRecoder, ICNT_Old: touchpad.TouchRecoder):
         ICNT_Old.Touch = ICNT_Dev.Touch
@@ -36,13 +38,25 @@ class Simulator:
             ICNT_Dev.X[0] = x
             ICNT_Dev.Y[0] = y
 
-    def clickHandler(self, event):
-        print("(x, y) = (%d, %d)" % (event.x, event.y))
+    def clickReleaseHandler(self, event):
+        if self.lastX == event.x and self.lastY == event.y:
+            print("点击：(%d, %d)" % (event.x, event.y))
+            self.SIM_touch(None, None, self.touch_recoder_new, self.touch_recoder_old)
+            self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
+
+        else:
+            print("滑动：(%d, %d) -> (%d, %d)" % (self.lastX, self.lastY, event.x, event.y))
+            self.SIM_touch(event.x, event.y, self.touch_recoder_new, self.touch_recoder_old)
+            self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
+
+
+    def clickPressHandler(self, event):
+        self.lastX = event.x
+        self.lastY = event.y
         self.SIM_touch(event.x, event.y, self.touch_recoder_new, self.touch_recoder_old)
         self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
 
-        self.SIM_touch(None, None, self.touch_recoder_new, self.touch_recoder_old)
-        self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
+
 
     def open(self, env) -> None:
 
@@ -61,7 +75,8 @@ class Simulator:
         tkImage = ImageTk.PhotoImage(image=pilImage)
 
         self.display = tkinter.Label(self.window, image=tkImage)
-        self.display.bind("<Button-1>", self.clickHandler)
+        self.display.bind("<ButtonPress-1>", self.clickPressHandler)
+        self.display.bind("<ButtonRelease-1>", self.clickReleaseHandler)
         self.display.pack()
         self.window.mainloop()
 
