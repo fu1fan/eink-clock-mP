@@ -5,6 +5,7 @@ from PIL import Image, ImageFont, ImageDraw
 
 import sdk.graphics.element_lib
 import sdk.graphics.paper_lib
+from sdk import configurator
 from main import environment
 
 graphics = environment.graphics
@@ -46,17 +47,25 @@ class TextClock(graphics.Element):
 
 def build(env: environment):
     paper = sdk.graphics.paper_lib.PaperTheme(env)
-    # refreshBtn = sdk.graphics.lib.Button((0, 0), paper, "刷新", paper.refresh)
-    # textLabel = sdk.graphics.element_lib.Label((0, 90), paper, "标签1")
-    
-    # testBtn = sdk.graphics.lib.Button(
-    #    (60, 90), paper, "测试", changeTheTextOfLabal)
+    config = configurator.Configurator(
+        env.logger_env, "configs/runtime.json", auto_save=True)
  
+    firstRun = config.readOrCreate("firstrun", True)
+
     text_clock = TextClock((0, 0), paper)
     paper.addElement(text_clock, "mainPage")
 
     # paper.addElement("mainPage", refreshBtn)
     # paper.addElement("mainPage", textLabel)
     # paper.addElement("mainPage", testBtn)
+
+    def showAD():
+        time.sleep(3)
+        config.set("firstrun", False)
+        env.popup.prompt("使用提示","点击屏幕最上方唤起菜单栏\n在APP内点击屏幕左上角可以唤起导航栏",Image.open("resources/images/help.png"))
+
+    if firstRun:
+        showADThread = threading.Thread(target=showAD)
+        showADThread.start()
 
     return paper

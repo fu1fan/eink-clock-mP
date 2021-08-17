@@ -7,7 +7,7 @@ def build(env):
     paper = paper_lib.PaperApp(env, background_image=Image.new("RGB", (296, 128), (0, 0, 0)))
 
     text_label = element_lib.Label(
-        (100, 40), paper, "Hello world!", (150, 30), bgcolor="black", textColor="white")
+        (100, 40), paper, "Hello world\nHello world!Hello world!!", (150, 100), bgcolor="black", textColor="white")
 
     def changeText():
         text_label.setText("Button1 Clicked!")
