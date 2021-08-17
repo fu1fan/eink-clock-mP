@@ -304,32 +304,30 @@ class Popup(graphics.BasicGraphicControl):
         if self.show_now:
             self.show_list.put(self.show_now)
         self.show_now = [image_18px, title, content]
-        self.env.touch_handler.add_king_clicked((218, 236, 25, 43), self.close_prompt)
+        # self.env.touch_handler.add_king_clicked((218, 236, 25, 43), self.close_prompt)
         self.env.paper.update_anyway()
 
-    def close_prompt(self):
+    def close(self):
         if self.show_now:
-            if len(self.show_now) == 3:
-                if self.show_list.empty():
-                    self.show_now = None
-                else:
-                    self.show_now = self.show_list.get(timeout=1)
-                self.env.paper.update_anyway()
+            if self.show_list.empty():
+                self.show_now = None
+            else:
+                self.show_now = self.show_list.get(timeout=1)
+            self.env.paper.update_anyway()
 
-    def choice(self) -> bool:
-        pass
+    def choice(self, title, content, func1, fun2, funcCancle, bt1="是", bt2="否", image_18px=None):
+        if self.show_now:
+            self.show_list.put(self.show_now)
+        self.show_now = [image_18px, title, content, func1, fun2, bt1, bt2, funcCancle]
+        self.env.paper.update_anyway()
 
-    def click_choice_a(self):
-        pass
-
-    def click_choice_b(self):
-        pass
-
-    def close_choice(self):
-        pass
+    def choice_handler(self, func):
+        func()
+        self.close()
 
     def build(self):
         if self.show_now:
+            new_image = None
             if len(self.show_now) == 3:
                 new_image = self.prompt_background.copy()
                 if self.show_now[0]:
@@ -339,10 +337,31 @@ class Popup(graphics.BasicGraphicControl):
                 draw = ImageDraw.Draw(new_image)
                 draw.text((26, 5), self.show_now[1], fill="black", font=self.font16)
                 self.pro_imgText.draw_text(self.show_now[2], draw)
-                return new_image
+                self.env.touch_handler.set_king_clicked(
+                    [
+                        [(218, 236, 25, 43), self.close, [], {}, False]
+                    ]
+                )
+            elif len(self.show_now) == 8:
+                new_image = self.choice_background.copy()
+                if self.show_now[0]:
+                    new_image.paste(self.show_now[0], (3, 3))
+                else:
+                    new_image.paste(self.env.Images.none18px, (3, 3))
+                draw = ImageDraw.Draw(new_image)
+                draw.text((26, 5), self.show_now[1], fill="black", font=self.font16)
+                draw.text((6, 61), self.show_now[5], fill="black", font=self.font13)
+                draw.text((92, 61), self.show_now[6], fill="black", font=self.font13)
+                self.cho_imgText.draw_text(self.show_now[2], draw)
+                self.env.touch_handler.set_king_clicked(
+                    [
+                        [(218, 236, 25, 43), self.choice_handler, [self.show_now[5]], {}, False],
+                        [(65, 150, 90, 100), self.choice_handler, [self.show_now[3]], {}, False],
+                        [(150, 236, 90, 100), self.choice_handler, [self.show_now[4]], {}, False]
+                    ]
+                )
 
-            elif len(self.show_now) == 6:
-                pass
+            return new_image
         else:
             return None
 
@@ -458,9 +477,6 @@ class Env:
             self.paper.recover()
         else:
             self.paper.init()
-
-    def notice(self, icon: Image.Image, text: str):
-        pass
 
     def reboot(self):
         self.logger_env.info("reboot")
