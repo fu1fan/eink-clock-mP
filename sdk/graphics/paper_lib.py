@@ -25,7 +25,7 @@ class PaperTheme(PaperDynamic):
         if self.__docker_active:
             self.suspended_touchpad = None
             self.__docker_active = False
-            self.env.openApp("系统设置")
+            self.env.openApp("系统选项")
 
     def close_docker(self):
         if self.__docker_active:
