@@ -7,12 +7,15 @@ import requests
 import json
 from sdk import configurator
 
+favId = 0
+
 
 def build(env):
 
     paper = paper_lib.PaperApp(env)
 
     favPage = page_lib.ListPage(paper, "favPage")
+
 
     saver = configurator.Configurator(
         env.logger_env, "configs/zuan.json", auto_save=True)
@@ -24,8 +27,11 @@ def build(env):
     zuanLabelDetail = element_lib.LabelWithMultipleLines(
         (5, 30), paper, "", (282, 80))
 
-    def backToMain():
+    def backToMain(index = 0):
         paper.changePage("mainPage")
+
+    def backToList():
+        paper.changePage("favPage")
 
     def getZuAn():
         zuan = requests.get("https://api.shadiao.app/nmsl?level=min").text
@@ -33,7 +39,10 @@ def build(env):
         zuanLabel.setText(zuan)
 
     def showDetail(index):
+        global favId
+        index = index - 1
         if index < len(favList):
+            favId = index
             zuanLabelDetail.setText(favList[index])
             paper.changePage("detailPage")
             
@@ -44,11 +53,18 @@ def build(env):
         saver.set("fav", favList)
 
     def myFav():
-        content = []
+        content = [["返回","resources/images/back.png", backToMain]]
         for zuan in favList:
             content.append([zuan, "resources/images/zuan.png", showDetail])
+        content.append(["返回","resources/images/back.png", backToMain])
         favPage.show(content, "祖安收藏夹")
         paper.changePage("favPage")
+
+    def delFav():
+        del favList[favId]
+        saver.set("fav", favList)
+        myFav()
+
 
     paper.addElement(element_lib.Label(
         (100, 0), paper, "祖安宝典", (150, 30)), "mainPage")
@@ -59,10 +75,10 @@ def build(env):
     getThread.start()  # 启动子线程
 
     paper.addElement(element_lib.Button(
-        (0, 97), paper, "收藏", fav, (50, 30)), "mainPage")
+        (5, 97), paper, "收藏", fav, (50, 30)), "mainPage")
     paper.addElement(element_lib.Button((100, 97), paper,
                      "换一个", getZuAn, (75, 30)), "mainPage")
-    paper.addElement(element_lib.Button((221, 97), paper,
+    paper.addElement(element_lib.Button((216, 97), paper,
                      "收藏夹", myFav, (75, 30)), "mainPage")
 
     paper.addPage("favPage", favPage)
@@ -71,6 +87,8 @@ def build(env):
         (100, 0), paper, "详细内容", (150, 30)), "detailPage")
     paper.addElement(zuanLabelDetail, "detailPage")
     paper.addElement(element_lib.Button(
-        (0, 97), paper, "返回", backToMain, (50, 30)), "detailPage")
+        (5, 97), paper, "返回", backToList, (50, 30)), "detailPage")
+    paper.addElement(element_lib.Button((200, 97), paper,
+                     "取消收藏", delFav, (90, 30)), "detailPage")
 
     return paper
