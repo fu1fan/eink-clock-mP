@@ -40,13 +40,16 @@ class Simulator:
 
     def clickReleaseHandler(self, event):
         if self.lastX == event.x and self.lastY == event.y:
-            print("点击：(%d, %d)" % (event.x, event.y))
-            self.SIM_touch(None, None, self.touch_recoder_new, self.touch_recoder_old)
+            print("点击：(%d, %d)" % (event.x, event.y)) # 点击事件
+            self.SIM_touch(None, None, self.touch_recoder_new, self.touch_recoder_old) # 触摸终止
             self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
 
         else:
-            print("滑动：(%d, %d) -> (%d, %d)" % (self.lastX, self.lastY, event.x, event.y))
+            print("滑动：(%d, %d) -> (%d, %d)" % (self.lastX, self.lastY, event.x, event.y)) # 滑动事件
             self.SIM_touch(event.x, event.y, self.touch_recoder_new, self.touch_recoder_old)
+            self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
+            
+            self.SIM_touch(None, None, self.touch_recoder_new, self.touch_recoder_old) # 触摸终止
             self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
 
 

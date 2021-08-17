@@ -19,10 +19,16 @@ def build(env):
 
     def settingItemOncick(index):
         print(index)
-        if index == 0:
+        if index == 1:
             paper.env.openApp("账号管理")
-        elif index == 1:
-            paper.changePage["wifi"]
+        elif index == 2:
+            content = [["返回", Path("resources/images/back.png"), backToSystemSettings],
+                        ["跟你说了没完工为啥点进来呢？",None,None]]
+            wifiSettings.show(content,"WiFi设置")
+            paper.changePage("wifiSettings")
+
+    def backToSystemSettings(index=0):
+        paper.changePage("settingsPage")
 
     def showSystemSettings():
         settingsList.show(settings, "系统设置", None)
@@ -35,7 +41,7 @@ def build(env):
     settings = [
         ["返回", Path("resources/images/back.png"), backToMain],
         ["账号管理", Path("resources/images/settings.png"), settingItemOncick],
-        ["网络设置（暂未完工）", None, None],
+        ["WIFI设置（暂未完工）", None, settingItemOncick],
     ]
 
     paper.addElement(element_lib.Label((100,0),paper,"系统选项",(90,30)))
@@ -46,5 +52,7 @@ def build(env):
     settingsList = page_lib.ListPage(paper,"settingsPage")
     paper.addPage("settingsPage", settingsList)
 
+    wifiSettings = page_lib.ListPage(paper, "wifiSettings")
+    paper.addPage("wifiSettings", wifiSettings)
 
     return paper
