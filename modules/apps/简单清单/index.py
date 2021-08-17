@@ -34,8 +34,8 @@ def build(env):
                 pass
             if listJson == []:
                 todoListTitle = "暂无清单"
-                todoListContent = [["请前往：",Path("resources/images/unfinished.png)",None],
-                [Path("pi.simplebytes.cn/todo"),Path("resources/images/unfinished.png"),None]]
+                todoListContent = [["请前往：",Path("resources/images/unfinished.png"),None],
+                    ["pi.simplebytes.cn/todo",Path("resources/images/unfinished.png"),None]]
             else:
                 todoListTitle = listJson[0]["title"]
                 todoListContent = []
