@@ -72,15 +72,21 @@ class Simulator:
 
         self.window.title('水墨屏模拟器 by xuanzhi33')
 
-        self.window.geometry('296x128')
+        self.window.geometry('390x178')
+
+        self.window.configure(background="black")
 
         pilImage = Image.new("RGB", (296, 128), "white")
         tkImage = ImageTk.PhotoImage(image=pilImage)
 
-        self.display = tkinter.Label(self.window, image=tkImage)
+        self.spaceLable = tkinter.Label(self.window,background="black")
+        self.spaceLable.pack()
+
+        self.display = tkinter.Label(self.window, image=tkImage,relief=tkinter.GROOVE)
         self.display.bind("<ButtonPress-1>", self.clickPressHandler)
         self.display.bind("<ButtonRelease-1>", self.clickReleaseHandler)
         self.display.pack()
+        
         self.window.mainloop()
 
     def updateImage(self, PILImg):
