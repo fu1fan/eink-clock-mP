@@ -28,7 +28,7 @@ def build(env):
         settingsList.show(settings, "系统设置", None)
         paper.changePage("settingsPage")
 
-    def backToMain():
+    def backToMain(index=0):
         paper.changePage("mainPage")
 
 
