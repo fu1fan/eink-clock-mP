@@ -138,7 +138,7 @@ class TouchHandler:
         self.signal_1 = False
         return True
 
-    def clean_king_clicked(self):
+    def clean_system_clicked(self):
         self.signal_1 = True
         while True:
             if not self.signal_2:
