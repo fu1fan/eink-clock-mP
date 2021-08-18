@@ -36,7 +36,7 @@ def build(env):
     def getZuAn():
         zuan = requests.get("https://api.shadiao.app/nmsl?level=min").text
         zuan = json.loads(zuan)["data"]["text"]
-        zuanLabel.setText(zuan)
+        zuanLabel.setText(zuan+" ——徐浩展")
 
     def showDetail(index):
         global favId
