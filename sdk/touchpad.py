@@ -409,6 +409,15 @@ class TouchHandler:
 
         elif ICNT_Dev.Touch and (not ICNT_Old.Touch):  # 如果开始触摸
             # self.logger_touch.debug("触摸事件开始：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
+
+            for i in ReIter(self.slide_x):
+                if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
+                    i[-1] = (ICNT_Dev.X[0], ICNT_Dev.Y[0])
+
+            for i in ReIter(self.slide_y):
+                if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
+                    i[-1] = (ICNT_Dev.X[0], ICNT_Dev.Y[0])
+
             for i in ReIter(self.touched):  # 扫描touch
                 if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
                     self.pool.add(i[1], *i[3], **i[4])  # 如果被点击，且标记为False，则执行func1
@@ -429,16 +438,6 @@ class TouchHandler:
                 if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
                     i[-1] = time.time()
                     return
-
-            for i in ReIter(self.slide_x):
-                if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
-                    i[-1] = (ICNT_Dev.X[0], ICNT_Dev.Y[0])
-                    break
-
-            for i in ReIter(self.slide_y):
-                if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
-                    i[-1] = (ICNT_Dev.X[0], ICNT_Dev.Y[0])
-                    break
 
         elif (not ICNT_Dev.Touch) and ICNT_Old.Touch:  # 如果停止触摸
             # self.logger_touch.debug("触摸事件终止：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
@@ -467,14 +466,18 @@ class TouchHandler:
 
             for i in ReIter(self.slide_x):  # ⚠️参数需要经过测试后调整
                 if i[-1] is not None:
-                    if (abs(ICNT_Dev.Y[0] - i[-1][1]) <= 85) and (abs(ICNT_Dev.X[0] - i[-1][0]) >= 50):
-                        self.pool.add(i[1], ICNT_Dev.X[0] - i[-1][0])
+                    dis_x = ICNT_Dev.X[0] - i[-1][0]
+                    dis_y = ICNT_Dev.Y[0] - i[-1][1]
+                    if abs(dis_x) > 20 and abs(dis_y / dis_x) < 0.5:
+                        self.pool.add(i[1], dis_x)
                     i[-1] = None
 
             for i in ReIter(self.slide_y):
                 if i[-1] is not None:
-                    if (abs(ICNT_Dev.X[0] - i[-1][0]) <= 50) and (abs(ICNT_Dev.Y[0] - i[-1][1]) >= 40):
-                        self.pool.add(i[1], ICNT_Dev.Y[0] - i[-1][1])
+                    dis_x = ICNT_Dev.X[0] - i[-1][0]
+                    dis_y = ICNT_Dev.Y[0] - i[-1][1]
+                    if abs(dis_y) > 20 and abs(dis_x / dis_y) < 0.5:
+                        self.pool.add(i[1], dis_y)
                     i[-1] = None
 
         self.signal_2 = False

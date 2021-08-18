@@ -16,6 +16,7 @@ class ListPage(_Page):
 
         self.addElement(sdk.graphics.element_lib.Button(
             (200, 0), self.paper, "", self.goPrev, (53, 30)))
+
         self.addElement(sdk.graphics.element_lib.Button(
             (254, 0), self.paper, "", self.goNext, (41, 30)))
 
@@ -148,6 +149,20 @@ class ListPage(_Page):
             self.closeBtnCover.setVisible(True)
 
         self.paper.recover_update()  # 解锁
+
+    def slideCo(self, distance):
+        if distance > 0:
+            self.goPrev()
+        else:
+            self.goNext()
+
+    def init(self):
+        super().init()
+        self.paper.env.touch_handler.add_slide_y((0, 296, 35, 128), self.slideCo)
+
+    def recover(self):
+        super().recover()
+        self.paper.env.touch_handler.add_slide_y((0, 296, 35, 128), self.slideCo)
 
     def exit(self):
         super().exit()
