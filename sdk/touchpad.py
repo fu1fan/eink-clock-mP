@@ -441,47 +441,56 @@ class TouchHandler:
 
         elif (not ICNT_Dev.Touch) and ICNT_Old.Touch:  # 如果停止触摸
             # self.logger_touch.debug("触摸事件终止：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
-            clicked = False
-            for i in ReIter(self.touched):
-                if i[-1]:
-                    self.pool.add(i[2], *i[3], **i[4])  # 如果没有被点击，且标记为True，则执行func2
-                    i[-1] = False
-
-            for i in ReIter(self.system_clicked):
-                if i[-1]:
-                    if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
-                        self.pool.add(i[1], *i[2], **i[3])
-                        clicked = True
-                    i[-1] = False
-
-            for i in ReIter(self.clicked):
-                if i[-1]:
-                    if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
-                        self.pool.add(i[1], *i[2], **i[3])
-                        clicked = True
-                    i[-1] = False
-
-            for i in ReIter(self.clicked_with_time):
-                if i[-1]:
-                    if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
-                        self.pool.add(i[1], time.time() - i[-1])
-                        clicked = True
-                    i[-1] = None
-
+            slide = False
             for i in ReIter(self.slide_x):  # ⚠️参数需要经过测试后调整
                 if i[-1] is not None:
                     dis_x = ICNT_Dev.X[0] - i[-1][0]
                     dis_y = ICNT_Dev.Y[0] - i[-1][1]
-                    if abs(dis_x) > 20 and abs(dis_y / dis_x) < 0.5 and not clicked:
+                    if abs(dis_x) > 20 and abs(dis_y / dis_x) < 0.5:
                         self.pool.add(i[1], dis_x)
+                        slide = True
                     i[-1] = None
 
             for i in ReIter(self.slide_y):
                 if i[-1] is not None:
                     dis_x = ICNT_Dev.X[0] - i[-1][0]
                     dis_y = ICNT_Dev.Y[0] - i[-1][1]
-                    if abs(dis_y) > 20 and abs(dis_x / dis_y) < 0.5 and not clicked:
+                    if abs(dis_y) > 20 and abs(dis_x / dis_y) < 0.5:
                         self.pool.add(i[1], dis_y)
+                        slide = True
                     i[-1] = None
+
+            if slide:
+                for i in self.touched:
+                    i[-1] = False
+                for i in self.system_clicked:
+                    i[-1] = False
+                for i in self.clicked:
+                    i[-1] = False
+                for i in self.clicked_with_time:
+                    i[-1] = None
+            else:
+                for i in ReIter(self.touched):
+                    if i[-1]:
+                        self.pool.add(i[2], *i[3], **i[4])  # 如果没有被点击，且标记为True，则执行func2
+                        i[-1] = False
+
+                for i in ReIter(self.system_clicked):
+                    if i[-1]:
+                        if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
+                            self.pool.add(i[1], *i[2], **i[3])
+                        i[-1] = False
+
+                for i in ReIter(self.clicked):
+                    if i[-1]:
+                        if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
+                            self.pool.add(i[1], *i[2], **i[3])
+                        i[-1] = False
+
+                for i in ReIter(self.clicked_with_time):
+                    if i[-1]:
+                        if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
+                            self.pool.add(i[1], time.time() - i[-1])
+                        i[-1] = None
 
         self.signal_2 = False
