@@ -315,15 +315,15 @@ class Popup(graphics.BasicGraphicControl):
                 self.show_now = self.show_list.get(timeout=1)
             self.env.paper.update_anyway()
 
-    def choice(self, title, content, func1, fun2, funcCancle, bt1="是", bt2="否", image_18px=None):
+    def choice(self, title, content, func1, fun2, funcCancle, bt1="否", bt2="是", image_18px=None):
         if self.show_now:
             self.show_list.put(self.show_now)
-        self.show_now = [image_18px, title, content, func1, fun2, bt1, bt2, funcCancle]
+        self.show_now = [image_18px, title, content, func1, fun2, funcCancle, bt1, bt2]
         self.env.paper.update_anyway()
 
     def choice_handler(self, func):
-        func()
         self.close()
+        func()
 
     def build(self):
         if self.show_now:
@@ -350,8 +350,8 @@ class Popup(graphics.BasicGraphicControl):
                     new_image.paste(self.env.Images.none18px, (3, 3))
                 draw = ImageDraw.Draw(new_image)
                 draw.text((26, 5), self.show_now[1], fill="black", font=self.font16)
-                draw.text((6, 61), self.show_now[5], fill="black", font=self.font13)
-                draw.text((92, 61), self.show_now[6], fill="black", font=self.font13)
+                draw.text((6, 61), self.show_now[6], fill="black", font=self.font13)
+                draw.text((92, 61), self.show_now[7], fill="black", font=self.font13)
                 self.cho_imgText.draw_text(self.show_now[2], draw)
                 self.env.touch_handler.set_system_clicked(
                     [
