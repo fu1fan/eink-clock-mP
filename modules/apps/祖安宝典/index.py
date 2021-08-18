@@ -49,7 +49,7 @@ def build(env):
     def changeMode():
         global zuanMode
         if (zuanMode=="min"):
-            env.popup.choice("切换模式", "确定切换到火力全开模式？\n该模式可能引起不适。", confirmToMaxMode, cancel, cancel, bt1="确定切换", bt2="取消", image_18px=Image.open("resources/images/zuan.png"))
+            env.popup.choice("切换模式", "确定切换到火力全开模式？\n该模式可能含下流词汇。", confirmToMaxMode, cancel, cancel, bt1="确定切换", bt2="取消", image_18px=Image.open("resources/images/zuan.png"))
         else:
             zuanMode = "min"
             zuanModeLabel.setText("普通模式")
