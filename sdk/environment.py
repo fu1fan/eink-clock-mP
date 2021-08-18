@@ -337,7 +337,7 @@ class Popup(graphics.BasicGraphicControl):
                 draw = ImageDraw.Draw(new_image)
                 draw.text((26, 5), self.show_now[1], fill="black", font=self.font16)
                 self.pro_imgText.draw_text(self.show_now[2], draw)
-                self.env.touch_handler.set_king_clicked(
+                self.env.touch_handler.set_system_clicked(
                     [
                         [(218, 236, 25, 43), self.close, [], {}, False]
                     ]
@@ -353,7 +353,7 @@ class Popup(graphics.BasicGraphicControl):
                 draw.text((6, 61), self.show_now[5], fill="black", font=self.font13)
                 draw.text((92, 61), self.show_now[6], fill="black", font=self.font13)
                 self.cho_imgText.draw_text(self.show_now[2], draw)
-                self.env.touch_handler.set_king_clicked(
+                self.env.touch_handler.set_system_clicked(
                     [
                         [(218, 236, 25, 43), self.choice_handler, [self.show_now[5]], {}, False],
                         [(65, 150, 90, 100), self.choice_handler, [self.show_now[3]], {}, False],
@@ -365,6 +365,28 @@ class Popup(graphics.BasicGraphicControl):
         else:
             return None
 
+
+class SystemEvent(Popup):
+    pass
+
+
+class FasterFonts:
+    def __init__(self):
+        self.font_list = []
+        for _ in range(128):
+            self.font_list.append(None)
+
+    class SizeOutOfRange(Exception):
+        pass
+
+    def get_heiti(self, size: int):
+        size -= 1
+        if 0 <= size < 127:
+            if not self.font_list[size]:
+                self.font_list[size] = ImageFont.truetype("resources/fonts/STHeiti_Light.ttc", size)
+            return self.font_list[size]
+        else:
+            raise self.SizeOutOfRange
 
 class Env:
     def __init__(self, configs, logger_env: logger.Logger, simulator):
@@ -392,6 +414,7 @@ class Env:
         self.touch_handler = touchpad.TouchHandler(self)
         self.touchpad_driver = TouchDriver(self.logger_env)
         self.touchpad_driver.ICNT_Init()
+        self.fonts = FasterFonts()
         self.paper = None
         # self.paper_old = None
         self.papers = LifoQueue(maxsize=5)
@@ -403,9 +426,6 @@ class Env:
     class Images:
         none18px = Image.open("resources/images/None18px.jpg")
         none20px = Image.open("resources/images/None20px.jpg")
-
-    class Fonts:    # todo: 添加一些常用字体
-        pass
 
     def init(self, paper, plugins, apps):
         if self.inited:
