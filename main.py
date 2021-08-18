@@ -12,9 +12,19 @@ from sdk import configurator
 from PIL import Image
 from pathlib import Path
 
-# TODO:添加双指双击刷新屏幕的功能
-# TODO:全局更换RGBA
-
+# TODO(功能):添加双指双击刷新屏幕的功能
+# TODO(优化):全局更换RGBA
+# TODO(功能):全局返回 ！！！！！！！！！！！
+# TODO(优化):改写docker触摸实现
+# TODO(功能):统一资源库（字体、图像）
+# TODO(优化):统一RGBA
+# TODO(功能):为paper加入choice和prompt元件
+# TODO(功能):网络配置
+# TODO(功能):应用商店
+# TODO(功能):应用排序
+# TODO(功能):插件管理
+# TODO(功能):优化ListPage（返回键）
+# TODO(功能):移植ListPage为Element
 
 example_config = {
     "main": {
