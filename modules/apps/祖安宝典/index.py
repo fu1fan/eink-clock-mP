@@ -8,7 +8,7 @@ import json
 from sdk import configurator
 
 favId = 0
-
+zuanMode = "min"
 
 def build(env):
 
@@ -23,9 +23,9 @@ def build(env):
     favList = saver.readOrCreate("fav", [])
 
     zuanLabel = element_lib.LabelWithMultipleLines(
-        (5, 30), paper, "加载中...", (282, 80))
+        (5, 30), paper, "加载中...", (282, 80), fontSize=15)
     zuanLabelDetail = element_lib.LabelWithMultipleLines(
-        (5, 30), paper, "", (282, 80))
+        (5, 30), paper, "", (282, 80), fontSize=15)
 
     def backToMain(index = 0):
         paper.changePage("mainPage")
@@ -34,9 +34,9 @@ def build(env):
         paper.changePage("favPage")
 
     def getZuAn():
-        zuan = requests.get("https://api.shadiao.app/nmsl?level=min").text
-        zuan = json.loads(zuan)["data"]["text"]
-        zuanLabel.setText(zuan+" ——徐浩展")
+        zuan = requests.get("https://api.shadiao.app/nmsl?level="+zuanMode).text
+        zuan = json.loads(zuan)["data"]["text"]+" ——匿名网友"
+        zuanLabel.setText(zuan)
 
     def showDetail(index):
         global favId
@@ -45,8 +45,22 @@ def build(env):
             favId = index
             zuanLabelDetail.setText(favList[index])
             paper.changePage("detailPage")
-            
 
+    def changeMode():
+        global zuanMode
+        if (zuanMode=="min"):
+            env.popup.choice("切换模式", "确定切换到火力全开模式？\n该模式可能引起不适。", confirmToMaxMode, cancel, cancel, bt1="确定切换", bt2="取消", image_18px=Image.open("resources/images/zuan.png"))
+        else:
+            zuanMode = "min"
+            zuanModeLabel.setText("普通模式")
+            
+    def cancel():
+        pass
+
+    def confirmToMaxMode():
+        global zuanMode
+        zuanMode = "max"
+        zuanModeLabel.setText("火力全开")
 
     def fav():
         favList.insert(0, zuanLabel.getText())
@@ -74,12 +88,16 @@ def build(env):
     getThread = threading.Thread(target=getZuAn)  # 使用子线程请求api
     getThread.start()  # 启动子线程
 
+    zuanModeLabel = element_lib.Button((135, 97), paper,
+                     "普通模式", changeMode, (90, 30))
+
     paper.addElement(element_lib.Button(
-        (5, 97), paper, "收藏", fav, (50, 30)), "mainPage")
-    paper.addElement(element_lib.Button((100, 97), paper,
-                     "换一个", getZuAn, (75, 30)), "mainPage")
-    paper.addElement(element_lib.Button((216, 97), paper,
-                     "收藏夹", myFav, (75, 30)), "mainPage")
+        (4, 97), paper, "收藏", fav, (50, 30)), "mainPage")
+    paper.addElement(element_lib.Button((52, 97), paper,
+                     "换一个", getZuAn, (70, 30)), "mainPage")
+    paper.addElement(zuanModeLabel, "mainPage")
+    paper.addElement(element_lib.Button((221, 97), paper,
+                     "收藏夹", myFav, (70, 30)), "mainPage")
 
     paper.addPage("favPage", favPage)
     paper.addPage("detailPage")
