@@ -36,7 +36,7 @@ class TouchHandler:
     def __init__(self, env):
         self.pool = env.pool
         self.clicked = []  # 当对象被点击并松开后调用指定函数                      ((x1, x2, y1, y2), func, args, kwargs)
-        self.king_clicked = []
+        self.system_clicked = []
         self.clicked_with_time = []  # 当对象被点击并松开且从未中后调用指定函数并返回触摸时间（float） ((x1, x2, y1, y2), func)
         self.touched = []  # 当对象被按下后调用指定函数，直到松开后再次调用另一指定函数 ((x1, x2, y1, y2), func1, func2, args, kwargs)
         self.slide_x = []  # 当屏幕从指定区域被横向滑动后调用指定函数               ((x1, x2, y1, y2), func, args, kwargs)
@@ -95,7 +95,7 @@ class TouchHandler:
         self.signal_1 = False
         return True
 
-    def add_king_clicked(self, area, func, *args, **kwargs):
+    def add_system_clicked(self, area, func, *args, **kwargs):
         if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
             raise ValueError("Area out of range!")
         self.signal_1 = True
@@ -103,10 +103,10 @@ class TouchHandler:
             if not self.signal_2:
                 break
             time.sleep(0.1)
-        self.king_clicked.append([area, func, args, kwargs, False])
+        self.system_clicked.append([area, func, args, kwargs, False])
         self.signal_1 = False
 
-    def remove_king_clicked(self, func) -> bool:  # 未测试
+    def remove_system_clicked(self, func) -> bool:  # 未测试
         self.signal_1 = True
         while True:
             if not self.signal_2:
@@ -123,18 +123,18 @@ class TouchHandler:
             self.signal_1 = False
             return False
         for i in remove_list:
-            del self.king_clicked[i - counter]
+            del self.system_clicked[i - counter]
             counter += 1
         self.signal_1 = False
         return True
 
-    def set_king_clicked(self, content: list):
+    def set_system_clicked(self, content: list):
         self.signal_1 = True
         while True:
             if not self.signal_2:
                 break
             time.sleep(0.1)
-        self.king_clicked = content
+        self.system_clicked = content
         self.signal_1 = False
         return True
 
@@ -144,7 +144,7 @@ class TouchHandler:
             if not self.signal_2:
                 break
             time.sleep(0.1)
-        self.king_clicked = []
+        self.system_clicked = []
         self.signal_1 = False
         return True
 
@@ -424,7 +424,7 @@ class TouchHandler:
                     i[-1] = True
                     break
 
-            for i in ReIter(self.king_clicked): # 优先处理
+            for i in ReIter(self.system_clicked): # 优先处理
                 if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
                     i[-1] = True
                     return
@@ -441,35 +441,14 @@ class TouchHandler:
 
         elif (not ICNT_Dev.Touch) and ICNT_Old.Touch:  # 如果停止触摸
             # self.logger_touch.debug("触摸事件终止：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
-            for i in ReIter(self.touched):
-                if i[-1]:
-                    self.pool.add(i[2], *i[3], **i[4])  # 如果没有被点击，且标记为True，则执行func2
-                    i[-1] = False
-
-            for i in ReIter(self.king_clicked):
-                if i[-1]:
-                    if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
-                        self.pool.add(i[1], *i[2], **i[3])
-                    i[-1] = False
-
-            for i in ReIter(self.clicked):
-                if i[-1]:
-                    if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
-                        self.pool.add(i[1], *i[2], **i[3])
-                    i[-1] = False
-
-            for i in ReIter(self.clicked_with_time):
-                if i[-1]:
-                    if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
-                        self.pool.add(i[1], time.time() - i[-1])
-                    i[-1] = None
-
+            slide = False
             for i in ReIter(self.slide_x):  # ⚠️参数需要经过测试后调整
                 if i[-1] is not None:
                     dis_x = ICNT_Dev.X[0] - i[-1][0]
                     dis_y = ICNT_Dev.Y[0] - i[-1][1]
                     if abs(dis_x) > 20 and abs(dis_y / dis_x) < 0.5:
                         self.pool.add(i[1], dis_x)
+                        slide = True
                     i[-1] = None
 
             for i in ReIter(self.slide_y):
@@ -478,6 +457,40 @@ class TouchHandler:
                     dis_y = ICNT_Dev.Y[0] - i[-1][1]
                     if abs(dis_y) > 20 and abs(dis_x / dis_y) < 0.5:
                         self.pool.add(i[1], dis_y)
+                        slide = True
                     i[-1] = None
+
+            if slide:
+                for i in self.touched:
+                    i[-1] = False
+                for i in self.system_clicked:
+                    i[-1] = False
+                for i in self.clicked:
+                    i[-1] = False
+                for i in self.clicked_with_time:
+                    i[-1] = None
+            else:
+                for i in ReIter(self.touched):
+                    if i[-1]:
+                        self.pool.add(i[2], *i[3], **i[4])  # 如果没有被点击，且标记为True，则执行func2
+                        i[-1] = False
+
+                for i in ReIter(self.system_clicked):
+                    if i[-1]:
+                        if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
+                            self.pool.add(i[1], *i[2], **i[3])
+                        i[-1] = False
+
+                for i in ReIter(self.clicked):
+                    if i[-1]:
+                        if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
+                            self.pool.add(i[1], *i[2], **i[3])
+                        i[-1] = False
+
+                for i in ReIter(self.clicked_with_time):
+                    if i[-1]:
+                        if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
+                            self.pool.add(i[1], time.time() - i[-1])
+                        i[-1] = None
 
         self.signal_2 = False
