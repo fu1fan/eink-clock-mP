@@ -43,8 +43,6 @@ class TouchHandler:
         self.slide_y = []  # 当屏幕从指定区域被纵向滑动后调用指定函数               ((x1, x2, y1, y2), func, args, kwargs)
         self.data_lock = threading.Lock()
         self.logger_touch = env.logger_env
-        self.signal_1 = False
-        self.signal_2 = False
 
     def add_clicked(self, area, func, *args, **kwargs):
         """
@@ -55,20 +53,12 @@ class TouchHandler:
         """
         if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
             raise ValueError("Area out of range!")
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         self.clicked.append([area, func, args, kwargs, False])
-        self.signal_1 = False
+        self.data_lock.release()
 
-    def remove_clicked(self, func) -> bool:  # 未测试
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+    def remove_clicked(self, func):  # 未测试
+        self.data_lock.acquire()
         counter = 0
         remove_list = []
         for i in self.clicked:
@@ -77,41 +67,28 @@ class TouchHandler:
             counter += 1
         counter = 0
         if len(remove_list) == 0:
-            self.signal_1 = False
+            self.data_lock.release()
             return False
         for i in remove_list:
             del self.clicked[i - counter]
             counter += 1
-        self.signal_1 = False
-        return True
+        self.data_lock.release()
 
     def set_clicked(self, content: list):
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         self.clicked = content
-        self.signal_1 = False
+        self.data_lock.release()
         return True
 
     def add_system_clicked(self, area, func, *args, **kwargs):
         if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
             raise ValueError("Area out of range!")
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         self.system_clicked.append([area, func, args, kwargs, False])
-        self.signal_1 = False
+        self.data_lock.release()
 
     def remove_system_clicked(self, func) -> bool:  # 未测试
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         counter = 0
         remove_list = []
         for i in self.clicked:
@@ -120,32 +97,24 @@ class TouchHandler:
             counter += 1
         counter = 0
         if len(remove_list) == 0:
-            self.signal_1 = False
+            self.data_lock.release()
             return False
         for i in remove_list:
             del self.system_clicked[i - counter]
             counter += 1
-        self.signal_1 = False
+        self.data_lock.release()
         return True
 
     def set_system_clicked(self, content: list):
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         self.system_clicked = content
-        self.signal_1 = False
+        self.data_lock.release()
         return True
 
     def clean_system_clicked(self):
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         self.system_clicked = []
-        self.signal_1 = False
+        self.data_lock.release()
         return True
 
     def add_clicked_with_time(self, area, func):
@@ -157,20 +126,12 @@ class TouchHandler:
         """
         if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
             raise ValueError("Area out of range!")
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         self.clicked_with_time.append([area, func, None])
-        self.signal_1 = False
+        self.data_lock.release()
 
     def remove_clicked_with_time(self, func) -> bool:  # 未测试
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         counter = 0
         remove_list = []
         for i in self.clicked_with_time:
@@ -179,41 +140,29 @@ class TouchHandler:
             counter += 1
         counter = 0
         if len(remove_list) == 0:
-            self.signal_1 = False
+            self.data_lock.release()
             return False
         for i in remove_list:
             del self.clicked_with_time[i - counter]
             counter += 1
-        self.signal_1 = False
+        self.data_lock.release()
         return True
 
     def set_clicked_with_time(self, content: list):
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         self.clicked_with_time = content
-        self.signal_1 = False
+        self.data_lock.release()
         return True
 
     def add_touched(self, area, func1, func2, *args, **kwargs):
         if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
             raise ValueError("Area out of range!")
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         self.touched.append([area, func1, func2, args, kwargs, False])
-        self.signal_1 = False
+        self.data_lock.release()
 
     def remove_touched(self, func) -> bool:
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         counter = 0
         remove_list = []
         for i in self.touched:
@@ -222,41 +171,29 @@ class TouchHandler:
             counter += 1
         counter = 0
         if len(remove_list) == 0:
-            self.signal_1 = False
+            self.data_lock.release()
             return False
         for i in remove_list:
             del self.touched[i - counter]
             counter += 1
-        self.signal_1 = False
+        self.data_lock.release()
         return True
 
     def set_touched(self, content: list):
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         self.touched = content
-        self.signal_1 = False
+        self.data_lock.release()
         return True
 
     def add_slide_x(self, area, func):
         if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
             raise ValueError("Area out of range!")
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         self.slide_x.append([area, func, None])
-        self.signal_1 = False
+        self.data_lock.release()
 
     def remove_slide_x(self, func) -> bool:
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         counter = 0
         remove_list = []
         for i in self.slide_x:
@@ -265,41 +202,29 @@ class TouchHandler:
             counter += 1
         counter = 0
         if len(remove_list) == 0:
-            self.signal_1 = False
+            self.data_lock.release()
             return False
         for i in remove_list:
             del self.slide_x[i - counter]
             counter += 1
-        self.signal_1 = False
+        self.data_lock.release()
         return True
 
     def set_slide_x(self, content: list):
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         self.slide_x = content
-        self.signal_1 = False
+        self.data_lock.release()
         return True
 
     def add_slide_y(self, area, func):
         if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
             raise ValueError("Area out of range!")
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         self.slide_y.append([area, func, None])
-        self.signal_1 = False
+        self.data_lock.release()
 
     def remove_slide_y(self, func) -> bool:
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         counter = 0
         remove_list = []
         for i in self.slide_y:
@@ -308,36 +233,28 @@ class TouchHandler:
             counter += 1
         counter = 0
         if len(remove_list) == 0:
-            self.signal_1 = False
+            self.data_lock.release()
             return False
         for i in remove_list:
             del self.slide_y[i - counter]
             counter += 1
-        self.signal_1 = False
+        self.data_lock.release()
         return True
 
     def set_slide_y(self, content: list):
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         self.slide_y = content
-        self.signal_1 = False
+        self.data_lock.release()
         return True
 
     def clear(self):
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         self.clicked = []
         self.clicked_with_time = []
         self.touched = []
         self.slide_x = []
         self.slide_y = []
-        self.signal_1 = False
+        self.data_lock.release()
 
     def backup(self) -> list:
         suspended = list()
@@ -349,11 +266,7 @@ class TouchHandler:
         return suspended
 
     def suspend(self) -> list:
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
         suspended = list()
         suspended.append(self.clicked.copy())
         self.clicked = []
@@ -365,15 +278,11 @@ class TouchHandler:
         self.slide_x = []
         suspended.append(self.slide_y.copy())
         self.slide_y = []
-        self.signal_1 = False
+        self.data_lock.release()
         return suspended
 
     def recover(self, content: list):
-        self.signal_1 = True
-        while True:
-            if not self.signal_2:
-                break
-            time.sleep(0.1)
+        self.data_lock.acquire()
 
         self.clicked = content[0]
         self.clicked_with_time = content[1]
@@ -381,14 +290,11 @@ class TouchHandler:
         self.slide_x = content[3]
         self.slide_y = content[4]
 
-        self.signal_1 = False
+        self.data_lock.release()
 
     def handle(self, ICNT_Dev: TouchRecoder, ICNT_Old: TouchRecoder):  # 此函数只可在主线程中运行
-        while True:
-            if not self.signal_1:
-                break
-            time.sleep(0.1)
-        self.signal_2 = True
+        self.data_lock.acquire()
+
         if ICNT_Dev.Touch and ICNT_Old.Touch:  # 如果保持一直触摸不变
             if not (ICNT_Dev.X[0] == ICNT_Old.X[0] and ICNT_Dev.Y[0] == ICNT_Old.Y[0]):
                 # self.logger_touch.debug("触摸位置变化：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
@@ -424,19 +330,22 @@ class TouchHandler:
                     i[-1] = True
                     break
 
-            for i in ReIter(self.system_clicked): # 优先处理
+            for i in ReIter(self.system_clicked):  # 优先处理
                 if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
                     i[-1] = True
+                    self.data_lock.release()
                     return
 
             for i in ReIter(self.clicked):
                 if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
                     i[-1] = True
+                    self.data_lock.release()
                     return
 
             for i in ReIter(self.clicked_with_time):
                 if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
                     i[-1] = time.time()
+                    self.data_lock.release()
                     return
 
         elif (not ICNT_Dev.Touch) and ICNT_Old.Touch:  # 如果停止触摸
@@ -493,4 +402,4 @@ class TouchHandler:
                             self.pool.add(i[1], time.time() - i[-1])
                         i[-1] = None
 
-        self.signal_2 = False
+        self.data_lock.release()
