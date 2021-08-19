@@ -59,8 +59,7 @@ def mainThread():  # 主线程：UI管理（如果有模拟器就不是主线程
     opening_images = []  # 准备开屏动画
     opening_images_path = configurator_main.read("opening_images")
     for path in opening_images_path:
-        file = open(Path(path), "rb")
-        opening_images.append(Image.open(file))
+        opening_images.append(Image.open(Path(path)))
     paperNow = environment.graphics.Paper(env, opening_images[0])
     load_lock = threading.Barrier(2)
 
@@ -70,9 +69,7 @@ def mainThread():  # 主线程：UI管理（如果有模拟器就不是主线程
             for i in opening_images[1:]:
                 paperNow.update_background(i)
         if load_lock.n_waiting == 0:  # 如果等动画显示完后主线程还没进入等待，则显示Loading画面
-            _file = open(Path(configurator_main.read("loading_image")), "rb")
-            paperNow.update_background(Image.open(_file))
-            _file.close()
+            paperNow.update_background(Image.open(Path(configurator_main.read("loading_image"))))
         load_lock.wait()
 
     try:

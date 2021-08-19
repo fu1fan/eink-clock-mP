@@ -101,7 +101,7 @@ if __name__ == "__main__":
         logger_updater.info(result.read())
     elif os.path.exists("changeBranch"):
         logger_updater.info("changeBranch")
-        paper.background_image = Image.open(open("resources/images/change.jpg", mode="rb"))
+        paper.background_image = Image.open(open("resources/images/change.jpg", mode="rb")).convert("RGBA")
         paper.init()
         # logger = Logger(0, tag="changeBranch")
         file = open("changeBranch", encoding="utf-8")
@@ -112,6 +112,6 @@ if __name__ == "__main__":
         logger_updater.info("已重置")
         result = os.popen("git checkout " + targetBranch)
         logger_updater.info(result.read())
-    paper.update_background(Image.open(open("resources/images/done.jpg", mode="rb")))
+    paper.update_background(Image.open(open("resources/images/done.jpg", mode="rb"))).convert("RGBA")
     epd.sleep()
     os.system("python3 main.py &")

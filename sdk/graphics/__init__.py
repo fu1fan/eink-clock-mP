@@ -247,8 +247,7 @@ class Element(BasicGraphicControl):
 
 
 class ImgText:  # 来自CSDN
-    def __init__(self, xy, size, font, color="black"):
-        self.xy = xy
+    def __init__(self, size, font, color="black"):
         self.size = size
         self.width = size[1]
         self.font = font
@@ -291,14 +290,14 @@ class ImgText:  # 来自CSDN
         total_height = total_lines * line_height
         return allText, total_height, line_height
 
-    def draw_text(self, text, id: ImageDraw.ImageDraw):
+    def draw_text(self, xy, text, id: ImageDraw.ImageDraw):
         """
         绘图以及文字
         :return:
         """
         # 左上角开始
         # 段落 , 行数, 行高
-        x, y = 0+self.xy[0], 0+self.xy[1]
+        x, y = x[0], y[0]
         duanluo, note_height, line_height = self.split_text(text)
         for dl, lc in duanluo:
             id.text((x, y), dl, fill=self.color, font=self.font)

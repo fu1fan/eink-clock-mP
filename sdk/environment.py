@@ -7,7 +7,6 @@ from PIL import Image, ImageTk, ImageFont, ImageDraw
 from sdk import logger
 from sdk import touchpad
 from sdk import graphics
-from sdk.graphics import element_lib
 from sdk import timing_task
 from sdk import threadpool_mini
 from queue import LifoQueue
@@ -40,26 +39,23 @@ class Simulator:
 
     def clickReleaseHandler(self, event):
         if self.lastX == event.x and self.lastY == event.y:
-            print("点击：(%d, %d)" % (event.x, event.y)) # 点击事件
-            self.SIM_touch(None, None, self.touch_recoder_new, self.touch_recoder_old) # 触摸终止
+            print("点击：(%d, %d)" % (event.x, event.y))  # 点击事件
+            self.SIM_touch(None, None, self.touch_recoder_new, self.touch_recoder_old)  # 触摸终止
             self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
 
         else:
-            print("滑动：(%d, %d) -> (%d, %d)" % (self.lastX, self.lastY, event.x, event.y)) # 滑动事件
+            print("滑动：(%d, %d) -> (%d, %d)" % (self.lastX, self.lastY, event.x, event.y))  # 滑动事件
             self.SIM_touch(event.x, event.y, self.touch_recoder_new, self.touch_recoder_old)
             self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
-            
-            self.SIM_touch(None, None, self.touch_recoder_new, self.touch_recoder_old) # 触摸终止
-            self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
 
+            self.SIM_touch(None, None, self.touch_recoder_new, self.touch_recoder_old)  # 触摸终止
+            self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
 
     def clickPressHandler(self, event):
         self.lastX = event.x
         self.lastY = event.y
         self.SIM_touch(event.x, event.y, self.touch_recoder_new, self.touch_recoder_old)
         self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
-
-
 
     def open(self, env) -> None:
 
@@ -76,17 +72,17 @@ class Simulator:
 
         self.window.configure(background="black")
 
-        pilImage = Image.new("RGB", (296, 128), "white")
+        pilImage = Image.new("RGBA", (296, 128), "white")
         tkImage = ImageTk.PhotoImage(image=pilImage)
 
-        self.spaceLable = tkinter.Label(self.window,background="black")
+        self.spaceLable = tkinter.Label(self.window, background="black")
         self.spaceLable.pack()
 
-        self.display = tkinter.Label(self.window, image=tkImage,relief=tkinter.GROOVE)
+        self.display = tkinter.Label(self.window, image=tkImage, relief=tkinter.GROOVE)
         self.display.bind("<ButtonPress-1>", self.clickPressHandler)
         self.display.bind("<ButtonRelease-1>", self.clickReleaseHandler)
         self.display.pack()
-        
+
         self.window.mainloop()
 
     def updateImage(self, PILImg):
@@ -100,27 +96,17 @@ class EpdController:
     用这个类来显示图片可能会被阻塞（当多个线程尝试访问屏幕时）
     """
 
-    def __init__(self,
-                 simulator: Simulator,
-                 logger_: logger.Logger,
-                 lock: threading.RLock,
-                 popup,
-                 init=True,
-                 auto_sleep_time=30,
-                 refresh_time=3600,
-                 refresh_interval=20):
+    def __init__(self, env, init=True, auto_sleep_time=30, refresh_time=3600, refresh_interval=20):
         super().__init__()
-
-        self.simulator = simulator
-
-        self.popup = popup
+        self.env = env
+        self.simulator = env.simulator
         self.last_update = time.time()
         self.partial_time = 0
         self.refresh_time = refresh_time
         self.refresh_interval = refresh_interval
         self.__auto_sleep_time = auto_sleep_time
-        self.logger_ = logger_
-        self.lock = lock
+        self.logger_ = self.env.logger_env
+        self.lock = threading.RLock()
         self.tk = timing_task.TimingTask(auto_sleep_time, self.controller)
         self.sleep_status = threading.Lock()  # 上锁表示休眠
         self.upside_down = False
@@ -160,7 +146,6 @@ class EpdController:
 
     def display(self, image: Image.Image, timeout=-1):
         self.lock.acquire(timeout=timeout)
-        # image.show()
 
         self.simulator.updateImage(image)
 
@@ -170,7 +155,6 @@ class EpdController:
 
     def display_Base(self, image, timeout=-1):
         self.lock.acquire()
-        # image.show()
 
         self.simulator.updateImage(image)
 
@@ -180,7 +164,6 @@ class EpdController:
 
     def display_Partial(self, image, timeout=-1):
         self.lock.acquire(timeout=timeout)
-        # image.show()
 
         self.simulator.updateImage(image)
 
@@ -198,7 +181,6 @@ class EpdController:
 
     def display_Partial_Wait(self, image, timeout=-1):
         self.lock.acquire(timeout=timeout)
-        # image.show()
 
         self.simulator.updateImage(image)
 
@@ -222,12 +204,12 @@ class EpdController:
             self.logger_.debug("屏幕休眠")
 
     def render(self, image: Image.Image):
-        pass
         if self.upside_down:
             image = image.transpose(Image.ROTATE_180)
-        popup_img = self.popup.build()
+        popup_img = self.env.popup.build()
         if popup_img:
             image.paste(popup_img, (60, 25))
+        self.env.system_event.render(image)
         return image
 
     def acquire(self, timeout=-1):
@@ -289,16 +271,19 @@ class Popup(graphics.BasicGraphicControl):
         # self.choice_now = None  # [image_20px, title, text, func1, func2, func_cancle]
         self.show_now = None
         self.show_list = LifoQueue()
-        self.font16 = ImageFont.truetype(
-            "resources/fonts/STHeiti_Light.ttc", 16)
-        self.font13 = ImageFont.truetype(
-            "resources/fonts/STHeiti_Light.ttc", 13)
-        self.cho_imgText = graphics.ImgText((7, 24), (35, 162), self.font13)
-        self.pro_imgText = graphics.ImgText((7, 24), (53, 162), self.font13)
-        file1 = open(Path("resources/images/prompt.jpg"), "rb")
-        self.prompt_background = Image.open(file1)
-        file2 = open(Path("resources/images/choice.jpg"), "rb")
-        self.choice_background = Image.open(file2)
+        self.font16 = self.env.fonts.get_heiti(16)
+        self.font13 = self.env.fonts.get_heiti(13)
+        self.cho_imgText = graphics.ImgText((35, 162), self.font13)
+        self.pro_imgText = graphics.ImgText((53, 162), self.font13)
+        self.prompt_background = Image.open(Path("resources/images/prompt.jpg"))
+        self.choice_background = Image.open(Path("resources/images/choice.jpg"))
+
+    @property
+    def active(self):
+        if self.show_now:
+            return True
+        else:
+            return False
 
     def prompt(self, title, content, image_18px=None):
         if self.show_now:
@@ -336,7 +321,7 @@ class Popup(graphics.BasicGraphicControl):
                     new_image.paste(self.env.Images.none18px, (3, 3))
                 draw = ImageDraw.Draw(new_image)
                 draw.text((26, 5), self.show_now[1], fill="black", font=self.font16)
-                self.pro_imgText.draw_text(self.show_now[2], draw)
+                self.pro_imgText.draw_text((7, 24), self.show_now[2], draw)
                 self.env.touch_handler.set_system_clicked(
                     [
                         [(218, 236, 25, 43), self.close, [], {}, False]
@@ -352,7 +337,7 @@ class Popup(graphics.BasicGraphicControl):
                 draw.text((26, 5), self.show_now[1], fill="black", font=self.font16)
                 draw.text((6, 61), self.show_now[6], fill="black", font=self.font13)
                 draw.text((92, 61), self.show_now[7], fill="black", font=self.font13)
-                self.cho_imgText.draw_text(self.show_now[2], draw)
+                self.cho_imgText.draw_text((7, 24), self.show_now[2], draw)
                 self.env.touch_handler.set_system_clicked(
                     [
                         [(218, 236, 25, 43), self.choice_handler, [self.show_now[5]], {}, False],
@@ -367,7 +352,17 @@ class Popup(graphics.BasicGraphicControl):
 
 
 class SystemEvent(Popup):
-    pass
+    def __init__(self, env):
+        super().__init__(env)
+
+    def render(self, image):
+        image_new = Image.new("RGBA", (296, 128), (255, 255, 255, 0))
+        system_popup = self.build()
+        if system_popup:
+            image_new.paste(system_popup, (60, 25))
+
+        r, g, b, a = image_new.split()
+        image.paste(image_new, mask=a)  # 在无需变化时不粘贴
 
 
 class FasterFonts:
@@ -388,32 +383,14 @@ class FasterFonts:
         else:
             raise self.SizeOutOfRange
 
+
 class Env:
     def __init__(self, configs, logger_env: logger.Logger, simulator):
-
+        # TODO:优化启动顺序
         self.simulator = simulator
 
         self.logger_env = logger_env
-        self.epd_lock = threading.RLock()
-        self.popup = Popup(self)
-        self.epd_driver = EpdController(self.simulator,
-                                        self.logger_env,
-                                        self.epd_lock,
-                                        self.popup,
-                                        True,
-                                        auto_sleep_time=configs["auto_sleep_time"],
-                                        refresh_time=configs["refresh_time"],
-                                        refresh_interval=configs["refresh_interval"])
-        if self.epd_driver.IsBusy():
-            self.logger_env.error("The screen is busy!")
-            raise RuntimeError("The screen is busy!")
 
-        self.pool = threadpool_mini.ThreadPool(configs["threadpool_size"], handler=logger_env.warn)
-        self.pool.start()
-
-        self.touch_handler = touchpad.TouchHandler(self)
-        self.touchpad_driver = TouchDriver(self.logger_env)
-        self.touchpad_driver.ICNT_Init()
         self.fonts = FasterFonts()
         self.paper = None
         # self.paper_old = None
@@ -422,8 +399,23 @@ class Env:
         self.apps = None
         self.inited = False
         self.theme = None
+        self.popup = Popup(self)
+        self.system_event = SystemEvent(self)
+        self.pool = threadpool_mini.ThreadPool(configs["threadpool_size"], handler=logger_env.warn)
+        self.pool.start()
+
+        self.touch_handler = touchpad.TouchHandler(self)
+        self.touchpad_driver = TouchDriver(self.logger_env)
+        self.touchpad_driver.ICNT_Init()
+        self.epd_driver = EpdController(self, True, auto_sleep_time=configs["auto_sleep_time"],
+                                        refresh_time=configs["refresh_time"],
+                                        refresh_interval=configs["refresh_interval"])
+        if self.epd_driver.IsBusy():
+            self.logger_env.error("The screen is busy!")
+            raise RuntimeError("The screen is busy!")
 
     class Images:
+        none1px = Image.open("resources/images/None1px.jpg")
         none18px = Image.open("resources/images/None18px.jpg")
         none20px = Image.open("resources/images/None20px.jpg")
 

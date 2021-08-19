@@ -83,7 +83,7 @@ class PaperTheme(PaperDynamic):
 
 
 class PaperApp(PaperDynamic):
-    def __init__(self, env, background_image=Image.new("RGB", (296, 128), (255, 255, 255))):
+    def __init__(self, env, background_image=Image.new("RGBA", (296, 128), (255, 255, 255, 255))):
         super().__init__(env, background_image=background_image)
         self.first_init = True
         self.__bar_active = False

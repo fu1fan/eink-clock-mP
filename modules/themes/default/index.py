@@ -15,7 +15,7 @@ class TextClock(graphics.Element):
     def __init__(self, xy, paper):
         super().__init__(xy, paper, (296, 128))
         self.last_update = -1
-        self.image = Image.new("RGB", (296, 128), 0)
+        self.image = Image.new("RGBA", (296, 128), "black")
         self.stop_sign = False
         self.font25 = ImageFont.truetype(
             "resources/fonts/PTSerifCaption.ttc", 53)

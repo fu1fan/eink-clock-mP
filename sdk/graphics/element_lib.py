@@ -13,8 +13,7 @@ class ImageElement(Element):
 
     def _setImage(self, image_path):
         try:
-            file = open(Path(image_path), "rb")
-            self.image = Image.open(file)
+            self.image = Image.open(Path(image_path)).convert("RGBA")
             self.size = (self.image.size[0], self.image.size[1])
         except:
             self.image = None
@@ -43,7 +42,7 @@ class TextElement(Element):
         self.font = ImageFont.truetype(
             "resources/fonts/STHeiti_Light.ttc", fontSize)
         self.textColor = textColor
-        self.background_image = Image.new("RGB", size, bgcolor)
+        self.background_image = Image.new("RGBA", size, bgcolor)
 
     def isVisible(self):
         return self._visible
