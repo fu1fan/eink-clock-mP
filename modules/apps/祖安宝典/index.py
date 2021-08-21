@@ -10,103 +10,102 @@ from sdk import configurator
 favId = 0
 zuanMode = "min"
 
-def build(env):
 
+def build(env):
     paper = paper_lib.PaperApp(env)
 
-    favPage = page_lib.ListPage(paper, "favPage")
-
+    fav_page = page_lib.ListPage(paper, "favPage")
 
     saver = configurator.Configurator(
         env.logger_env, "configs/zuan.json", auto_save=True)
 
-    favList = saver.readOrCreate("fav", [])
+    fav_list = saver.read_or_create("fav", [])
 
-    zuanLabel = element_lib.LabelWithMultipleLines(
+    zuan_label = element_lib.LabelWithMultipleLines(
         (5, 30), paper, "加载中...", (282, 80), fontSize=15)
-    zuanLabelDetail = element_lib.LabelWithMultipleLines(
+    zuan_label_detail = element_lib.LabelWithMultipleLines(
         (5, 30), paper, "", (282, 80), fontSize=15)
 
-    def backToMain(index = 0):
-        paper.changePage("mainPage")
+    def back_to_main(index=0):
+        paper.change_page("mainPage")
 
-    def backToList():
-        paper.changePage("favPage")
+    def back_to_list():
+        paper.change_page("favPage")
 
-    def getZuAn():
-        zuan = requests.get("https://api.shadiao.app/nmsl?level="+zuanMode).text
-        zuan = json.loads(zuan)["data"]["text"]+" ——匿名网友"
-        zuanLabel.setText(zuan)
+    def get_zu_an():
+        zuan = requests.get("https://api.shadiao.app/nmsl?level=" + zuanMode).text
+        zuan = json.loads(zuan)["data"]["text"] + " ——匿名网友"
+        zuan_label.set_text(zuan)
 
-    def showDetail(index):
+    def show_detail(index):
         global favId
         index = index - 1
-        if index < len(favList):
+        if index < len(fav_list):
             favId = index
-            zuanLabelDetail.setText(favList[index])
-            paper.changePage("detailPage")
+            zuan_label_detail.set_text(fav_list[index])
+            paper.change_page("detailPage")
 
-    def changeMode():
+    def change_mode():
         global zuanMode
-        if (zuanMode=="min"):
-            env.popup.choice("切换模式", "确定切换到火力全开模式？\n该模式可能含下流词汇。", confirmToMaxMode, cancel, cancel, bt1="确定切换", bt2="取消", image_18px=Image.open("resources/images/zuan.png"))
+        if zuanMode == "min":
+            env.popup.choice("切换模式", "确定切换到火力全开模式？\n该模式可能含下流词汇。", confirm_to_max_mode, cancel, cancel, bt1="确定切换",
+                             bt2="取消", image_18px=Image.open("resources/images/zuan.png"))
         else:
             zuanMode = "min"
-            zuanModeLabel.setText("普通模式")
-            
+            zuan_mode_label.set_text("普通模式")
+
     def cancel():
         pass
 
-    def confirmToMaxMode():
+    def confirm_to_max_mode():
         global zuanMode
         zuanMode = "max"
-        zuanModeLabel.setText("火力全开")
+        zuan_mode_label.set_text("火力全开")
 
     def fav():
-        favList.insert(0, zuanLabel.getText())
-        saver.set("fav", favList)
+        fav_list.insert(0, zuan_label.get_text())
+        saver.set("fav", fav_list)
 
-    def myFav():
-        content = [["返回","resources/images/back.png", backToMain]]
-        for zuan in favList:
-            content.append([zuan, "resources/images/zuan.png", showDetail])
-        content.append(["返回","resources/images/back.png", backToMain])
-        favPage.show(content, "祖安收藏夹")
-        paper.changePage("favPage")
+    def my_fav():
+        content = [["返回", "resources/images/back.png", back_to_main]]
+        for zuan in fav_list:
+            content.append([zuan, "resources/images/zuan.png", show_detail])
+        content.append(["返回", "resources/images/back.png", back_to_main])
+        fav_page.show(content, "祖安收藏夹")
+        paper.change_page("favPage")
 
-    def delFav():
-        del favList[favId]
-        saver.set("fav", favList)
-        myFav()
+    def del_fav():
+        del fav_list[favId]
+        saver.set("fav", fav_list)
+        my_fav()
 
-
-    paper.addElement(element_lib.Label(
+    paper.add_element(element_lib.Label(
         (100, 0), paper, "祖安宝典", (150, 30)), "mainPage")
 
-    paper.addElement(zuanLabel, "mainPage")
+    paper.add_element(zuan_label, "mainPage")
 
-    getThread = threading.Thread(target=getZuAn)  # 使用子线程请求api
-    getThread.start()  # 启动子线程
+    get_thread = threading.Thread(target=get_zu_an)  # 使用子线程请求api
+    get_thread.start()  # 启动子线程
 
-    zuanModeLabel = element_lib.Button((135, 97), paper,
-                     "普通模式", changeMode, (90, 30))
+    zuan_mode_label = element_lib.Button((135, 97), paper,
+                                         "普通模式", change_mode, (90, 30))
 
-    paper.addElement(element_lib.Button(
+    paper.add_element(element_lib.Button(
         (4, 97), paper, "收藏", fav, (50, 30)), "mainPage")
-    paper.addElement(element_lib.Button((52, 97), paper,
-                     "换一个", getZuAn, (70, 30)), "mainPage")
-    paper.addElement(zuanModeLabel, "mainPage")
-    paper.addElement(element_lib.Button((221, 97), paper,
-                     "收藏夹", myFav, (70, 30)), "mainPage")
+    paper.add_element(element_lib.Button((52, 97), paper,
+                                         "换一个", get_zu_an, (70, 30)), "mainPage")
+    paper.add_element(zuan_mode_label, "mainPage")
+    paper.add_element(element_lib.Button((221, 97), paper,
+                                         "收藏夹", my_fav, (70, 30)), "mainPage")
 
-    paper.addPage("favPage", favPage)
-    paper.addPage("detailPage")
-    paper.addElement(element_lib.Label(
+    paper.add_page("favPage", fav_page)
+    paper.add_page("detailPage")
+    paper.add_element(element_lib.Label(
         (100, 0), paper, "详细内容", (150, 30)), "detailPage")
-    paper.addElement(zuanLabelDetail, "detailPage")
-    paper.addElement(element_lib.Button(
-        (5, 97), paper, "返回", backToList, (50, 30)), "detailPage")
-    paper.addElement(element_lib.Button((200, 97), paper,
-                     "取消收藏", delFav, (90, 30)), "detailPage")
+    paper.add_element(zuan_label_detail, "detailPage")
+    paper.add_element(element_lib.Button(
+        (5, 97), paper, "返回", back_to_list, (50, 30)), "detailPage")
+    paper.add_element(element_lib.Button((200, 97), paper,
+                                         "取消收藏", del_fav, (90, 30)), "detailPage")
 
     return paper

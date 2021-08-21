@@ -10,17 +10,17 @@ def build(env):
         (100, 40), paper, "Hello world\nHello world!Hello world!!", (150, 100), bgcolor="black", textColor="white")
 
     def changeText():
-        text_label.setText("Button1 Clicked!")
+        text_label.set_text("Button1 Clicked!")
         print(1)
 
     def changeText2():
-        text_label.setText("Button2 Clicked!")
+        text_label.set_text("Button2 Clicked!")
         print(2)
 
-    paper.addElement(text_label, "mainPage")
-    paper.addElement(element_lib.Button(
+    paper.add_element(text_label, "mainPage")
+    paper.add_element(element_lib.Button(
         (100, 80), paper, "I'm a button", changeText, (150, 30), bgcolor="white", textColor="black"), "mainPage")
-    paper.addElement(element_lib.Button(
+    paper.add_element(element_lib.Button(
         (120, 90), paper, "I'm a button(2)", changeText2, (150, 30), bgcolor="black", textColor="white"), "mainPage")
 
     return paper

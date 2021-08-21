@@ -7,52 +7,51 @@ def build(env):
     paper = paper_lib.PaperApp(env)
 
     def poweroff():
-        poweroffBtn.setText("正在关机")
+        poweroff_btn.set_text("正在关机")
         paper.env.poweroff()
 
     def reboot():
-        rebootBtn.setText("正在重启")
+        reboot_btn.set_text("正在重启")
         paper.env.reboot()
 
-    poweroffBtn = element_lib.Button((100,63),paper,"点击关机",poweroff,(90,30))
-    rebootBtn = element_lib.Button((100,95),paper,"点击重启",reboot,(90,30))
+    poweroff_btn = element_lib.Button((100, 63), paper, "点击关机", poweroff, (90, 30))
+    reboot_btn = element_lib.Button((100, 95), paper, "点击重启", reboot, (90, 30))
 
-    def settingItemOncick(index):
+    def setting_item_oncick(index):
         print(index)
         if index == 1:
-            paper.env.openApp("账号管理")
+            paper.env.open_app("账号管理")
         elif index == 2:
-            content = [["返回", Path("resources/images/back.png"), backToSystemSettings],
-                        ["跟你说了没完工为啥点进来呢？",None,None]]
-            wifiSettings.show(content,"WiFi设置")
-            paper.changePage("wifiSettings")
+            content = [["返回", Path("resources/images/back.png"), back_to_system_settings],
+                       ["跟你说了没完工为啥点进来呢？", None, None]]
+            wifi_settings.show(content, "WiFi设置")
+            paper.change_page("wifiSettings")
 
-    def backToSystemSettings(index=0):
-        paper.changePage("settingsPage")
+    def back_to_system_settings(index=0):
+        paper.change_page("settingsPage")
 
-    def showSystemSettings():
-        settingsList.show(settings, "系统设置", None)
-        paper.changePage("settingsPage")
+    def show_system_settings():
+        settings_list.show(settings, "系统设置", None)
+        paper.change_page("settingsPage")
 
-    def backToMain(index=0):
-        paper.changePage("mainPage")
-
+    def back_to_main(index=0):
+        paper.change_page("mainPage")
 
     settings = [
-        ["返回", Path("resources/images/back.png"), backToMain],
-        ["账号管理", Path("resources/images/settings.png"), settingItemOncick],
-        ["WIFI设置（暂未完工）", None, settingItemOncick],
+        ["返回", Path("resources/images/back.png"), back_to_main],
+        ["账号管理", Path("resources/images/settings.png"), setting_item_oncick],
+        ["WIFI设置（暂未完工）", None, setting_item_oncick],
     ]
 
-    paper.addElement(element_lib.Label((100,0),paper,"系统选项",(90,30)))
-    paper.addElement(element_lib.Button((100,31),paper,"系统设置",showSystemSettings,(90,30)))
-    paper.addElement(poweroffBtn)
-    paper.addElement(rebootBtn)
+    paper.add_element(element_lib.Label((100, 0), paper, "系统选项", (90, 30)))
+    paper.add_element(element_lib.Button((100, 31), paper, "系统设置", show_system_settings, (90, 30)))
+    paper.add_element(poweroff_btn)
+    paper.add_element(reboot_btn)
 
-    settingsList = page_lib.ListPage(paper,"settingsPage")
-    paper.addPage("settingsPage", settingsList)
+    settings_list = page_lib.ListPage(paper, "settingsPage")
+    paper.add_page("settingsPage", settings_list)
 
-    wifiSettings = page_lib.ListPage(paper, "wifiSettings")
-    paper.addPage("wifiSettings", wifiSettings)
+    wifi_settings = page_lib.ListPage(paper, "wifiSettings")
+    paper.add_page("wifiSettings", wifi_settings)
 
     return paper

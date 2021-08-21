@@ -21,8 +21,13 @@ class Simulator:
         self.touch_recoder_old = None
         self.lastX = None
         self.lastY = None
+        self.env = None
+        self.window = None
+        self.space_label = None
+        self.display = None
 
-    def SIM_touch(self, x, y, ICNT_Dev: touchpad.TouchRecoder, ICNT_Old: touchpad.TouchRecoder):
+    @staticmethod
+    def sim_touch(x, y, ICNT_Dev: touchpad.TouchRecoder, ICNT_Old: touchpad.TouchRecoder):
         ICNT_Old.Touch = ICNT_Dev.Touch
         ICNT_Old.TouchGestureId = ICNT_Dev.TouchGestureId
         ICNT_Old.TouchCount = ICNT_Dev.TouchCount
@@ -37,24 +42,24 @@ class Simulator:
             ICNT_Dev.X[0] = x
             ICNT_Dev.Y[0] = y
 
-    def clickReleaseHandler(self, event):
+    def click_release_handler(self, event):
         if self.lastX == event.x and self.lastY == event.y:
             print("点击：(%d, %d)" % (event.x, event.y))  # 点击事件
-            self.SIM_touch(None, None, self.touch_recoder_new, self.touch_recoder_old)  # 触摸终止
+            self.sim_touch(None, None, self.touch_recoder_new, self.touch_recoder_old)  # 触摸终止
             self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
 
         else:
             print("滑动：(%d, %d) -> (%d, %d)" % (self.lastX, self.lastY, event.x, event.y))  # 滑动事件
-            self.SIM_touch(event.x, event.y, self.touch_recoder_new, self.touch_recoder_old)
+            self.sim_touch(event.x, event.y, self.touch_recoder_new, self.touch_recoder_old)
             self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
 
-            self.SIM_touch(None, None, self.touch_recoder_new, self.touch_recoder_old)  # 触摸终止
+            self.sim_touch(None, None, self.touch_recoder_new, self.touch_recoder_old)  # 触摸终止
             self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
 
-    def clickPressHandler(self, event):
+    def click_press_handler(self, event):
         self.lastX = event.x
         self.lastY = event.y
-        self.SIM_touch(event.x, event.y, self.touch_recoder_new, self.touch_recoder_old)
+        self.sim_touch(event.x, event.y, self.touch_recoder_new, self.touch_recoder_old)
         self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
 
     def open(self, env) -> None:
@@ -72,26 +77,26 @@ class Simulator:
 
         self.window.configure(background="black")
 
-        pilImage = Image.new("RGBA", (296, 128), "white")
-        tkImage = ImageTk.PhotoImage(image=pilImage)
+        pil_image = Image.new("RGBA", (296, 128), "white")
+        tk_image = ImageTk.PhotoImage(image=pil_image)
 
-        self.spaceLable = tkinter.Label(self.window, background="black")
-        self.spaceLable.pack()
+        self.space_label = tkinter.Label(self.window, background="black")
+        self.space_label.pack()
 
-        self.display = tkinter.Label(self.window, image=tkImage, relief=tkinter.GROOVE)
-        self.display.bind("<ButtonPress-1>", self.clickPressHandler)
-        self.display.bind("<ButtonRelease-1>", self.clickReleaseHandler)
+        self.display = tkinter.Label(self.window, image=tk_image, relief=tkinter.GROOVE)
+        self.display.bind("<ButtonPress-1>", self.click_press_handler)
+        self.display.bind("<ButtonRelease-1>", self.click_release_handler)
         self.display.pack()
 
         self.window.mainloop()
 
-    def updateImage(self, PILImg):
-        tkImage = ImageTk.PhotoImage(image=PILImg)
-        self.display.configure(image=tkImage)
-        self.display.image = tkImage
+    def update_image(self, PILImg):
+        tk_image = ImageTk.PhotoImage(image=PILImg)
+        self.display.configure(image=tk_image)
+        self.display.image = tk_image
 
 
-class EpdController:
+class EpdController:    # TODO:此部分改动可能导导致继承关系错误，合并时必须手动处理！！！切记切记
     """
     用这个类来显示图片可能会被阻塞（当多个线程尝试访问屏幕时）
     """
@@ -145,51 +150,57 @@ class EpdController:
         self.logger_.debug("屏幕初始化")
 
     def display(self, image: Image.Image, timeout=-1):
-        self.lock.acquire(timeout=timeout)
+        if not self.lock.acquire(timeout=timeout):
+            raise TimeoutError
 
-        self.simulator.updateImage(image)
-
-        self.lock.release()
-        self.last_update = time.time()
-        self.partial_time = 0
-
-    def display_Base(self, image, timeout=-1):
-        self.lock.acquire()
-
-        self.simulator.updateImage(image)
+        self.simulator.update_image(image)
 
         self.lock.release()
         self.last_update = time.time()
         self.partial_time = 0
 
-    def display_Partial(self, image, timeout=-1):
-        self.lock.acquire(timeout=timeout)
+    def display_base(self, image, timeout=-1):
+        if not self.lock.acquire(timeout=timeout):
+            raise TimeoutError
 
-        self.simulator.updateImage(image)
+        self.simulator.update_image(image)
+
+        self.lock.release()
+        self.last_update = time.time()
+        self.partial_time = 0
+
+    def display_partial(self, image, timeout=-1):
+        if not self.lock.acquire(timeout=timeout):
+            raise TimeoutError
+
+        self.simulator.update_image(image)
 
         self.lock.release()
         self.last_update = time.time()
         self.partial_time += 1
 
-    def display_Auto(self, image, timeout=-1):
-        self.lock.acquire(timeout=timeout)
+    def display_auto(self, image, timeout=-1):
+        if not self.lock.acquire(timeout=timeout):
+            raise TimeoutError
         if (time.time() - self.last_update > self.refresh_time) or (self.partial_time >= self.refresh_interval):
-            self.display_Base(image, timeout)
+            self.display_base(image, timeout)
         else:
-            self.display_Partial_Wait(image, timeout)
+            self.display_partial_wait(image, timeout)
         self.lock.release()
 
-    def display_Partial_Wait(self, image, timeout=-1):
-        self.lock.acquire(timeout=timeout)
+    def display_partial_wait(self, image, timeout=-1):
+        if not self.lock.acquire(timeout=timeout):
+            raise TimeoutError
 
-        self.simulator.updateImage(image)
+        self.simulator.update_image(image)
 
         self.lock.release()
         self.last_update = time.time()
         self.partial_time += 1
 
     def clear(self, color, timeout=-1):
-        self.lock.acquire(timeout=timeout)
+        if not self.lock.acquire(timeout=timeout):
+            raise TimeoutError
         pass
         self.lock.release()
         self.last_update = time.time()
@@ -222,7 +233,7 @@ class EpdController:
         self.upside_down = value
 
     @staticmethod
-    def IsBusy():
+    def is_busy():
         return False
 
 
@@ -230,17 +241,17 @@ class TouchDriver:
     def __init__(self, logger_touch: logger):
         self.logger_touch = logger_touch
 
-    def ICNT_Reset(self):
+    def icnt_reset(self):
         self.logger_touch.debug("触摸屏重置")
 
-    def ICNT_ReadVersion(self):
+    def icnt_read_version(self):
         self.logger_touch.debug("触摸屏的版本为:" + "调试器模式")
 
-    def ICNT_Init(self):
+    def icnt_init(self):
         self.logger_touch.debug("触摸屏初始化")
 
     @staticmethod
-    def ICNT_Scan(ICNT_Dev: touchpad.TouchRecoder, ICNT_Old: touchpad.TouchRecoder):
+    def icnt_scan(ICNT_Dev: touchpad.TouchRecoder, ICNT_Old: touchpad.TouchRecoder):
         try:
             x = int(input("x:"))
             y = int(input("y:"))
@@ -406,11 +417,11 @@ class Env:
 
         self.touch_handler = touchpad.TouchHandler(self)
         self.touchpad_driver = TouchDriver(self.logger_env)
-        self.touchpad_driver.ICNT_Init()
+        self.touchpad_driver.icnt_init()
         self.epd_driver = EpdController(self, True, auto_sleep_time=configs["auto_sleep_time"],
                                         refresh_time=configs["refresh_time"],
                                         refresh_interval=configs["refresh_interval"])
-        if self.epd_driver.IsBusy():
+        if self.epd_driver.is_busy():
             self.logger_env.error("The screen is busy!")
             raise RuntimeError("The screen is busy!")
 
@@ -430,7 +441,7 @@ class Env:
         self.apps = apps
         self.paper.init()
 
-    def changePaper(self, paper, exit_paper=False):
+    def change_paper(self, paper, exit_paper=False):
         if not self.inited:
             return
         self.touch_handler.clear()
@@ -448,17 +459,17 @@ class Env:
         else:
             self.paper.init()
 
-    def openApp(self, appName, exit_paper=False):
+    def open_app(self, appName, exit_paper=False):
         if not self.inited:
             return
         if appName in self.apps:
             if self.apps[appName][2] is None:
                 self.apps[appName][2] = self.apps[appName][0].build(self)
-            self.changePaper(self.apps[appName][2], exit_paper=exit_paper)
+            self.change_paper(self.apps[appName][2], exit_paper=exit_paper)
         else:
             raise ModuleNotFoundError
 
-    def backHome(self, exit_paper=False):
+    def back_home(self, exit_paper=False):
         if not self.inited:
             return
         self.touch_handler.clear()

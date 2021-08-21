@@ -3,7 +3,7 @@
 from sdk import epdconfig as config
 
 
-class ICNT_Development:
+class IcntDevelopment:
     def __init__(self):
         self.Touch = 0
         self.TouchGestureId = 0
@@ -15,7 +15,7 @@ class ICNT_Development:
         self.P = [0, 1, 2, 3, 4]
 
 
-class INCT86:
+class ICNT86:
     def __init__(self):
         # e-Paper
         self.ERST = config.EPD_RST_PIN
@@ -30,7 +30,7 @@ class INCT86:
     def digital_read(pin):
         return config.digital_read(pin)
 
-    def ICNT_Reset(self):
+    def icnt_reset(self):
         config.digital_write(self.TRST, 1)
         config.delay_ms(100)
         config.digital_write(self.TRST, 0)
@@ -39,31 +39,31 @@ class INCT86:
         config.delay_ms(100)
 
     @staticmethod
-    def ICNT_Write(reg, data):
+    def icnt_write(reg, data):
         config.i2c_writebyte(reg, data)
 
     @staticmethod
-    def ICNT_Read(reg, __len):
+    def icnt_read(reg, __len):
         return config.i2c_readbyte(reg, __len)
 
-    def ICNT_ReadVersion(self):
-        buf = self.ICNT_Read(0x000a, 4)
+    def icnt_read_version(self):
+        buf = self.icnt_read(0x000a, 4)
         print(buf)
 
-    def ICNT_Init(self):
-        self.ICNT_Reset()
-        self.ICNT_ReadVersion()
+    def icnt_init(self):
+        self.icnt_reset()
+        self.icnt_read_version()
 
-    def ICNT_Scan(self, ICNT_Dev, ICNT_Old):
+    def icnt_scan(self, ICNT_Dev, ICNT_Old):
         # buf = []
         mask = 0x00
 
         if ICNT_Dev.Touch == 1:
             # ICNT_Dev.Touch = 0
-            buf = self.ICNT_Read(0x1001, 1)
+            buf = self.icnt_read(0x1001, 1)
 
             if buf[0] == 0x00:
-                self.ICNT_Write(0x1001, mask)
+                self.icnt_write(0x1001, mask)
                 config.delay_ms(1)
                 # print("buffers status is 0")
                 return
@@ -71,13 +71,13 @@ class INCT86:
                 ICNT_Dev.TouchCount = buf[0]
 
                 if ICNT_Dev.TouchCount > 5 or ICNT_Dev.TouchCount < 1:
-                    self.ICNT_Write(0x1001, mask)
+                    self.icnt_write(0x1001, mask)
                     ICNT_Dev.TouchCount = 0
                     # print("TouchCount number is wrong")
                     return
 
-                buf = self.ICNT_Read(0x1002, ICNT_Dev.TouchCount * 7)
-                self.ICNT_Write(0x1001, mask)
+                buf = self.icnt_read(0x1002, ICNT_Dev.TouchCount * 7)
+                self.icnt_write(0x1001, mask)
 
                 ICNT_Old.X[0] = ICNT_Dev.X[0]
                 ICNT_Old.Y[0] = ICNT_Dev.Y[0]

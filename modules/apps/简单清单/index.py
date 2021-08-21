@@ -7,9 +7,9 @@ import threading
 import json
 from pathlib import Path
 
-
 mainBtn = None
 listJson = None
+
 
 def build(env):
     global mainBtn
@@ -19,60 +19,59 @@ def build(env):
     config = sdk.configurator.Configurator(
         env.logger_env, "configs/account.json", auto_save=True)
     username = config.read("user/name")
-    usertoken = config.read("user/token")
-    
-    def showTodo():
+    user_token = config.read("user/token")
 
-        def loadTodo():
+    def show_todo():
+
+        def load_todo():
             global listJson
-            todoListPage = page_lib.ListPage(paper,"todoList")
-            paper.addPage("todoList", todoListPage)
+            todo_list_page = page_lib.ListPage(paper, "todoList")
+            paper.add_page("todoList", todo_list_page)
             listJson = requests.post("https://pi.simplebytes.cn/api/todo.php",
-                {"name": username, "token": usertoken}).text
+                                     {"name": username, "token": user_token}).text
             listJson = json.loads(listJson)
+
             def todoItemClickHandler():
                 pass
-            if listJson == []:
-                todoListTitle = "暂无清单"
-                todoListContent = [["请前往：",Path("resources/images/unfinished.png"),None],
-                    ["pi.simplebytes.cn/todo",Path("resources/images/unfinished.png"),None]]
+
+            if not listJson:
+                todo_list_title = "暂无清单"
+                todo_list_content = [["请前往：", Path("resources/images/unfinished.png"), None],
+                                   ["pi.simplebytes.cn/todo", Path("resources/images/unfinished.png"), None]]
             else:
-                todoListTitle = listJson[0]["title"]
-                todoListContent = []
+                todo_list_title = listJson[0]["title"]
+                todo_list_content = []
 
                 for item in listJson[0]["content"]:
                     if not item["finished"]:
                         imgpath = Path("resources/images/unfinished.png")
-                        todoListContent.append([item["name"], imgpath, todoItemClickHandler])
+                        todo_list_content.append([item["name"], imgpath, todoItemClickHandler])
 
                 for item in listJson[0]["content"]:
                     if item["finished"]:
                         imgpath = Path("resources/images/ok.png")
-                        todoListContent.append([item["name"], imgpath, todoItemClickHandler])
+                        todo_list_content.append([item["name"], imgpath, todoItemClickHandler])
 
+            todo_list_page.show(todo_list_content, todo_list_title, None)
+            paper.change_page("todoList")
+            mainBtn.set_text("显示您第一个清单")
 
-            todoListPage.show(todoListContent, todoListTitle, None)
-            paper.changePage("todoList")
-            mainBtn.setText("显示您第一个清单")
+        mainBtn.set_text("加载中...")
+        load_todo_thread = threading.Thread(target=load_todo)
+        load_todo_thread.start()
 
-        mainBtn.setText("加载中...")
-        loadTodoThread = threading.Thread(target=loadTodo)
-        loadTodoThread.start()
-
-    if (username and usertoken):
+    if username and user_token:
         mainBtn = element_lib.Button(
-            (0, 35), paper, "显示您第一个清单", showTodo, (296, 30)
+            (0, 35), paper, "显示您第一个清单", show_todo, (296, 30)
         )
     else:
         mainBtn = element_lib.Button(
             (0, 35), paper, "请先绑定账号~", None, (296, 30)
         )
-    
 
-
-    paper.addElement(element_lib.Label(
+    paper.add_element(element_lib.Label(
         (100, 0), paper, "简单清单", (150, 30)), "mainPage")
 
-    paper.addElement(mainBtn, "mainPage")
+    paper.add_element(mainBtn, "mainPage")
 
     return paper

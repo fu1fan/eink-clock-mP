@@ -49,23 +49,23 @@ def build(env: environment):
     paper = sdk.graphics.paper_lib.PaperTheme(env)
     config = configurator.Configurator(
         env.logger_env, "configs/runtime.json", auto_save=True)
- 
-    firstRun = config.readOrCreate("firstrun", True)
+
+    firstRun = config.read_or_create("firstrun", True)
 
     text_clock = TextClock((0, 0), paper)
-    paper.addElement(text_clock, "mainPage")
+    paper.add_element(text_clock, "mainPage")
 
     # paper.addElement("mainPage", refreshBtn)
     # paper.addElement("mainPage", textLabel)
     # paper.addElement("mainPage", testBtn)
 
-    def showAD():
+    def show_ad():
         time.sleep(3)
         config.set("firstrun", False)
-        env.popup.prompt("使用提示","点击屏幕最上方唤起菜单栏\n在APP内点击屏幕左上角可以唤起导航栏",Image.open("resources/images/help.png"))
+        env.popup.prompt("使用提示", "点击屏幕最上方唤起菜单栏\n在APP内点击屏幕左上角可以唤起导航栏", Image.open("resources/images/help.png"))
 
     if firstRun:
-        showADThread = threading.Thread(target=showAD)
-        showADThread.start()
+        show_ad_thread = threading.Thread(target=show_ad)
+        show_ad_thread.start()
 
     return paper

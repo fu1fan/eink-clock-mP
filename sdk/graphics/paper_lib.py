@@ -8,7 +8,7 @@ from sdk.graphics import Element, PaperDynamic, element_lib, page_lib
 class PaperTheme(PaperDynamic):
     def __init__(self, env, background_image=Image.new("RGB", (296, 128), (255, 255, 255))):
         super().__init__(env, background_image)
-        self.pages["appList"] = page_lib.appListPage(self, "appList")
+        self.pages["appList"] = page_lib.Applistpage(self, "appList")
         self.dock_image = Image.open(open("resources/images/docker.jpg", "rb"))
         self.__docker_active = False
         self.inited = False
@@ -18,14 +18,14 @@ class PaperTheme(PaperDynamic):
         if self.__docker_active:
             self.suspended_touchpad = None
             self.__docker_active = False
-            self.changePage("appList")
+            self.change_page("appList")
             self.pages["appList"].show()
 
     def settings_click_handler(self):
         if self.__docker_active:
             self.suspended_touchpad = None
             self.__docker_active = False
-            self.env.openApp("系统选项")
+            self.env.open_app("系统选项")
 
     def close_docker(self):
         if self.__docker_active:
@@ -75,8 +75,8 @@ class PaperTheme(PaperDynamic):
         self.image_old = new_image  # TODO:删除image_old
         return new_image
 
-    def changePage(self, name, refresh=None):
-        super().changePage(name, refresh)
+    def change_page(self, name, refresh=None):
+        super().change_page(name, refresh)
         if name == "mainPage":
             self.env.touch_handler.add_clicked(
                 (0, 296, 0, 30), self.docker_clicked_handler)
@@ -92,18 +92,19 @@ class PaperApp(PaperDynamic):
         self.args = []
         self.kwargs = {}
         self.suspended_touched = None
+        self.pages_stack = Lifo
 
     def back_click_handler(self, long):
         if self.__bar_active:
             if long >= 1:
-                self.env.backHome()
+                self.env.back_home()
             else:
                 self.env.back()
             self.__bar_active = False
 
     def close_click_handler(self):
         if self.__bar_active:
-            self.env.backHome(True)
+            self.env.back_home(True)
             self.__bar_active = False
 
     def more_click_handler(self):
@@ -164,7 +165,7 @@ class PaperApp(PaperDynamic):
             new_image.paste(self.bar_image, (0, 0))
         return new_image
 
-    def changePage(self, name, refresh=None):
-        super().changePage(name, refresh)
+    def change_page(self, name, refresh=None):
+        super().change_page(name, refresh)
         self.env.touch_handler.add_clicked(
             (0, 30, 0, 30), self.bar_clicked_handler)

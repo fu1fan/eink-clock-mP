@@ -73,6 +73,7 @@ class VersionCtrl:
                 self.logger.error(traceback.format_exc(), "获取分支信息失败")
                 return False
 
+
 if __name__ == "__main__":
     epd_lock = threading.RLock()
     logger_updater = logger.Logger(logger.DEBUG, tag="updater")
@@ -80,7 +81,7 @@ if __name__ == "__main__":
                           logger_updater)
     epd = env.epd_driver
     paper = graphics.Paper(env)
-    if epd.IsBusy():
+    if epd.is_busy():
         logger_updater.error("The screen is busy!")
         os.system("python3 main.py &")
         raise RuntimeError("The screen is busy!")

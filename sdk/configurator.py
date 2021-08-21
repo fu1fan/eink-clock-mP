@@ -66,7 +66,7 @@ class Configurator:  # 没有对多线程进行适配，需要自行加锁
         # 设置目录
         self.current_config = finder
 
-    def readOrCreate(self, path: str, default_value):
+    def read_or_create(self, path: str, default_value):
         if path[0] == "/":
             finder = self.config
             path = path[1:]

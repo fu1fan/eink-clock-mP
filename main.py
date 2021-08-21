@@ -54,22 +54,22 @@ class DependenceError(Exception):
     pass
 
 
-def mainThread():  # 主线程：UI管理（如果有模拟器就不是主线程了）
+def main_thread():  # 主线程：UI管理（如果有模拟器就不是主线程了）
 
     opening_images = []  # 准备开屏动画
     opening_images_path = configurator_main.read("opening_images")
     for path in opening_images_path:
         opening_images.append(Image.open(Path(path)))
-    paperNow = environment.graphics.Paper(env, opening_images[0])
+    paper_now = environment.graphics.Paper(env, opening_images[0])
     load_lock = threading.Barrier(2)
 
     def opening():
-        paperNow.init()
+        paper_now.init()
         if len(opening_images) >= 1:
             for i in opening_images[1:]:
-                paperNow.update_background(i)
+                paper_now.update_background(i)
         if load_lock.n_waiting == 0:  # 如果等动画显示完后主线程还没进入等待，则显示Loading画面
-            paperNow.update_background(Image.open(Path(configurator_main.read("loading_image"))))
+            paper_now.update_background(Image.open(Path(configurator_main.read("loading_image"))))
         load_lock.wait()
 
     try:
@@ -204,7 +204,7 @@ if __name__ == "__main__":
     simulator = environment.Simulator()  # 我是一个模拟器
     env = environment.Env(configurator_main.read(
         "env_configs"), logger_main, simulator)  # 有模拟器的env
-    mainThrd = threading.Thread(target=mainThread, daemon=True)  # 因为模拟器必须得是主线程
+    mainThrd = threading.Thread(target=main_thread, daemon=True)  # 因为模拟器必须得是主线程
     mainThrd.start()  # 原来的主线程就得让位了~
 
     simulator.open(env)  # 打开模拟器

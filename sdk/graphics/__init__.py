@@ -32,15 +32,15 @@ class Paper(BasicGraphicControl):
 
     def display(self, image: Image):
         b_image = self.epd.render(image)
-        self.epd.display_Base(b_image)  # 是这样的吗？？？迷人的驱动
+        self.epd.display_base(b_image)  # 是这样的吗？？？迷人的驱动
 
     def display_partial(self, image: Image):
         b_image = self.epd.render(image)
-        self.epd.display_Partial_Wait(b_image)
+        self.epd.display_partial_wait(b_image)
 
     def display_auto(self, image: Image):
         b_image = self.epd.render(image)
-        self.epd.display_Auto(b_image)
+        self.epd.display_auto(b_image)
 
     def build(self) -> Image:
         self.image_old = self.background_image
@@ -85,7 +85,7 @@ class Page(list):  # page是对list的重写，本质为添加一个构造器
         self.name = name
         self.inited = False
 
-    def addElement(self, element):
+    def add_element(self, element):
         self.append(element)
         element.page = self
 
@@ -145,18 +145,18 @@ class PaperDynamic(Paper):
         self.image_old = new_image
         return new_image
 
-    def addPage(self, name: str, page=None):
+    def add_page(self, name: str, page=None):
         if page is None:
             page = Page(self, name)
         self.pages[name] = page
 
-    def addElement(self, element, target: str = "mainPage"):
+    def add_element(self, element, target: str = "mainPage"):
         self.pages[target].append(element)
         element.page = self.pages[target]
         if self.active:
             element.init()
 
-    def changePage(self, name, refresh=None):
+    def change_page(self, name, refresh=None):
         if name in self.pages:
             if name == self.nowPage:
                 return
@@ -236,7 +236,7 @@ class Element(BasicGraphicControl):
         self.inited = False
         self.active = False
 
-    def pause(self):    # 切换出page时调用
+    def pause(self):  # 切换出page时调用
         self.active = False
 
     def recover(self):  # 切换回page时调用
@@ -280,25 +280,25 @@ class ImgText:  # 来自CSDN
     def split_text(self, text):
         # 按规定宽度分组
         max_line_height, total_lines = 0, 0
-        allText = []
+        all_text = []
         for text in text.split('\n'):
             duanluo, line_height, line_count = self.get_duanluo(text)
             max_line_height = max(line_height, max_line_height)
             total_lines += line_count
-            allText.append((duanluo, line_count))
+            all_text.append((duanluo, line_count))
         line_height = max_line_height
         total_height = total_lines * line_height
-        return allText, total_height, line_height
+        return all_text, total_height, line_height
 
-    def draw_text(self, xy, text, id: ImageDraw.ImageDraw):
+    def draw_text(self, xy, text, image_draw: ImageDraw.ImageDraw):
         """
         绘图以及文字
         :return:
         """
         # 左上角开始
         # 段落 , 行数, 行高
-        x, y = x[0], y[0]
+        x, y = xy[0], xy[0]
         duanluo, note_height, line_height = self.split_text(text)
         for dl, lc in duanluo:
-            id.text((x, y), dl, fill=self.color, font=self.font)
+            image_draw.text((x, y), dl, fill=self.color, font=self.font)
             y += line_height * lc

@@ -2,56 +2,54 @@ from PIL import Image
 
 from sdk.graphics import paper_lib, element_lib
 
-
 resultFlag = False
 
-def build(env):
 
+def build(env):
     paper = paper_lib.PaperApp(env, background_image=Image.new("RGB", (296, 128), (0, 0, 0)))
 
-    numberLabel = element_lib.Label(
+    number_label = element_lib.Label(
         (0, 0), paper, "", (296, 30), bgcolor="black", textColor="white")
 
-    paper.addElement(numberLabel, "mainPage")
-    
-    keyboardList = [["AC", "7", "8", "9", "←", "*"],
+    paper.add_element(number_label, "mainPage")
+
+    keyboard_list = [["AC", "7", "8", "9", "←", "*"],
                     [".", "4", "5", "6", "-", "/"],
                     ["0", "1", "2", "3", "+", "="]]
     keyboard = {}
 
     def addChar(char="0"):
         global resultFlag
-        if char=="=":
+        if char == "=":
             try:
-                numberLabel.setText(str(eval(numberLabel.getText())))
+                number_label.set_text(str(eval(number_label.get_text())))
             except ZeroDivisionError:
-                numberLabel.setText("不能除以0哦~")
+                number_label.set_text("不能除以0哦~")
             except SyntaxError:
-                numberLabel.setText("语法错误")
+                number_label.set_text("语法错误")
             except:
-                numberLabel.setText("错误")
+                number_label.set_text("错误")
 
             resultFlag = True
-        elif char=="AC":
-            numberLabel.setText("")
-        elif char=="←":
-            numberLabel.setText(numberLabel.getText()[:-1])
+        elif char == "AC":
+            number_label.set_text("")
+        elif char == "←":
+            number_label.set_text(number_label.get_text()[:-1])
             resultFlag = False
         elif char in "+-*/":
-            numberLabel.setText(numberLabel.getText()+char)
+            number_label.set_text(number_label.get_text() + char)
             resultFlag = False
         elif resultFlag:
-            numberLabel.setText(char)
+            number_label.set_text(char)
             resultFlag = False
         else:
-            numberLabel.setText(numberLabel.getText()+char)
+            number_label.set_text(number_label.get_text() + char)
 
     for i in range(3):
         for j in range(6):
-            nowChar = keyboardList[i][j]
-            keyboard[nowChar] = element_lib.Button(
-                (j * 49 + 2, i * 30 + 36), paper, nowChar, addChar, (48, 29), outline=None,  char=nowChar)
-            paper.addElement(keyboard[nowChar], "mainPage")
+            now_char = keyboard_list[i][j]
+            keyboard[now_char] = element_lib.Button(
+                (j * 49 + 2, i * 30 + 36), paper, now_char, addChar, (48, 29), outline=None, char=now_char)
+            paper.add_element(keyboard[now_char], "mainPage")
 
-   
     return paper

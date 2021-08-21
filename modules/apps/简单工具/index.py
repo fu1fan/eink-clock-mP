@@ -5,22 +5,22 @@ from pathlib import Path
 def build(env):
     paper = paper_lib.PaperApp(env)
 
-    def toolsItemOncick(index):
+    def tools_item_oncick(index):
         if index == 0:
-            paper.env.openApp("随机数生成器")
+            paper.env.open_app("随机数生成器")
         elif index == 1:
-            paper.env.openApp("简单计算器")
+            paper.env.open_app("简单计算器")
         elif index == 2:
-            paper.env.openApp("祖安宝典")
+            paper.env.open_app("祖安宝典")
 
     tools = [
-        ["随机数生成器", Path("resources/images/random.png"), toolsItemOncick],
-        ["简单计算器", Path("resources/images/calculator.png"), toolsItemOncick],
-        ["祖安宝典", Path("resources/images/zuan.png"),toolsItemOncick]
+        ["随机数生成器", Path("resources/images/random.png"), tools_item_oncick],
+        ["简单计算器", Path("resources/images/calculator.png"), tools_item_oncick],
+        ["祖安宝典", Path("resources/images/zuan.png"), tools_item_oncick]
     ]
 
-    toolsList = page_lib.ListPage(paper,"mainPage")
-    paper.pages["mainPage"] = toolsList
-    toolsList.show(tools, "简单工具", None)
+    tools_list = page_lib.ListPage(paper, "mainPage")
+    paper.pages["mainPage"] = tools_list
+    tools_list.show(tools, "简单工具", None)
 
     return paper

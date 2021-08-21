@@ -35,7 +35,7 @@ EPD_WIDTH = 128
 EPD_HEIGHT = 296
 
 
-class EPD_2IN9_V2:
+class Epd2in9V2:
     def __init__(self):
         self.reset_pin = epdconfig.EPD_RST_PIN
         self.dc_pin = epdconfig.EPD_DC_PIN
@@ -116,34 +116,34 @@ class EPD_2IN9_V2:
         epdconfig.spi_writebyte2(data)
         epdconfig.digital_write(self.cs_pin, 1)
 
-    def WaitBusy(self):  # 等待直到屏幕结束忙碌
+    def wait_busy(self):  # 等待直到屏幕结束忙碌
         # logging.debug("e-Paper busy")
         while epdconfig.digital_read(self.busy_pin) == 1:  # 0: idle, 1: busy
             epdconfig.delay_ms(0.1)
         # logging.debug("e-Paper busy release")
 
-    def IsBusy(self):
+    def is_busy(self):
         return epdconfig.digital_read(self.busy_pin)
 
-    def TurnOnDisplay(self):  # 不建议进行操作
+    def turn_on_display(self):  # 不建议进行操作
         self.send_command(0x22)  # DISPLAY_UPDATE_CONTROL_2
         self.send_data(0xF7)
         self.send_command(0x20)  # MASTER_ACTIVATION
-        self.WaitBusy()
+        self.wait_busy()
 
-    def TurnOnDisplay_Partial(self):  # 不建议进行操作
+    def turn_on_display_partial(self):  # 不建议进行操作
         self.send_command(0x22)  # DISPLAY_UPDATE_CONTROL_2
         self.send_data(0x0F)
         self.send_command(0x20)  # MASTER_ACTIVATION
         # self.ReadBusy()
 
-    def TurnOnDisplay_Partial_Wait(self):  # 不建议进行操作
+    def turn_on_display_partial_wait(self):  # 不建议进行操作
         self.send_command(0x22)  # DISPLAY_UPDATE_CONTROL_2
         self.send_data(0x0F)
         self.send_command(0x20)  # MASTER_ACTIVATION
-        self.WaitBusy()
+        self.wait_busy()
 
-    def SendLut(self, lut):  # 不建议进行操作
+    def send_lut(self, lut):  # 不建议进行操作
         self.send_command(0x32)
         # for i in range(0, 153):
         # self.send_data(self.WF_PARTIAL_2IN9[i])
@@ -151,9 +151,9 @@ class EPD_2IN9_V2:
             self.send_data2(self.WF_PARTIAL_2IN9)
         else:
             self.send_data2(self.WF_PARTIAL_2IN9_Wait)
-        self.WaitBusy()
+        self.wait_busy()
 
-    def SetWindow(self, x_start, y_start, x_end, y_end):  # 不建议进行操作
+    def set_window(self, x_start, y_start, x_end, y_end):  # 不建议进行操作
         self.send_command(0x44)  # SET_RAM_X_ADDRESS_START_END_POSITION
         # x point must be the multiple of 8 or the last 3 bits will be ignored
         self.send_data((x_start >> 3) & 0xFF)
@@ -164,7 +164,7 @@ class EPD_2IN9_V2:
         self.send_data(y_end & 0xFF)
         self.send_data((y_end >> 8) & 0xFF)
 
-    def SetCursor(self, x, y):  # 不建议进行操作
+    def set_cursor(self, x, y):  # 不建议进行操作
         self.send_command(0x4E)  # SET_RAM_X_ADDRESS_COUNTER
         # x point must be the multiple of 8 or the last 3 bits will be ignored
         self.send_data(x & 0xFF)
@@ -172,7 +172,7 @@ class EPD_2IN9_V2:
         self.send_command(0x4F)  # SET_RAM_Y_ADDRESS_COUNTER
         self.send_data(y & 0xFF)
         self.send_data((y >> 8) & 0xFF)
-        self.WaitBusy()
+        self.wait_busy()
 
     def init(self):  # 初始化
         if epdconfig.module_init() != 0:
@@ -180,9 +180,9 @@ class EPD_2IN9_V2:
         # EPD hardware init start
         self.reset()
 
-        self.WaitBusy()
+        self.wait_busy()
         self.send_command(0x12)  # SWRESET
-        self.WaitBusy()
+        self.wait_busy()
 
         self.send_command(0x01)  # Driver output control
         self.send_data(0x27)
@@ -192,14 +192,14 @@ class EPD_2IN9_V2:
         self.send_command(0x11)  # data entry mode
         self.send_data(0x03)
 
-        self.SetWindow(0, 0, self.width - 1, self.height - 1)
+        self.set_window(0, 0, self.width - 1, self.height - 1)
 
         self.send_command(0x21)  # Display update control
         self.send_data(0x00)
         self.send_data(0x80)
 
-        self.SetCursor(0, 0)
-        self.WaitBusy()
+        self.set_cursor(0, 0)
+        self.wait_busy()
         # EPD hardware init end
         return 0
 
@@ -235,9 +235,9 @@ class EPD_2IN9_V2:
         # for i in range(0, int(self.width / 8)):
         # self.send_data(images[i + j * int(self.width / 8)])
         self.send_data2(image)
-        self.TurnOnDisplay()
+        self.turn_on_display()
 
-    def display_Base(self, image):  # 显示静态底图
+    def display_base(self, image):  # 显示静态底图
         if image is None:
             return
 
@@ -253,9 +253,9 @@ class EPD_2IN9_V2:
         # self.send_data(images[i + j * int(self.width / 8)])
         self.send_data2(image)
 
-        self.TurnOnDisplay()
+        self.turn_on_display()
 
-    def display_Partial(self, image):  # 局部显示
+    def display_partial(self, image):  # 局部显示
         if image is None:
             return
 
@@ -264,7 +264,7 @@ class EPD_2IN9_V2:
         # epdconfig.digital_write(self.reset_pin, 1)
         # epdconfig.delay_ms(2)
 
-        self.SendLut(1)
+        self.send_lut(1)
         self.send_command(0x37)
         self.send_data(0x00)
         self.send_data(0x00)
@@ -283,10 +283,10 @@ class EPD_2IN9_V2:
         self.send_command(0x22)
         self.send_data(0xC0)
         self.send_command(0x20)
-        self.WaitBusy()
+        self.wait_busy()
 
-        self.SetWindow(0, 0, self.width - 1, self.height - 1)
-        self.SetCursor(0, 0)
+        self.set_window(0, 0, self.width - 1, self.height - 1)
+        self.set_cursor(0, 0)
 
         self.send_command(0x24)  # WRITE_RAM
         # for j in range(0, self.height):
@@ -294,9 +294,9 @@ class EPD_2IN9_V2:
         # self.send_data(images[i + j * int(self.width / 8)])
         self.send_data2(image)
 
-        self.TurnOnDisplay_Partial()
+        self.turn_on_display_partial()
 
-    def display_Partial_Wait(self, image):  # 局部显示并等待显示完成
+    def display_partial_wait(self, image):  # 局部显示并等待显示完成
         if image is None:
             return
 
@@ -305,7 +305,7 @@ class EPD_2IN9_V2:
         epdconfig.digital_write(self.reset_pin, 1)
         # epdconfig.delay_ms(2)
 
-        self.SendLut(0)
+        self.send_lut(0)
         self.send_command(0x37)
         self.send_data(0x00)
         self.send_data(0x00)
@@ -324,10 +324,10 @@ class EPD_2IN9_V2:
         self.send_command(0x22)
         self.send_data(0xC0)
         self.send_command(0x20)
-        self.WaitBusy()
+        self.wait_busy()
 
-        self.SetWindow(0, 0, self.width - 1, self.height - 1)
-        self.SetCursor(0, 0)
+        self.set_window(0, 0, self.width - 1, self.height - 1)
+        self.set_cursor(0, 0)
 
         self.send_command(0x24)  # WRITE_RAM
         # for j in range(0, self.height):
@@ -335,14 +335,14 @@ class EPD_2IN9_V2:
         # self.send_data(images[i + j * int(self.width / 8)])
         self.send_data2(image)
 
-        self.TurnOnDisplay_Partial_Wait()
+        self.turn_on_display_partial_wait()
 
     def clear(self, color):  # 清屏
         self.send_command(0x24)  # WRITE_RAM
         for j in range(0, self.height):
             for i in range(0, int(self.width / 8)):
                 self.send_data(color)
-        self.TurnOnDisplay()
+        self.turn_on_display()
 
     def sleep(self):  # 睡眠模式
         self.send_command(0x10)  # DEEP_SLEEP_MODE

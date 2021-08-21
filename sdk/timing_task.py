@@ -53,7 +53,7 @@ class TimingTask:
         else:
             self.limit = limit
         if timeoutHandler is None:
-            self.handler = self.__timeoutHandler
+            self.handler = self.__timeout_handler
         else:
             self.handler = timeoutHandler
 
@@ -68,7 +68,7 @@ class TimingTask:
         self.__running = False
 
     @staticmethod
-    def __timeoutHandler(_):
+    def __timeout_handler(_):
         pass
 
     def __run(self):

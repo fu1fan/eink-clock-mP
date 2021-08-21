@@ -35,7 +35,7 @@ def logout():
 
 
 def refreshMain():
-    if (configurator.read("user/name")):
+    if configurator.read("user/name"):
         infoLabel.setText("你好，" + configurator.read("user/name"))
         actionButton.setText("点击退出账号")
         actionButton.setOnclick(logout)
@@ -54,7 +54,7 @@ def pair():
         global paircode
         paircode = json.loads(requests.get(
             "https://pi.simplebytes.cn/api/getPairCode.php").text)["paircode"]
-        codeLabel.setText(str(paircode))
+        codeLabel.set_text(str(paircode))
 
     getPairCodeThread = threading.Thread(target=getPairCode)
     getPairCodeThread.start()
@@ -67,7 +67,7 @@ def pair():
             result = requests.post(
                 "https://pi.simplebytes.cn/api/getPairInfo.php", {"paircode": paircode}).text
             result = json.loads(result)
-            if (result["msg"] != "WAIT_PAIRING"):
+            if result["msg"] != "WAIT_PAIRING":
                 msg = "已绑定：" + result["username"]
                 configurator.set("user/name", result["username"])
                 configurator.set("user/token", result["usertoken"])
@@ -75,7 +75,7 @@ def pair():
             else:
                 msg = "输完配对码后再点下一步哦"
 
-            resultLabel.setText(msg)
+            resultLabel.set_text(msg)
 
         paper.addElement(resultLabel, "nextPage")
 
@@ -110,10 +110,10 @@ def build(env):
 
     paper = sdk.graphics.paper_lib.PaperApp(env)
 
-    paper.addElement(sdk.graphics.element_lib.Label(
+    paper.add_element(sdk.graphics.element_lib.Label(
         (100, 0), paper, "账号管理", (150, 30)), "mainPage")
 
-    if (configurator.read("user/name")):
+    if configurator.read("user/name"):
         infoLabel = sdk.graphics.element_lib.Label(
             (0, 35), paper, "你好，" + configurator.read("user/name"), (296, 30))
 
@@ -126,10 +126,10 @@ def build(env):
         actionButton = sdk.graphics.element_lib.Button(
             (0, 95), paper, "点击绑定账号", pair, (296, 30))
 
-    paper.addElement(infoLabel, "mainPage")
-    paper.addElement(actionButton, "mainPage")
+    paper.add_element(infoLabel, "mainPage")
+    paper.add_element(actionButton, "mainPage")
 
-    paper.addPage("pairPage")
-    paper.addPage("nextPage")
+    paper.add_page("pairPage")
+    paper.add_page("nextPage")
 
     return paper
