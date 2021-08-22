@@ -34,6 +34,7 @@ class ReIter:   # 反向迭代器
 
 class TouchHandler:
     def __init__(self, env):
+        self.env = env
         self.pool = env.pool
         self.clicked = []  # 当对象被点击并松开后调用指定函数                      ((x1, x2, y1, y2), func, args, kwargs)
         self.system_clicked = []
@@ -43,6 +44,9 @@ class TouchHandler:
         self.slide_y = []  # 当屏幕从指定区域被纵向滑动后调用指定函数               ((x1, x2, y1, y2), func, args, kwargs)
         self.data_lock = threading.Lock()
         self.logger_touch = env.logger_env
+        self.back_left = None
+        self.back_right = None
+        self.home_bar = None
 
     def add_clicked(self, area, func, *args, **kwargs):
         """
@@ -298,6 +302,15 @@ class TouchHandler:
         if ICNT_Dev.Touch and ICNT_Old.Touch:  # 如果保持一直触摸不变
             if not (ICNT_Dev.X[0] == ICNT_Old.X[0] and ICNT_Dev.Y[0] == ICNT_Old.Y[0]):
                 # self.logger_touch.debug("触摸位置变化：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
+                if self.back_left and not self.back_left[2]:
+                    if ICNT_Dev.X[0] - self.back_left[0] >= 20:
+                        self.pool.add(self.env.system_event.back_show_left)
+                        self.back_left[2] = True
+                elif self.back_right and not self.back_right[2]:
+                    if self.back_right[0] - ICNT_Dev.X[0] >= 20:
+                        self.pool.add(self.env.system_event.back_show_right)
+                        self.back_right[2] = True
+
                 for i in ReIter(self.touched):  # 扫描touch
                     if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
                         if not i[-1]:
@@ -315,6 +328,15 @@ class TouchHandler:
 
         elif ICNT_Dev.Touch and (not ICNT_Old.Touch):  # 如果开始触摸
             # self.logger_touch.debug("触摸事件开始：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
+
+            if ICNT_Dev.X[0] <= 20:
+                self.back_left = [ICNT_Dev.X[0], ICNT_Dev.Y[0], False]
+
+            elif ICNT_Dev.X[0] >= 276:
+                self.back_right = [ICNT_Dev.X[0], ICNT_Dev.Y[0], False]
+
+            elif ICNT_Dev.Y[0] >= 108 and 100 <= ICNT_Dev.X[0] <= 200:
+                self.home_bar = (ICNT_Dev.X[0], ICNT_Dev.Y[0])
 
             for i in ReIter(self.slide_x):
                 if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
@@ -351,55 +373,77 @@ class TouchHandler:
         elif (not ICNT_Dev.Touch) and ICNT_Old.Touch:  # 如果停止触摸
             # self.logger_touch.debug("触摸事件终止：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
             slide = False
-            for i in ReIter(self.slide_x):  # ⚠️参数需要经过测试后调整
-                if i[-1] is not None:
-                    dis_x = ICNT_Dev.X[0] - i[-1][0]
-                    dis_y = ICNT_Dev.Y[0] - i[-1][1]
-                    if abs(dis_x) > 20 and abs(dis_y / dis_x) < 0.5:
-                        self.pool.add(i[1], dis_x)
-                        slide = True
-                    i[-1] = None
-
-            for i in ReIter(self.slide_y):
-                if i[-1] is not None:
-                    dis_x = ICNT_Dev.X[0] - i[-1][0]
-                    dis_y = ICNT_Dev.Y[0] - i[-1][1]
-                    if abs(dis_y) > 20 and abs(dis_x / dis_y) < 0.5:
-                        self.pool.add(i[1], dis_y)
-                        slide = True
-                    i[-1] = None
-
-            if slide:
-                for i in self.touched:
-                    i[-1] = False
-                for i in self.system_clicked:
-                    i[-1] = False
-                for i in self.clicked:
-                    i[-1] = False
-                for i in self.clicked_with_time:
-                    i[-1] = None
-            else:
-                for i in ReIter(self.touched):
+            if self.back_left:
+                if ICNT_Dev.X[0] - self.back_left[0] > 20:
+                    self.env.system_event.left_showed = False
+                    self.pool.add(self.env.back)
+                    slide = True
+                else:
+                    self.pool.add(self.env.system_event.back_hide_left)
+                self.back_left = None
+            elif self.back_right:
+                if self.back_right[0] - ICNT_Dev.X[0] > 20:
+                    self.env.system_event.right_showed = False
+                    self.pool.add(self.env.back)
+                    slide = True
+                else:
+                    self.pool.add(self.env.system_event.back_hide_right)
+                self.back_right = None
+            elif self.home_bar:
+                if self.home_bar[1] - ICNT_Dev.Y[0] > 20 and 100 <= ICNT_Dev.X[0] <= 200:
+                    self.pool.add(self.env.system_event.home_ctrl)
+                    slide = True
+                self.home_bar = None
+            if not slide:
+                for i in ReIter(self.slide_x):  # ⚠️参数需要经过测试后调整
                     if i[-1]:
-                        self.pool.add(i[2], *i[3], **i[4])  # 如果没有被点击，且标记为True，则执行func2
-                        i[-1] = False
-
-                for i in ReIter(self.system_clicked):
-                    if i[-1]:
-                        if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
-                            self.pool.add(i[1], *i[2], **i[3])
-                        i[-1] = False
-
-                for i in ReIter(self.clicked):
-                    if i[-1]:
-                        if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
-                            self.pool.add(i[1], *i[2], **i[3])
-                        i[-1] = False
-
-                for i in ReIter(self.clicked_with_time):
-                    if i[-1]:
-                        if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
-                            self.pool.add(i[1], time.time() - i[-1])
+                        dis_x = ICNT_Dev.X[0] - i[-1][0]
+                        dis_y = ICNT_Dev.Y[0] - i[-1][1]
+                        if abs(dis_x) > 20 and abs(dis_y / dis_x) < 0.5:
+                            self.pool.add(i[1], dis_x)
+                            slide = True
                         i[-1] = None
+
+                for i in ReIter(self.slide_y):
+                    if i[-1]:
+                        dis_x = ICNT_Dev.X[0] - i[-1][0]
+                        dis_y = ICNT_Dev.Y[0] - i[-1][1]
+                        if abs(dis_y) > 20 and abs(dis_x / dis_y) < 0.5:
+                            self.pool.add(i[1], dis_y)
+                            slide = True
+                        i[-1] = None
+
+                if slide:
+                    for i in self.touched:
+                        i[-1] = False
+                    for i in self.system_clicked:
+                        i[-1] = False
+                    for i in self.clicked:
+                        i[-1] = False
+                    for i in self.clicked_with_time:
+                        i[-1] = None
+                else:
+                    for i in ReIter(self.touched):
+                        if i[-1]:
+                            self.pool.add(i[2], *i[3], **i[4])  # 如果没有被点击，且标记为True，则执行func2
+                            i[-1] = False
+
+                    for i in ReIter(self.system_clicked):
+                        if i[-1]:
+                            if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
+                                self.pool.add(i[1], *i[2], **i[3])
+                            i[-1] = False
+
+                    for i in ReIter(self.clicked):
+                        if i[-1]:
+                            if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
+                                self.pool.add(i[1], *i[2], **i[3])
+                            i[-1] = False
+
+                    for i in ReIter(self.clicked_with_time):
+                        if i[-1]:
+                            if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
+                                self.pool.add(i[1], time.time() - i[-1])
+                            i[-1] = None
 
         self.data_lock.release()

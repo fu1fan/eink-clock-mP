@@ -365,14 +365,60 @@ class Popup(graphics.BasicGraphicControl):
 class SystemEvent(Popup):
     def __init__(self, env):
         super().__init__(env)
+        self.left_img = Image.open("resources/images/back_left.png").convert("RGBA")
+        self.left_img_alpha = self.left_img.split()[3]
+        self.right_img = Image.open("resources/images/back_right.png").convert("RGBA")
+        self.right_img_alpha = self.right_img.split()[3]
+        self.bar_img = Image.open("resources/images/home_bar.png").convert("RGBA")
+        self.bar_img_alpha = self.bar_img.split()[3]
+        self.left_showed = False
+        self.right_showed = False
+        self.home_bar_active = False
+
+    def back_show_left(self):
+        if not self.left_showed:
+            self.left_showed = True
+            self.env.paper.update_anyway()
+
+    def back_hide_left(self):
+        if self.left_showed:
+            self.left_showed = False
+            self.env.paper.update_anyway()
+
+    def back_show_right(self):
+        if not self.right_showed:
+            self.right_showed = True
+            self.env.paper.update_anyway()
+
+    def back_hide_right(self):
+        if self.right_showed:
+            self.right_showed = False
+            self.env.paper.update_anyway()
+
+    def home_ctrl(self):
+        if self.home_bar_active:
+            self.home_bar_active = False
+            self.env.back_home()
+        else:
+            self.home_bar_active = True
+            self.env.paper.update_anyway()
+            time.sleep(3)
+            if self.home_bar_active:
+                self.home_bar_active = False
+                self.env.paper.update_anyway()
 
     def render(self, image):
         image_new = Image.new("RGBA", (296, 128), (255, 255, 255, 0))
         system_popup = self.build()
         if system_popup:
             image_new.paste(system_popup, (60, 25))
-
-        r, g, b, a = image_new.split()
+        if self.left_showed:
+            image_new.paste(self.left_img, mask=self.left_img_alpha)
+        if self.right_showed:
+            image_new.paste(self.right_img, mask=self.right_img_alpha)
+        if self.home_bar_active:
+            image_new.paste(self.bar_img, mask=self.bar_img_alpha)
+        a = image_new.split()[3]
         image.paste(image_new, mask=a)  # 在无需变化时不粘贴
 
 
@@ -436,12 +482,11 @@ class Env:
         self.inited = True
         self.theme = paper
         self.paper = paper
-        self.papers.put(self.paper)
         self.plugins = plugins
         self.apps = apps
         self.paper.init()
 
-    def change_paper(self, paper, exit_paper=False):
+    def change_paper(self, paper, exit_paper=False, to_stack=True):
         if not self.inited:
             return
         self.touch_handler.clear()
@@ -449,9 +494,10 @@ class Env:
             self.paper.exit()
         else:
             self.paper.pause()  # pause()能暂停页面
-            if self.papers.full():
-                self.paper.get()
-            self.papers.put(self.paper, timeout=1)
+            if to_stack:
+                if self.papers.full():
+                    self.paper.get()
+                self.papers.put(self.paper, timeout=1)
         # self.paper_old, self.paper = self.paper, paper
         self.paper = paper
         if paper.inited:
@@ -489,7 +535,7 @@ class Env:
     def back(self, exit_paper=False):
         if not self.inited:
             return
-        if not self.paper.back():
+        if not (self.paper.back() or self.papers.empty()):
             self.touch_handler.clear()
             if exit_paper:
                 self.paper.exit()

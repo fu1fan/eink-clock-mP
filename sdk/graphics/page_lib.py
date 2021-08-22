@@ -14,14 +14,8 @@ class ListPage(_Page):
         self.add_element(sdk.graphics.element_lib.Button(
             (0, 0), self.paper, "", self.close, (45, 30)))
 
-        self.add_element(sdk.graphics.element_lib.Button(
-            (200, 0), self.paper, "", self.go_prev, (53, 30)))
-
-        self.add_element(sdk.graphics.element_lib.Button(
-            (254, 0), self.paper, "", self.go_next, (41, 30)))
-
         self.add_element(_ImageElement(
-            (0, 0), self.paper, "resources/images/list.jpg"))
+            (0, 0), self.paper, "resources/images/list.png"))
 
         self.closeBtnCover = sdk.graphics.element_lib.Label((0, 0), self.paper, "")
         self.add_element(self.closeBtnCover)
@@ -130,7 +124,7 @@ class ListPage(_Page):
 
     def show(self, content=None, listTitle="", closeEvent=None, closeBtn=None):
         if content is None:
-            content = []
+            content = [["空"], None, None]
         self.content = content
         self.listTitle = listTitle
         self.closeEvent = closeEvent

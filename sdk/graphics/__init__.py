@@ -58,7 +58,7 @@ class Paper(BasicGraphicControl):
         self.active = False
         self.inited = False
 
-    def back(self):
+    def back(self, refresh=False):
         return False
 
     def refresh(self):
@@ -185,6 +185,7 @@ class PaperDynamic(Paper):
         else:
             page = self.pages_stack.get(timeout=1)
             self.change_page(page, refresh)
+            return True
 
     def update_anyway(self, refresh=None):
         if self.update_lock.acquire(blocking=False) and self.active:
@@ -204,7 +205,7 @@ class PaperDynamic(Paper):
         self.update_anyway(refresh)
 
     def pause_update(self, timeout=-1):
-        if not self.update_lock.acquire(timeout=-1):
+        if not self.update_lock.acquire(timeout=timeout):
             raise TimeoutError
 
     def recover_update(self, raise_for_unlocked=False):
