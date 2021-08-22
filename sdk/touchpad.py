@@ -383,11 +383,11 @@ class TouchHandler:
                 self.back_left = None
             elif self.back_right:
                 if self.back_right[0] - ICNT_Dev.X[0] > 20:
-                    self.pool.add(self.env.system_event.back_hide_righ, False)
+                    self.pool.add(self.env.system_event.back_hide_right, False)
                     self.pool.add(self.env.back)
                     slide = True
                 else:
-                    self.pool.add(self.env.system_event.back_hide_righ, True)
+                    self.pool.add(self.env.system_event.back_hide_right, True)
                 self.back_right = None
             elif self.home_bar:
                 if self.home_bar[1] - ICNT_Dev.Y[0] > 20 and 100 <= ICNT_Dev.X[0] <= 200:
