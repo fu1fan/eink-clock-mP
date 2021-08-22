@@ -33,11 +33,11 @@ class ListPage(_Page):
             self.add_element(icon)
 
         self.label_of_page = sdk.graphics.element_lib.Label(
-            (155, 0), self.paper, "", (55, 28))
+            (235, 0), self.paper, "", (60, 28))
         self.add_element(self.label_of_page)
 
         self.title_of_list = sdk.graphics.element_lib.Label(
-            (50, 0), self.paper, "", (105, 28))
+            (50, 0), self.paper, "", (185, 28))
         self.add_element(self.title_of_list)
 
         self.listTexts = (
