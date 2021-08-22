@@ -92,7 +92,7 @@ class PaperApp(PaperDynamic):
         self.args = []
         self.kwargs = {}
         self.suspended_touched = None
-        self.pages_stack = Lifo
+        # self.pages_stack = Lifo # FIXME:？？？
 
     def back_click_handler(self, long):
         if self.__bar_active:
