@@ -2,7 +2,7 @@ import os
 import threading
 import time
 
-from PIL import Image, ImageTk, ImageFont, ImageDraw
+from PIL import Image, ImageFont, ImageDraw
 
 from sdk import logger, icnt86, epd2in9_V2
 from sdk import touchpad
