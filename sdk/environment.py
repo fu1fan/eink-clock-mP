@@ -183,10 +183,10 @@ class TouchDriver(icnt86.ICNT86):
 
         if n == 0:  # 检测屏幕是否被点击，不是每次都能扫描出来
             ICNT_Dev.Touch = 1
-            buf = self.ICNT_Read(0x1001, 1)
+            buf = self.icnt_read(0x1001, 1)
 
             if buf[0] == 0x00:
-                self.ICNT_Write(0x1001, mask)
+                self.icnt_write(0x1001, mask)
                 config.delay_ms(1)
                 self.logger_touch.warn("touchpad buffers status is 0!")
                 return
@@ -194,13 +194,13 @@ class TouchDriver(icnt86.ICNT86):
                 ICNT_Dev.TouchCount = buf[0]
 
                 if ICNT_Dev.TouchCount > 5 or ICNT_Dev.TouchCount < 1:
-                    self.ICNT_Write(0x1001, mask)
+                    self.icnt_write(0x1001, mask)
                     ICNT_Dev.TouchCount = 0
                     self.logger_touch.warn("TouchCount number is wrong!")
                     return
 
-                buf = self.ICNT_Read(0x1002, ICNT_Dev.TouchCount * 7)
-                self.ICNT_Write(0x1001, mask)
+                buf = self.icnt_read(0x1002, ICNT_Dev.TouchCount * 7)
+                self.icnt_write(0x1001, mask)
 
                 for i in range(0, ICNT_Dev.TouchCount, 1):
                     ICNT_Dev.TouchEvenId[i] = buf[6 + 7 * i]
@@ -393,7 +393,7 @@ class FasterFonts:
 
 
 class Env:
-    def __init__(self, configs, logger_env: logger.Logger, simulator):
+    def __init__(self, configs, logger_env: logger.Logger):
         # TODO:优化启动顺序
         self.logger_env = logger_env
         self.epd_lock = threading.RLock()
