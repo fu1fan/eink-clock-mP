@@ -122,16 +122,12 @@ class Label(TextElement):
 
 
 class LabelWithMultipleLines(TextElement):
-    def __init__(self, xy, paper: PaperDynamic, text, size=(50, 30), bgcolor="white", textColor="black", fontSize=20,
-                 *args, **kwargs):
-        super().__init__(xy, paper, text, size, bgcolor, textColor, fontSize, args, kwargs)
-        self.width = self.size[0]
-        self.duanluo, self.note_height, self.line_height = self.split_text()
 
     def build(self) -> Image:
         if self.inited and self._visible:
             self.width = self.size[0]
             # 段落 , 行数, 行高
+            self.duanluo, self.note_height, self.line_height = self.split_text()
 
             image = self.background_image.copy()
             draw = ImageDraw.Draw(image)
