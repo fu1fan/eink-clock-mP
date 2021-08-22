@@ -17,8 +17,6 @@ class ListPage(_Page):
         self.add_element(_ImageElement(
             (0, 0), self.paper, "resources/images/list.png"))
 
-        self.closeBtnCover = sdk.graphics.element_lib.Label((0, 0), self.paper, "")
-        self.add_element(self.closeBtnCover)
 
         self.icons = (
             sdk.graphics.element_lib.ImageElement(
@@ -122,7 +120,7 @@ class ListPage(_Page):
             self.show_items()
             self.paper.recover_update()  # 解锁
 
-    def show(self, content=None, listTitle="", closeEvent=None, closeBtn=None):
+    def show(self, content=None, listTitle="", closeEvent=None):
         if content is None:
             content = [["空"], None, None]
         elif len(content) == 0:
@@ -138,10 +136,6 @@ class ListPage(_Page):
 
         self.title_of_list.set_text(self.listTitle)
         self.show_items()
-        if closeBtn:
-            self.closeBtnCover.set_visible(False)
-        else:
-            self.closeBtnCover.set_visible(True)
 
         self.paper.recover_update()  # 解锁
 
@@ -172,13 +166,13 @@ class Applistpage(ListPage):
     def back_to_main_page(self):
         self.paper.change_page("mainPage")
 
-    def show(self, content=None, listTitle="", closeEvent=None, closeBtn=None):  # TODO:此处原本出现签名不一致问题，临时改正
+    def show(self, content=None, listTitle="", closeEvent=None):  # TODO:此处原本出现签名不一致问题，临时改正
         app_list = []
 
         for appName, appContent in self.paper.env.apps.items():
             app_list.append([appName, appContent[1][1], self.open_app_by_index])
 
-        super().show(app_list, "应用列表", self.back_to_main_page, True)
+        super().show(app_list, "应用列表", self.back_to_main_page)
 
 
 # keyboardPage 还未完成哦

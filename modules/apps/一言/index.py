@@ -38,7 +38,6 @@ def build(env):
 
     def show_detail(index):
         global favId
-        index = index - 1
         if index < len(fav_list):
             favId = index
             yiyan_label_detail.set_text(fav_list[index])
@@ -49,11 +48,10 @@ def build(env):
         saver.set("fav", fav_list)
 
     def my_fav():
-        content = [["返回", "resources/images/back.png", back_to_main]]
+        content = []
         for yiyan in fav_list:
             content.append([yiyan, "resources/images/message.png", show_detail])
-        content.append(["返回", "resources/images/back.png", back_to_main])
-        favPage.show(content, "一言收藏夹")
+        favPage.show(content, "一言收藏夹", back_to_main)
         paper.change_page("favPage")
 
     def del_fav():

@@ -39,7 +39,6 @@ def build(env):
 
     def show_detail(index):
         global favId
-        index = index - 1
         if index < len(fav_list):
             favId = index
             zuan_label_detail.set_text(fav_list[index])
@@ -67,11 +66,10 @@ def build(env):
         saver.set("fav", fav_list)
 
     def my_fav():
-        content = [["返回", "resources/images/back.png", back_to_main]]
+        content = []
         for zuan in fav_list:
             content.append([zuan, "resources/images/zuan.png", show_detail])
-        content.append(["返回", "resources/images/back.png", back_to_main])
-        fav_page.show(content, "祖安收藏夹")
+        fav_page.show(content, "祖安收藏夹", back_to_main)
         paper.change_page("favPage")
 
     def del_fav():
