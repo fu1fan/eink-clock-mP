@@ -397,8 +397,7 @@ class Env:
         # TODO:优化启动顺序
         self.logger_env = logger_env
         self.epd_lock = threading.RLock()
-        self.epd_driver = EpdController(self.logger_env,
-                                        self.epd_lock,
+        self.epd_driver = EpdController(self,
                                         True,
                                         configs["auto_sleep_time"],
                                         configs["refresh_time"],
