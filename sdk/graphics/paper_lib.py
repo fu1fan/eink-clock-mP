@@ -1,14 +1,13 @@
 import time
 
-from PIL import Image, ImageDraw
+from PIL import Image
 
-from sdk.graphics import Element, PaperDynamic, element_lib, page_lib
+from sdk.graphics import PaperDynamic, page_lib
 
 
 class PaperTheme(PaperDynamic):
     def __init__(self, env, background_image=Image.new("RGB", (296, 128), (255, 255, 255))):
         super().__init__(env, background_image)
-        self.pages["appList"] = page_lib.Applistpage(self, "appList")
         self.dock_image = Image.open(open("resources/images/docker.jpg", "rb"))
         self.__docker_active = False
         self.inited = False
@@ -18,6 +17,7 @@ class PaperTheme(PaperDynamic):
         if self.__docker_active:
             self.suspended_touchpad = None
             self.__docker_active = False
+            self.pages["appList"] = page_lib.Applistpage(self, "appList")
             self.change_page("appList", to_stack=True)
             self.pages["appList"].show()
 
@@ -89,6 +89,7 @@ class PaperApp(PaperDynamic):
         self.__bar_active = False
         self.bar_image = Image.open(open("resources/images/app_control.jpg", "rb"))
         self.more_event = None
+        self.more_list = None
         self.args = []
         self.kwargs = {}
         self.suspended_touched = None
@@ -103,10 +104,13 @@ class PaperApp(PaperDynamic):
 
     def more_click_handler(self):
         if self.__bar_active:
+            self.__bar_active = False
             if self.more_event:
                 self.more_event(*self.args, **self.kwargs)
             else:
-
+                self.pages["more_list"] = page_lib.ListPage(self, "more_list")  # todo:改用element！！！
+                self.change_page("more_list", to_stack=True)
+                self.pages["more_list"].show(self.more_list)
 
     def close_bar(self):
         if self.__bar_active:

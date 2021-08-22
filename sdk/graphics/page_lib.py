@@ -125,6 +125,8 @@ class ListPage(_Page):
     def show(self, content=None, listTitle="", closeEvent=None, closeBtn=None):
         if content is None:
             content = [["空"], None, None]
+        elif len(content) == 0:
+            content = [["空"], None, None]
         self.content = content
         self.listTitle = listTitle
         self.closeEvent = closeEvent

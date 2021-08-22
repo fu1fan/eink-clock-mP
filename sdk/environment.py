@@ -380,20 +380,30 @@ class SystemEvent(Popup):
             self.left_showed = True
             self.env.paper.update_anyway()
 
-    def back_hide_left(self):
+    def back_hide_left(self, go_back):
         if self.left_showed:
-            self.left_showed = False
-            self.env.paper.update_anyway()
+            if go_back:
+                self.left_showed = False
+                if self.env.papers.empty():
+                    self.env.paper.update_anyway()
+            else:
+                self.left_showed = False
+                self.env.paper.update_anyway()
 
     def back_show_right(self):
         if not self.right_showed:
             self.right_showed = True
             self.env.paper.update_anyway()
 
-    def back_hide_right(self):
+    def back_hide_right(self, go_back):
         if self.right_showed:
-            self.right_showed = False
-            self.env.paper.update_anyway()
+            if go_back:
+                self.right_showed = False
+                if self.env.papers.empty():
+                    self.env.paper.update_anyway()
+            else:
+                self.right_showed = False
+                self.env.paper.update_anyway()
 
     def home_ctrl(self):
         if self.home_bar_active:
