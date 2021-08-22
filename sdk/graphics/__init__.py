@@ -4,6 +4,8 @@ import traceback
 
 from PIL import Image, ImageDraw
 
+from queue import LifoQueue
+
 
 class BasicGraphicControl(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -55,6 +57,9 @@ class Paper(BasicGraphicControl):
     def exit(self):
         self.active = False
         self.inited = False
+
+    def back(self):
+        return False
 
     def refresh(self):
         if not self.active:
@@ -118,13 +123,14 @@ class PaperDynamic(Paper):
         self.pages = {"mainPage": Page(self, "mainPage")}
         # TODO:为Handler页面添加内容
         self.nowPage = "mainPage"
-        self.oldPage = "mainPage"
         # self.touch_handler = env.touch_handler
         self.env = env
+        self.pages_stack = LifoQueue()
 
     def exit(self):
         for page in self.pages.values():
             page.exit()
+        self.pages_stack.queue.clear()
         super().exit()
 
     def pause(self):
@@ -156,13 +162,14 @@ class PaperDynamic(Paper):
         if self.active:
             element.init()
 
-    def change_page(self, name, refresh=None):
+    def change_page(self, name, refresh=None, to_stack=False):
         if name in self.pages:
             if name == self.nowPage:
                 return
             self.env.touch_handler.clear()
             self.pages[self.nowPage].pause()
-            self.oldPage = self.nowPage
+            if to_stack:
+                self.pages_stack.put(self.nowPage)
             self.nowPage = name
             if self.pages[name].inited:
                 self.pages[name].recover()
@@ -171,6 +178,13 @@ class PaperDynamic(Paper):
             self.update_anyway(refresh)
         else:
             raise ValueError("The specified page does not exist!")
+
+    def back(self, refresh=False) -> bool:
+        if self.pages_stack.empty():
+            return False
+        else:
+            page = self.pages_stack.get(timeout=1)
+            self.change_page(page, refresh)
 
     def update_anyway(self, refresh=None):
         if self.update_lock.acquire(blocking=False) and self.active:
@@ -212,6 +226,7 @@ class PaperDynamic(Paper):
 
     def clear(self):
         self.pages = {"mainPage": Page(self, "mainPage")}
+        self.pages_stack.queue.clear()
 
 
 class Element(BasicGraphicControl):

@@ -489,17 +489,18 @@ class Env:
     def back(self, exit_paper=False):
         if not self.inited:
             return
-        self.touch_handler.clear()
-        if exit_paper:
-            self.paper.exit()
-        else:
-            self.paper.pause()  # pause()能暂停页面
-        # self.paper_old, self.paper = self.paper, paper
-        self.paper = self.papers.get(timeout=1)
-        if self.paper.inited:
-            self.paper.recover()
-        else:
-            self.paper.init()
+        if not self.paper.back():
+            self.touch_handler.clear()
+            if exit_paper:
+                self.paper.exit()
+            else:
+                self.paper.pause()  # pause()能暂停页面
+            # self.paper_old, self.paper = self.paper, paper
+            self.paper = self.papers.get(timeout=1)
+            if self.paper.inited:
+                self.paper.recover()
+            else:
+                self.paper.init()
 
     def reboot(self):
         self.logger_env.info("reboot")
