@@ -17,7 +17,6 @@ class ListPage(_Page):
         self.add_element(_ImageElement(
             (0, 0), self.paper, "resources/images/list.png"))
 
-
         self.icons = (
             sdk.graphics.element_lib.ImageElement(
                 (8, 36), self.paper, "resources/images/None20px.jpg"),
