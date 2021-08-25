@@ -14,17 +14,20 @@ from pathlib import Path
 
 # TODO(修复):修复屏幕休眠机制
 # TODO(功能):添加页面组织器
+# TODO(功能):ListElement右上角显示页码
 # TODO(功能):添加双指双击刷新屏幕的功能
 # TODO(优化):改写docker触摸实现
 # TODO(优化):为支持的应用添加图像缓存，加速渲染
 # TODO(优化):取消env中页面队列大小
 # TODO(功能):统一资源库（字体、图像）
+# TODO(优化):appControlBar添加时间显示
 # TODO(功能):为paper加入choice和prompt元件
 # TODO(功能):网络配置
 # TODO(功能):应用商店
 # TODO(功能):应用排序
 # TODO(功能):插件管理
-# TODO(功能):移植ListPage为Element
+# TODO(功能):线程池扩容功能
+
 
 example_config = {
     "main": {

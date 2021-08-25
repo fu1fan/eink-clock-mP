@@ -191,12 +191,11 @@ class ListItem:
 
 class List(Element):
     def __init__(self, paper):
-        super().__init__((0, 0), paper, size=(296, 128), background=Image.open("resources/images.png"))
+        super().__init__((0, 0), paper, size=(296, 128), background=Image.open("resources/images/list.png"))
         self.content = None
         self.active = False
         self.page_count = 0
         self.current_page = -1
-        self.texts = ["", "", ""]
         self.title = ""
         self.last_build_index = -1
         self.last_build = self.background
@@ -220,15 +219,26 @@ class List(Element):
                 self.current_page += 1
                 self.paper.update(self.page)
 
-    def show(self, content: list[ListItem]):
+    def show(self, title: str, content: list[ListItem]):
         if not self.active:
             self.active = True
             self.paper.add_back_operation(self.hide)
             self.last_build_index = -1
+        self.title = title
         self.content = content
         self.page_count = ceil(len(content) / 3)
         self.current_page = 0
         self.paper.update(self.page)
+
+    def exit(self):
+        if self.active:
+            self.content = None
+            self.active = False
+            self.page_count = 0
+            self.current_page = -1
+            self.title = ""
+            self.last_build_index = -1
+            self.last_build = self.background
 
     def build(self):
         if self.active:
@@ -238,13 +248,14 @@ class List(Element):
                 new_image = self.background.copy()
                 draw = ImageDraw.Draw(new_image)
                 j = 0
+                draw.text((35, 32), "title", fill="black", font=self.paper.env.fonts.get_heiti(20))
                 for i in range(self.current_page * 3, self.current_page * 3 + 3):
                     try:
                         if self.content[i].icon:
                             new_image.paste(self.content[i].icon, (8, 36+30*j))
-                            draw.text((35, 32), self.texts[0], fill="black", font=self.paper.env.fonts.get_heiti(20))
+                            draw.text((35, 32), self.content[i].text, fill="black", font=self.paper.env.fonts.get_heiti(20))
                         else:
-                            draw.text((12, 32+30*j), self.texts[0], fill="black", font=self.paper.env.fonts.get_heiti(20))
+                            draw.text((12, 32+30*j), self.content[i].text, fill="black", font=self.paper.env.fonts.get_heiti(20))
                     except IndexError:
                         break
                     j += 1
@@ -281,7 +292,12 @@ class ListWithIndexReturn(List):
         else:
             return 0
 
-    def show(self, content: list[ListItem]):
+    def recover(self):
+        self.paper.env.touch_handler.add_clicked((0, 296, 30, 60), self._func1)
+        self.paper.env.touch_handler.add_clicked((0, 296, 60, 90), self._func2)
+        self.paper.env.touch_handler.add_clicked((0, 296, 90, 120), self._func3)
+
+    def show(self, title: str,content: list[ListItem]):
         if not self.active:
             self.active = True
             self.paper.add_back_operation(self.hide)
@@ -289,6 +305,7 @@ class ListWithIndexReturn(List):
             self.paper.env.touch_handler.add_clicked((0, 296, 30, 60), self._func1)
             self.paper.env.touch_handler.add_clicked((0, 296, 60, 90), self._func2)
             self.paper.env.touch_handler.add_clicked((0, 296, 90, 120), self._func3)
+        self.title = title
         self.content = content
         self.page_count = ceil(len(content) / 3)
         self.current_page = 0
@@ -298,7 +315,7 @@ class ListWithIndexReturn(List):
         return self.result
 
 
-class ListWithFunc(List):
+class ListWithFunc(ListWithIndexReturn):
     def __init__(self, paper):
         super().__init__(paper)
 
@@ -311,17 +328,7 @@ class ListWithFunc(List):
     def _func3(self):
         self.content[self.current_page*3+2].func()
 
-    def hide(self):
-        if self.active:
-            self.active = False
-            self.paper.env.touch_handler.remove_clicked(self._func1)
-            self.paper.env.touch_handler.remove_clicked(self._func2)
-            self.paper.env.touch_handler.remove_clicked(self._func3)
-            self.paper.update(self.page)
-        else:
-            return 0
-
-    def show(self, content: list[ListItem]):
+    def show(self, title: str, content: list[ListItem]):
         if not self.active:
             self.active = True
             self.paper.add_back_operation(self.hide)
@@ -329,6 +336,7 @@ class ListWithFunc(List):
             self.paper.env.touch_handler.add_clicked((0, 296, 30, 60), self._func1)
             self.paper.env.touch_handler.add_clicked((0, 296, 60, 90), self._func2)
             self.paper.env.touch_handler.add_clicked((0, 296, 90, 120), self._func3)
+        self.title = title
         self.content = content
         self.page_count = ceil(len(content) / 3)
         self.current_page = 0
