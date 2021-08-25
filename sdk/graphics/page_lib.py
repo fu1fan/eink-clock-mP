@@ -200,3 +200,49 @@ class Keyboardpage(_Page):
 
     def show(self, inputType="text"):
         pass
+
+
+class NewListPageShow(_Page):
+    def __init__(self, paper, name, content: list[sdk.graphics.element_lib.ListItem]):
+        super().__init__(paper, name)
+        if content is None:
+            self.content = []
+        else:
+            self.content = content
+        self.add_element(sdk.graphics.element_lib.List(self.paper))
+
+    def set_content(self, content: list[sdk.graphics.element_lib.ListItem]):
+        self.content = content
+        self[0].show(self.content)
+
+    def init(self):
+        super().init()
+        self[0].show(self.content)
+
+    def add_item(self, text, icon=None):
+        self.content.append(sdk.graphics.element_lib.ListItem(text, icon=icon))
+        if self[0].active:
+            self[0].show(self.content)
+
+
+class NewListPageFunc(_Page):
+    def __init__(self, paper, name, content: list[sdk.graphics.element_lib.ListItem]):
+        super().__init__(paper, name)
+        if content is None:
+            self.content = []
+        else:
+            self.content = content
+        self.add_element(sdk.graphics.element_lib.ListWithFunc(self.paper))
+
+    def set_content(self, content: list[sdk.graphics.element_lib.ListItem]):
+        self.content = content
+        self[0].show(self.content)
+
+    def add_item(self, text, func=None, icon=None):
+        self.content.append(sdk.graphics.element_lib.ListItem(text, func, icon))
+        if self[0].active:
+            self[0].show(self.content)
+
+    def init(self):
+        super().init()
+        self[0].show(self.content)
