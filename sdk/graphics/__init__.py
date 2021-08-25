@@ -189,7 +189,7 @@ class PaperDynamic(Paper):
                     return self.back(refresh)
                 else:
                     return True
-            elif isinstance(operation, Page):
+            elif isinstance(operation, str):
                 self.change_page(operation, refresh)
                 return True
 
