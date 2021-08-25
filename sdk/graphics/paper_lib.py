@@ -169,4 +169,4 @@ class PaperApp(PaperDynamic):
     def change_page(self, name, refresh=None, to_stack=False):
         super().change_page(name, refresh, to_stack)
         self.env.touch_handler.add_clicked(
-            (0, 30, 0, 30), self.bar_clicked_handler)
+            (266, 296, 0, 30), self.bar_clicked_handler)
