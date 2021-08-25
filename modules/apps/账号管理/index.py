@@ -5,6 +5,8 @@ from PIL import Image
 import sdk.graphics
 import sdk.graphics.element_lib
 import sdk.graphics.paper_lib
+from sdk.environment import Env
+
 
 import requests
 import json
@@ -16,6 +18,7 @@ configurator = None
 infoLabel = None
 actionButton = None
 paircode = 0
+theEnv = None
 
 
 def backToMain():
@@ -56,8 +59,7 @@ def pair():
             "https://pi.simplebytes.cn/api/getPairCode.php").text)["paircode"]
         codeLabel.set_text(str(paircode))
 
-    getPairCodeThread = threading.Thread(target=getPairCode)
-    getPairCodeThread.start()
+    theEnv.pool.add(getPairCode)
 
     def nextStep():
         resultLabel = sdk.graphics.element_lib.Label(
@@ -82,8 +84,7 @@ def pair():
         paper.add_element(sdk.graphics.element_lib.Button(
             (0, 70), paper, "返回首页", backToMain, (296, 30)), "nextPage")
 
-        getResultThread = threading.Thread(target=getResult)
-        getResultThread.start()
+        theEnv.pool.add(getResult)
 
         paper.change_page("nextPage")
 
@@ -99,11 +100,13 @@ def pair():
     paper.change_page("pairPage")
 
 
-def build(env):
+def build(env:Env):
     global paper
     global configurator
     global infoLabel
     global actionButton
+    global theEnv
+    theEnv = env
 
     configurator = sdk.configurator.Configurator(
         env.logger_env, "configs/account.json", auto_save=True)

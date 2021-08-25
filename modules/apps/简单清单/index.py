@@ -57,8 +57,7 @@ def build(env):
             mainBtn.set_text("显示您第一个清单")
 
         mainBtn.set_text("加载中...")
-        load_todo_thread = threading.Thread(target=load_todo)
-        load_todo_thread.start()
+        env.pool.add(load_todo)
 
     if username and user_token:
         mainBtn = element_lib.Button(
