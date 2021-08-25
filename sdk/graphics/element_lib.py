@@ -200,6 +200,9 @@ class List(Element):
         self.last_build_index = -1
         self.last_build = self.background
 
+    def init(self):
+        return
+
     def hide(self):
         if self.active:
             self.active = False
@@ -239,6 +242,7 @@ class List(Element):
             self.title = ""
             self.last_build_index = -1
             self.last_build = self.background
+        super().exit()
 
     def build(self):
         if self.active:
@@ -293,6 +297,7 @@ class ListWithIndexReturn(List):
             return 0
 
     def recover(self):
+        super().recover()
         self.paper.env.touch_handler.add_clicked((0, 296, 30, 60), self._func1)
         self.paper.env.touch_handler.add_clicked((0, 296, 60, 90), self._func2)
         self.paper.env.touch_handler.add_clicked((0, 296, 90, 120), self._func3)
