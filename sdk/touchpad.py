@@ -78,6 +78,19 @@ class TouchHandler:
             counter += 1
         self.data_lock.release()
 
+    def remove_a_clicked_quickly(self, func):
+        self.data_lock.acquire()
+        counter = 0
+        for i in ReIter(self.clicked):
+            if i[1] == func:
+                break
+            if counter == len(self.clicked):
+                self.data_lock.release()
+                return
+            counter += 1
+        del self.clicked[counter]
+        self.data_lock.release()
+
     def set_clicked(self, content: list):
         self.data_lock.acquire()
         self.clicked = content
@@ -108,6 +121,19 @@ class TouchHandler:
             counter += 1
         self.data_lock.release()
         return True
+
+    def remove_a_system_clicked_quickly(self, func):
+        self.data_lock.acquire()
+        counter = 0
+        for i in ReIter(self.system_clicked):
+            if i[1] == func:
+                break
+            if counter == len(self.system_clicked):
+                self.data_lock.release()
+                return
+            counter += 1
+        del self.system_clicked[counter]
+        self.data_lock.release()
 
     def set_system_clicked(self, content: list):
         self.data_lock.acquire()
@@ -152,6 +178,19 @@ class TouchHandler:
         self.data_lock.release()
         return True
 
+    def remove_a_clicked_with_time_quickly(self, func):
+        self.data_lock.acquire()
+        counter = 0
+        for i in ReIter(self.clicked_with_time):
+            if i[1] == func:
+                break
+            if counter == len(self.clicked_with_time):
+                self.data_lock.release()
+                return
+            counter += 1
+        del self.clicked_with_time[counter]
+        self.data_lock.release()
+
     def set_clicked_with_time(self, content: list):
         self.data_lock.acquire()
         self.clicked_with_time = content
@@ -182,6 +221,19 @@ class TouchHandler:
             counter += 1
         self.data_lock.release()
         return True
+
+    def remove_a_touched_quickly(self, func):
+        self.data_lock.acquire()
+        counter = 0
+        for i in ReIter(self.touched):
+            if i[1] == func:
+                break
+            if counter == len(self.touched):
+                self.data_lock.release()
+                return
+            counter += 1
+        del self.touched[counter]
+        self.data_lock.release()
 
     def set_touched(self, content: list):
         self.data_lock.acquire()
@@ -214,6 +266,19 @@ class TouchHandler:
         self.data_lock.release()
         return True
 
+    def remove_a_slide_x_quickly(self, func):
+        self.data_lock.acquire()
+        counter = 0
+        for i in ReIter(self.slide_x):
+            if i[1] == func:
+                break
+            if counter == len(self.slide_x):
+                self.data_lock.release()
+                return
+            counter += 1
+        del self.clicked[counter]
+        self.data_lock.release()
+
     def set_slide_x(self, content: list):
         self.data_lock.acquire()
         self.slide_x = content
@@ -244,6 +309,19 @@ class TouchHandler:
             counter += 1
         self.data_lock.release()
         return True
+
+    def remove_a_slide_y_quickly(self, func):
+        self.data_lock.acquire()
+        counter = 0
+        for i in ReIter(self.slide_y):
+            if i[1] == func:
+                break
+            if counter == len(self.slide_y):
+                self.data_lock.release()
+                return
+            counter += 1
+        del self.clicked[counter]
+        self.data_lock.release()
 
     def set_slide_y(self, content: list):
         self.data_lock.acquire()
