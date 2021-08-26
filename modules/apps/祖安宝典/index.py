@@ -12,7 +12,7 @@ zuanMode = "min"
 
 
 def build(env):
-    paper = paper_lib.PaperApp(env)
+    paper = paper_lib.PaperApp(env, "祖安宝典")
 
     fav_page = page_lib.ListPage(paper, "favPage")
 

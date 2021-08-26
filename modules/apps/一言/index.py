@@ -11,7 +11,7 @@ favId = 0
 
 
 def build(env):
-    paper = paper_lib.PaperApp(env)
+    paper = paper_lib.PaperApp(env, "一言")
 
     favPage = page_lib.ListPage(paper, "favPage")
 

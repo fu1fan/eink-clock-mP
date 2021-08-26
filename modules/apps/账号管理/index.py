@@ -111,7 +111,7 @@ def build(env:Env):
     configurator = sdk.configurator.Configurator(
         env.logger_env, "configs/account.json", auto_save=True)
 
-    paper = sdk.graphics.paper_lib.PaperApp(env)
+    paper = sdk.graphics.paper_lib.PaperApp(env, "账号管理")
 
     paper.add_element(sdk.graphics.element_lib.Label(
         (100, 0), paper, "账号管理", (150, 30)), "mainPage")

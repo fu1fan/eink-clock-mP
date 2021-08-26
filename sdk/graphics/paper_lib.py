@@ -1,6 +1,6 @@
 import time
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from sdk.graphics import PaperDynamic, page_lib
 
@@ -11,13 +11,13 @@ class PaperTheme(PaperDynamic):
         self.dock_image = Image.open(open("resources/images/docker.jpg", "rb"))
         self.__docker_active = False
         self.inited = False
+        self.pages["appList"] = page_lib.ApplistPage(self, "appList")
         self.suspended_touchpad = None
 
     def appbox_click_handler(self):
         if self.__docker_active:
             self.suspended_touchpad = None
             self.__docker_active = False
-            self.pages["appList"] = page_lib.Applistpage(self, "appList")
             self.change_page("appList", to_stack=True)
             self.pages["appList"].show()
 
@@ -83,7 +83,7 @@ class PaperTheme(PaperDynamic):
 
 
 class PaperApp(PaperDynamic):
-    def __init__(self, env, background_image=Image.new("RGBA", (296, 128), (255, 255, 255, 255))):
+    def __init__(self, env, app_name, icon=None, background_image=Image.new("RGBA", (296, 128), (255, 255, 255, 255))):
         super().__init__(env, background_image=background_image)
         self.first_init = True
         self.__bar_active = False
@@ -93,6 +93,14 @@ class PaperApp(PaperDynamic):
         self.args = []
         self.kwargs = {}
         self.suspended_touched = None
+        self.name = app_name
+        self.clock_font = self.env.fonts.get_heiti(18)
+        self.title_font = self.env.fonts.get_heiti(19)
+        self.title = self.name
+        if icon:
+            self.icon = icon
+        else:
+            self.icon = self.env.Images.none20px
 
     def close_click_handler(self, long):
         if self.__bar_active:
@@ -164,6 +172,10 @@ class PaperApp(PaperDynamic):
         new_image = super().build()
         if self.__bar_active:
             new_image.paste(self.bar_image, (0, 0))
+            new_image.paste(self.icon, (3, 3))
+            image_draw = ImageDraw.ImageDraw(new_image)
+            image_draw.text((28, 4), self.title, fill="black", font=self.title_font)
+            image_draw.text((178, 7), time.strftime("%H : %M", time.localtime()), fill="black", font=self.clock_font)
         return new_image
 
     def change_page(self, name, refresh=None, to_stack=False):

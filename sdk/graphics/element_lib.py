@@ -182,6 +182,8 @@ class LabelWithMultipleLines(TextElement):
         return all_text, total_height, line_height
 
 
+'''
+暂时弃用
 class ListItem:
     def __init__(self, text=None, func=lambda: None, icon=None):
         self.icon = icon
@@ -346,3 +348,4 @@ class ListWithFunc(ListWithIndexReturn):
         self.page_count = ceil(len(content) / 3)
         self.current_page = 0
         self.paper.update(self.page)
+'''

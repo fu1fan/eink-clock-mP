@@ -27,6 +27,7 @@ from pathlib import Path
 # TODO(功能):应用排序
 # TODO(功能):插件管理
 # TODO(功能):线程池扩容功能
+# TODO(功能):添加文字居中的功能
 
 
 example_config = {

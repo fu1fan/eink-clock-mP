@@ -14,7 +14,7 @@ listJson = None
 def build(env):
     global mainBtn
 
-    paper = paper_lib.PaperApp(env)
+    paper = paper_lib.PaperApp(env, "简单清单")
 
     config = sdk.configurator.Configurator(
         env.logger_env, "configs/account.json", auto_save=True)

@@ -6,7 +6,7 @@ resultFlag = False
 
 
 def build(env):
-    paper = paper_lib.PaperApp(env, background_image=Image.new("RGB", (296, 128), (0, 0, 0)))
+    paper = paper_lib.PaperApp(env, "简单计算器", background_image=Image.new("RGB", (296, 128), (0, 0, 0)))
 
     number_label = element_lib.Label(
         (0, 0), paper, "", (296, 30), bgcolor="black", textColor="white")

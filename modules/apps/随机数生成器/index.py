@@ -7,7 +7,7 @@ maxN = 100
 
 
 def build(env):
-    paper = paper_lib.PaperApp(env)
+    paper = paper_lib.PaperApp(env, "随机数生成器")
 
     paper.add_element(element_lib.Label(
         (80, 0), paper, "随机数生成器", (150, 30)), "mainPage")
