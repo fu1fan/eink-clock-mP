@@ -96,6 +96,7 @@ class PaperApp(PaperDynamic):
         self.name = app_name
         self.clock_font = self.env.fonts.get_heiti(18)
         self.title_font = self.env.fonts.get_heiti(19)
+        self.more_cover = Image.new("RGB", (10, 20), "white")
         self.title = self.name
         if icon:
             self.icon = icon
@@ -115,10 +116,6 @@ class PaperApp(PaperDynamic):
             self.__bar_active = False
             if self.more_event:
                 self.more_event(*self.args, **self.kwargs)
-            else:
-                self.pages["more_list"] = page_lib.ListPage(self, "more_list")  # todo:改用element！！！
-                self.change_page("more_list", to_stack=True)
-                self.pages["more_list"].show(self.more_list)
 
     def close_bar(self):
         if self.__bar_active:
@@ -172,10 +169,12 @@ class PaperApp(PaperDynamic):
         new_image = super().build()
         if self.__bar_active:
             new_image.paste(self.bar_image, (0, 0))
+            if not self.more_event:
+                new_image.paste(self.more_cover, (246, 3))
             new_image.paste(self.icon, (3, 3))
             image_draw = ImageDraw.ImageDraw(new_image)
-            image_draw.text((28, 4), self.title, fill="black", font=self.title_font)
-            image_draw.text((178, 7), time.strftime("%H : %M", time.localtime()), fill="black", font=self.clock_font)
+            image_draw.text((30, 4), self.title, fill="black", font=self.title_font)
+            image_draw.text((150, 7), time.strftime("%H : %M", time.localtime()), fill="black", font=self.clock_font)
         return new_image
 
     def change_page(self, name, refresh=None, to_stack=False):
