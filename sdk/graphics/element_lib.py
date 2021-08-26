@@ -45,6 +45,8 @@ class TextElement(Element):
             "resources/fonts/STHeiti_Light.ttc", fontSize)
         self.textColor = textColor
         self.background_image = Image.new("RGBA", size, bgcolor)
+        self.need_update = True
+        self.image_old = self.background_image
 
     def is_visible(self):
         return self._visible
@@ -58,16 +60,32 @@ class TextElement(Element):
 
     def set_text(self, newText):
         self.text = newText
+        self.need_update = True
+        self.paper.update(self.page.name)
+
+    def setxy(self, xy: tuple[int, int]):
+        self.xy = xy
+        self.need_update = True
+        self.paper.update(self.page.name)
+
+    def set_size(self, size: tuple[int, int]):
+        self.size = size
+        self.need_update = True
         self.paper.update(self.page.name)
 
     def build(self):
         if self.inited and self._visible:
-            image = self.background_image.copy()
-            image_draw = ImageDraw.ImageDraw(image)
-            # image_draw.rectangle((0, 0, self.size[0], self.size[1]), fill="white", outline="black", width=1)
-            image_draw.text((5, 5), self.text,
-                            font=self.font, fill=self.textColor)
-            return image
+            if self.need_update:
+                image = self.background_image.copy()
+                image_draw = ImageDraw.ImageDraw(image)
+                # image_draw.rectangle((0, 0, self.size[0], self.size[1]), fill="white", outline="black", width=1)
+                image_draw.text((5, 5), self.text,
+                                font=self.font, fill=self.textColor)
+                self.image_old = image
+                self.need_update = False
+                return image
+            else:
+                return self.image_old
         elif not self._visible:
             return None
 
@@ -104,14 +122,19 @@ class Button(TextElement):
 
     def build(self) -> Image:
         if self.inited and self._visible:
-            image = self.background_image.copy()
-            image_draw = ImageDraw.ImageDraw(image)
-            if self.outline is not None:
-                image_draw.rectangle(
-                    (0, 0, self.size[0] - 1, self.size[1] - 1), outline=self.outline, width=2)
-            image_draw.text((5, 5), self.text,
-                            font=self.font, fill=self.textColor)
-            return image
+            if self.need_update:
+                image = self.background_image.copy()
+                image_draw = ImageDraw.ImageDraw(image)
+                if self.outline is not None:
+                    image_draw.rectangle(
+                        (0, 0, self.size[0] - 1, self.size[1] - 1), outline=self.outline, width=2)
+                image_draw.text((5, 5), self.text,
+                                font=self.font, fill=self.textColor)
+                self.image_old = image
+                self.need_update = False
+                return image
+            else:
+                return self.image_old
         elif not self._visible:
             return None
 
