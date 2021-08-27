@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def build(env):
-    paper = paper_lib.PaperApp(env)
+    paper = paper_lib.PaperApp(env, "系统菜单")
 
     def poweroff():
         poweroff_btn.set_text("正在关机")

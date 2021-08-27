@@ -1,3 +1,5 @@
+import threading
+from math import ceil
 from pathlib import Path
 import traceback
 
@@ -39,10 +41,11 @@ class TextElement(Element):
         self.size = size
         self.args = args
         self.kwargs = kwargs
-        self.font = ImageFont.truetype(
-            "resources/fonts/STHeiti_Light.ttc", fontSize)
+        self.font = self.paper.env.fonts.get_heiti(fontSize)
         self.textColor = textColor
         self.background_image = Image.new("RGBA", size, bgcolor)
+        self.need_update = True
+        self.image_old = self.background_image
 
     def is_visible(self):
         return self._visible
@@ -56,16 +59,32 @@ class TextElement(Element):
 
     def set_text(self, newText):
         self.text = newText
+        self.need_update = True
+        self.paper.update(self.page.name)
+
+    def setxy(self, xy: tuple[int, int]):
+        self.xy = xy
+        self.need_update = True
+        self.paper.update(self.page.name)
+
+    def set_size(self, size: tuple[int, int]):
+        self.size = size
+        self.need_update = True
         self.paper.update(self.page.name)
 
     def build(self):
         if self.inited and self._visible:
-            image = self.background_image.copy()
-            image_draw = ImageDraw.ImageDraw(image)
-            # image_draw.rectangle((0, 0, self.size[0], self.size[1]), fill="white", outline="black", width=1)
-            image_draw.text((5, 5), self.text,
-                            font=self.font, fill=self.textColor)
-            return image
+            if self.need_update:
+                image = self.background_image.copy()
+                image_draw = ImageDraw.ImageDraw(image)
+                # image_draw.rectangle((0, 0, self.size[0], self.size[1]), fill="white", outline="black", width=1)
+                image_draw.text((5, 5), self.text,
+                                font=self.font, fill=self.textColor)
+                self.image_old = image
+                self.need_update = False
+                return image
+            else:
+                return self.image_old
         elif not self._visible:
             return None
 
@@ -102,14 +121,19 @@ class Button(TextElement):
 
     def build(self) -> Image:
         if self.inited and self._visible:
-            image = self.background_image.copy()
-            image_draw = ImageDraw.ImageDraw(image)
-            if self.outline is not None:
-                image_draw.rectangle(
-                    (0, 0, self.size[0] - 1, self.size[1] - 1), outline=self.outline, width=2)
-            image_draw.text((5, 5), self.text,
-                            font=self.font, fill=self.textColor)
-            return image
+            if self.need_update:
+                image = self.background_image.copy()
+                image_draw = ImageDraw.ImageDraw(image)
+                if self.outline is not None:
+                    image_draw.rectangle(
+                        (0, 0, self.size[0] - 1, self.size[1] - 1), outline=self.outline, width=2)
+                image_draw.text((5, 5), self.text,
+                                font=self.font, fill=self.textColor)
+                self.image_old = image
+                self.need_update = False
+                return image
+            else:
+                return self.image_old
         elif not self._visible:
             return None
 
@@ -178,3 +202,172 @@ class LabelWithMultipleLines(TextElement):
         line_height = max_line_height
         total_height = total_lines * line_height
         return all_text, total_height, line_height
+
+
+'''
+暂时弃用
+class ListItem:
+    def __init__(self, text=None, func=lambda: None, icon=None):
+        self.icon = icon
+        self.text = text
+        self.func = func
+
+
+class List(Element):
+    def __init__(self, paper):
+        super().__init__((0, 0), paper, size=(296, 128), background=Image.open("resources/images/list.png"))
+        self.content = None
+        self.active = False
+        self.page_count = 0
+        self.current_page = -1
+        self.title = ""
+        self.last_build_index = -1
+        self.last_build = self.background
+
+    def init(self):
+        return
+
+    def hide(self):
+        if self.active:
+            self.active = False
+            self.paper.update(self.page)
+        else:
+            return 0
+
+    def go_prev(self):
+        if self.active:
+            if self.current_page > 0:
+                self.current_page -= 1
+                self.paper.update(self.page)
+
+    def go_next(self):
+        if self.active:
+            if self.current_page < self.page_count:
+                self.current_page += 1
+                self.paper.update(self.page)
+
+    def show(self, title: str, content: list[ListItem]):
+        if not self.active:
+            self.active = True
+            self.paper.add_back_operation(self.hide)
+            self.last_build_index = -1
+        self.title = title
+        self.content = content
+        self.page_count = ceil(len(content) / 3)
+        self.current_page = 0
+        self.paper.update(self.page)
+
+    def exit(self):
+        if self.active:
+            self.content = None
+            self.active = False
+            self.page_count = 0
+            self.current_page = -1
+            self.title = ""
+            self.last_build_index = -1
+            self.last_build = self.background
+        super().exit()
+
+    def build(self):
+        if self.active:
+            if self.last_build_index == self.current_page:
+                return self.last_build
+            else:
+                new_image = self.background.copy()
+                draw = ImageDraw.Draw(new_image)
+                j = 0
+                draw.text((35, 32), "title", fill="black", font=self.paper.env.fonts.get_heiti(20))
+                for i in range(self.current_page * 3, self.current_page * 3 + 3):
+                    try:
+                        if self.content[i].icon:
+                            new_image.paste(self.content[i].icon, (8, 36+30*j))
+                            draw.text((35, 32), self.content[i].text, fill="black", font=self.paper.env.fonts.get_heiti(20))
+                        else:
+                            draw.text((12, 32+30*j), self.content[i].text, fill="black", font=self.paper.env.fonts.get_heiti(20))
+                    except IndexError:
+                        break
+                    j += 1
+                self.last_build = new_image
+                self.last_build_index = self.current_page
+                return new_image
+
+
+class ListWithIndexReturn(List):
+    def __init__(self, paper):
+        super().__init__(paper)
+        self.return_lock = threading.Event()
+        self.result = None
+
+    def _func1(self):
+        self.result = self.current_page*3
+        self.return_lock.set()
+
+    def _func2(self):
+        self.result = self.current_page*3 + 1
+        self.return_lock.set()
+
+    def _func3(self):
+        self.result = self.current_page*3 + 2
+        self.return_lock.set()
+
+    def hide(self):
+        if self.active:
+            self.active = False
+            self.paper.env.touch_handler.remove_clicked(self._func1)
+            self.paper.env.touch_handler.remove_clicked(self._func2)
+            self.paper.env.touch_handler.remove_clicked(self._func3)
+            self.paper.update(self.page)
+        else:
+            return 0
+
+    def recover(self):
+        super().recover()
+        self.paper.env.touch_handler.add_clicked((0, 296, 30, 60), self._func1)
+        self.paper.env.touch_handler.add_clicked((0, 296, 60, 90), self._func2)
+        self.paper.env.touch_handler.add_clicked((0, 296, 90, 120), self._func3)
+
+    def show(self, title: str,content: list[ListItem]):
+        if not self.active:
+            self.active = True
+            self.paper.add_back_operation(self.hide)
+            self.last_build_index = -1
+            self.paper.env.touch_handler.add_clicked((0, 296, 30, 60), self._func1)
+            self.paper.env.touch_handler.add_clicked((0, 296, 60, 90), self._func2)
+            self.paper.env.touch_handler.add_clicked((0, 296, 90, 120), self._func3)
+        self.title = title
+        self.content = content
+        self.page_count = ceil(len(content) / 3)
+        self.current_page = 0
+        self.paper.update(self.page)
+        self.return_lock.clear()
+        self.return_lock.wait()
+        return self.result
+
+
+class ListWithFunc(ListWithIndexReturn):
+    def __init__(self, paper):
+        super().__init__(paper)
+
+    def _func1(self):
+        self.content[self.current_page*3].func()
+
+    def _func2(self):
+        self.content[self.current_page*3+1].func()
+
+    def _func3(self):
+        self.content[self.current_page*3+2].func()
+
+    def show(self, title: str, content: list[ListItem]):
+        if not self.active:
+            self.active = True
+            self.paper.add_back_operation(self.hide)
+            self.last_build_index = -1
+            self.paper.env.touch_handler.add_clicked((0, 296, 30, 60), self._func1)
+            self.paper.env.touch_handler.add_clicked((0, 296, 60, 90), self._func2)
+            self.paper.env.touch_handler.add_clicked((0, 296, 90, 120), self._func3)
+        self.title = title
+        self.content = content
+        self.page_count = ceil(len(content) / 3)
+        self.current_page = 0
+        self.paper.update(self.page)
+'''

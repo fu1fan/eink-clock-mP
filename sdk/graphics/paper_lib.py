@@ -1,6 +1,6 @@
 import time
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from sdk.graphics import PaperDynamic, page_lib
 
@@ -11,34 +11,31 @@ class PaperTheme(PaperDynamic):
         self.dock_image = Image.open(open("resources/images/docker.jpg", "rb"))
         self.__docker_active = False
         self.inited = False
-        self.suspended_touchpad = None
+        self.pages["appList"] = page_lib.ApplistPage(self, "appList")
 
     def appbox_click_handler(self):
         if self.__docker_active:
-            self.suspended_touchpad = None
             self.__docker_active = False
-            self.pages["appList"] = page_lib.Applistpage(self, "appList")
             self.change_page("appList", to_stack=True)
             self.pages["appList"].show()
 
     def settings_click_handler(self):
         if self.__docker_active:
-            self.suspended_touchpad = None
             self.__docker_active = False
             self.env.open_app("系统选项")
 
     def close_docker(self):
         if self.__docker_active:
-            if self.suspended_touchpad:
-                self.env.touch_handler.recover(self.suspended_touchpad)
-                self.suspended_touchpad = None
+            self.env.touch_handler.remove_a_clicked(self.appbox_click_handler)
+            self.env.touch_handler.remove_a_clicked(self.settings_click_handler)
+            self.env.touch_handler.remove_a_clicked(self.close_docker)
             self.__docker_active = False
             self.update_anyway()
 
     def docker_clicked_handler(self):
         if (self.nowPage != "mainPage") or self.__docker_active or (not self.inited):
             return
-        self.suspended_touchpad = self.env.touch_handler.suspend()
+        # self.suspended_touchpad = self.env.touch_handler.suspend()
         self.env.touch_handler.add_clicked(
             (60, 100, 0, 30), self.appbox_click_handler)
         self.env.touch_handler.add_clicked(
@@ -52,9 +49,9 @@ class PaperTheme(PaperDynamic):
             if not self.__docker_active:
                 return
         self.__docker_active = False
-        if self.suspended_touchpad:
-            self.env.touch_handler.recover(self.suspended_touchpad)
-            self.suspended_touchpad = None
+        self.env.touch_handler.remove_a_clicked(self.appbox_click_handler)
+        self.env.touch_handler.remove_a_clicked(self.settings_click_handler)
+        self.env.touch_handler.remove_a_clicked(self.close_docker)
         self.update_anyway()
 
     def init(self):
@@ -83,7 +80,7 @@ class PaperTheme(PaperDynamic):
 
 
 class PaperApp(PaperDynamic):
-    def __init__(self, env, background_image=Image.new("RGBA", (296, 128), (255, 255, 255, 255))):
+    def __init__(self, env, app_name, icon=None, background_image=Image.new("RGBA", (296, 128), (255, 255, 255, 255))):
         super().__init__(env, background_image=background_image)
         self.first_init = True
         self.__bar_active = False
@@ -92,7 +89,16 @@ class PaperApp(PaperDynamic):
         self.more_list = None
         self.args = []
         self.kwargs = {}
-        self.suspended_touched = None
+        # self.suspended_touched = None
+        self.name = app_name
+        self.clock_font = self.env.fonts.get_heiti(18)
+        self.title_font = self.env.fonts.get_heiti(19)
+        self.more_cover = Image.new("RGB", (10, 20), "white")
+        self.title = self.name
+        if icon:
+            self.icon = icon
+        else:
+            self.icon = self.env.Images.none20px
 
     def close_click_handler(self, long):
         if self.__bar_active:
@@ -107,30 +113,25 @@ class PaperApp(PaperDynamic):
             self.__bar_active = False
             if self.more_event:
                 self.more_event(*self.args, **self.kwargs)
-            else:
-                self.pages["more_list"] = page_lib.ListPage(self, "more_list")  # todo:改用element！！！
-                self.change_page("more_list", to_stack=True)
-                self.pages["more_list"].show(self.more_list)
 
     def close_bar(self):
         if self.__bar_active:
             self.__bar_active = False
-            if self.suspended_touched:
-                self.env.touch_handler.recover(self.suspended_touched)
-                self.suspended_touched = None
+            self.env.touch_handler.remove_a_clicked(self.close_bar)
+            self.env.touch_handler.remove_a_clicked_with_time(self.close_click_handler)
+            self.env.touch_handler.remove_a_clicked(self.more_click_handler)
             self.update_anyway()
 
     def bar_clicked_handler(self):
         if self.__bar_active or (not self.inited):
             return
-        self.suspended_touched = self.env.touch_handler.suspend()
+        # self.suspended_touched = self.env.touch_handler.suspend()
         self.env.touch_handler.add_clicked(
             (0, 296, 30, 128), self.close_bar)
         self.env.touch_handler.add_clicked_with_time(
             (266, 296, 0, 30), self.close_click_handler)
         self.env.touch_handler.add_clicked(
-            (236, 266, 0, 30), self.more_click_handler
-        )
+            (236, 266, 0, 30), self.more_click_handler)
         self.__bar_active = True
         self.update_anyway()
         for _ in range(5):
@@ -138,9 +139,9 @@ class PaperApp(PaperDynamic):
             if not self.__bar_active:
                 return
         self.__bar_active = False
-        if self.suspended_touched:
-            self.env.touch_handler.recover(self.suspended_touched)
-            self.suspended_touched = None
+        self.env.touch_handler.remove_a_clicked(self.close_bar)
+        self.env.touch_handler.remove_a_clicked_with_time(self.close_click_handler)
+        self.env.touch_handler.remove_a_clicked(self.more_click_handler)
         self.update_anyway()
 
     def init(self):
@@ -164,9 +165,15 @@ class PaperApp(PaperDynamic):
         new_image = super().build()
         if self.__bar_active:
             new_image.paste(self.bar_image, (0, 0))
+            if not self.more_event:
+                new_image.paste(self.more_cover, (246, 3))
+            new_image.paste(self.icon, (3, 3))
+            image_draw = ImageDraw.ImageDraw(new_image)
+            image_draw.text((30, 4), self.title, fill="black", font=self.title_font)
+            image_draw.text((150, 7), time.strftime("%H : %M", time.localtime()), fill="black", font=self.clock_font)
         return new_image
 
     def change_page(self, name, refresh=None, to_stack=False):
         super().change_page(name, refresh, to_stack)
         self.env.touch_handler.add_clicked(
-            (0, 30, 0, 30), self.bar_clicked_handler)
+            (266, 296, 0, 30), self.bar_clicked_handler)

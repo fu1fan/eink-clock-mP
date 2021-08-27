@@ -12,15 +12,18 @@ from sdk import configurator
 from PIL import Image
 from pathlib import Path
 
+# TODO(修复):修复屏幕休眠机制
+# TODO(功能):添加页面组织器
 # TODO(功能):添加双指双击刷新屏幕的功能
-# TODO(优化):改写docker触摸实现
 # TODO(功能):统一资源库（字体、图像）
 # TODO(功能):为paper加入choice和prompt元件
 # TODO(功能):网络配置
 # TODO(功能):应用商店
 # TODO(功能):应用排序
 # TODO(功能):插件管理
-# TODO(功能):移植ListPage为Element
+# TODO(功能):线程池扩容功能
+# TODO(功能):添加文字居中的功能
+
 
 example_config = {
     "main": {

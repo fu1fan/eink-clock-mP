@@ -14,7 +14,7 @@ listJson = None
 def build(env):
     global mainBtn
 
-    paper = paper_lib.PaperApp(env)
+    paper = paper_lib.PaperApp(env, "简单清单")
 
     config = sdk.configurator.Configurator(
         env.logger_env, "configs/account.json", auto_save=True)
@@ -57,8 +57,7 @@ def build(env):
             mainBtn.set_text("显示您第一个清单")
 
         mainBtn.set_text("加载中...")
-        load_todo_thread = threading.Thread(target=load_todo)
-        load_todo_thread.start()
+        env.pool.add(load_todo)
 
     if username and user_token:
         mainBtn = element_lib.Button(

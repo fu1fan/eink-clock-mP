@@ -26,7 +26,7 @@ class Paper(BasicGraphicControl):
         self.background_image = background_image
         self.epd = env.epd_driver
         self.image_old = self.background_image
-        self.update_lock = threading.Lock()
+        self.update_lock = threading.RLock()
 
     def __del__(self):
         if self.active:
@@ -125,12 +125,12 @@ class PaperDynamic(Paper):
         self.nowPage = "mainPage"
         # self.touch_handler = env.touch_handler
         self.env = env
-        self.pages_stack = LifoQueue()
+        self.back_stack = LifoQueue()
 
     def exit(self):
         for page in self.pages.values():
             page.exit()
-        self.pages_stack.queue.clear()
+        self.back_stack.queue.clear()
         super().exit()
 
     def pause(self):
@@ -163,13 +163,13 @@ class PaperDynamic(Paper):
             element.init()
 
     def change_page(self, name, refresh=None, to_stack=False):
-        if name in self.pages:
+        if name in self.pages.keys():
             if name == self.nowPage:
                 return
             self.env.touch_handler.clear()
             self.pages[self.nowPage].pause()
             if to_stack:
-                self.pages_stack.put(self.nowPage)
+                self.back_stack.put(self.nowPage)
             self.nowPage = name
             if self.pages[name].inited:
                 self.pages[name].recover()
@@ -180,12 +180,21 @@ class PaperDynamic(Paper):
             raise ValueError("The specified page does not exist!")
 
     def back(self, refresh=False) -> bool:
-        if self.pages_stack.empty():
+        if self.back_stack.empty():
             return False
         else:
-            page = self.pages_stack.get(timeout=1)
-            self.change_page(page, refresh)
-            return True
+            operation = self.back_stack.get(timeout=1)
+            if callable(operation):
+                if operation():  # 若制定函数有返回，则再次返回（方便程序有自己的返回方法）
+                    return self.back(refresh)
+                else:
+                    return True
+            elif isinstance(operation, str):
+                self.change_page(operation, refresh)
+                return True
+
+    def add_back_operation(self, func):
+        self.back_stack.put(func)
 
     def update_anyway(self, refresh=None):
         if self.update_lock.acquire(blocking=False) and self.active:
@@ -204,19 +213,19 @@ class PaperDynamic(Paper):
             return
         self.update_anyway(refresh)
 
-    def pause_update(self, timeout=-1):
-        if not self.update_lock.acquire(timeout=timeout):
-            raise TimeoutError
+    def pause_update(self):
+        return self.update_lock.acquire(blocking=False)
 
-    def recover_update(self, raise_for_unlocked=False):
+    def recover_update(self, raise_=False, update_now=True):
         try:
             self.update_lock.release()
         except RuntimeError as e:
-            if raise_for_unlocked:
+            if raise_:
                 raise e
             else:
                 self.env.logger_env.warn(traceback.format_exc())
-        self.env.pool.add_immediately(self.update_anyway)
+        if update_now:
+            self.env.pool.add_immediately(self.update_anyway)
 
     def update_async(self, page_name: str, refresh=None):
         self.env.pool.add_immediately(self.update, page_name, refresh)
@@ -227,7 +236,7 @@ class PaperDynamic(Paper):
 
     def clear(self):
         self.pages = {"mainPage": Page(self, "mainPage")}
-        self.pages_stack.queue.clear()
+        self.back_stack.queue.clear()
 
 
 class Element(BasicGraphicControl):
@@ -258,7 +267,7 @@ class Element(BasicGraphicControl):
     def recover(self):  # 切换回page时调用
         self.active = True
 
-    def build(self) -> Image.Image:  # 当页面刷新时被调用，须返回一个图像
+    def build(self):  # 当页面刷新时被调用，须返回一个图像
         return self.background
 
 

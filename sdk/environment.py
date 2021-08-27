@@ -409,7 +409,7 @@ class Env:
         self.fonts = FasterFonts()
         self.paper = None
         # self.paper_old = None
-        self.papers = LifoQueue(maxsize=5)
+        self.papers = LifoQueue()
         self.plugins = None
         self.apps = None
         self.inited = False
@@ -453,8 +453,6 @@ class Env:
         else:
             self.paper.pause()  # pause()能暂停页面
             if to_stack:
-                if self.papers.full():
-                    self.paper.get()
                 self.papers.put(self.paper, timeout=1)
         # self.paper_old, self.paper = self.paper, paper
         self.paper = paper

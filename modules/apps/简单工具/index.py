@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 def build(env):
-    paper = paper_lib.PaperApp(env)
+    paper = paper_lib.PaperApp(env, "简单工具")
 
     def tools_item_oncick(index):
         if index == 0:
