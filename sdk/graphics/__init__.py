@@ -163,7 +163,7 @@ class PaperDynamic(Paper):
             element.init()
 
     def change_page(self, name, refresh=None, to_stack=False):
-        if name in self.pages:
+        if name in self.pages.keys():
             if name == self.nowPage:
                 return
             self.env.touch_handler.clear()
