@@ -14,11 +14,11 @@ class ListPage(_graphics.Page):
 
         self.icons = (
             _element_lib.ImageElement(
-                (8, 36), self.paper, "resources/images/None20px.jpg"),
+                (8, 36), self.paper, self.env.Images.none20px),
             _element_lib.ImageElement(
-                (8, 66), self.paper, "resources/images/None20px.jpg"),
+                (8, 66), self.paper, self.env.Images.none20px),
             _element_lib.ImageElement(
-                (8, 96), self.paper, "resources/images/None20px.jpg")
+                (8, 96), self.paper, self.env.Images.none20px)
         )
 
         for icon in self.icons:
@@ -79,7 +79,7 @@ class ListPage(_graphics.Page):
             self.more_items_dots.set_image(
                 "resources/images/more_items_dots.jpg")
         else:
-            self.more_items_dots.set_image("resources/images/None1px.jpg")
+            self.more_items_dots.set_image(self.env.Images.none1px)
 
         index_of_the_first = (self.current_page_of_content - 1) * 3
         for i in range(0, 3):
@@ -92,12 +92,12 @@ class ListPage(_graphics.Page):
                     self.icons[i].set_image(
                         self.content[index_of_the_first + i][1])
                 else:
-                    self.icons[i].set_image("resources/images/None20px.jpg")
+                    self.icons[i].set_image(self.env.Images.none20px)
                 # 不必在此更改点击事件
 
             else:
                 self.listTexts[i].set_text("")
-                self.icons[i].set_image("resources/images/None1px.jpg")
+                self.icons[i].set_image(self.env.Images.none1px)
                 # 也不必在此更改点击事件了
 
     def go_prev(self):
@@ -141,11 +141,11 @@ class ListPage(_graphics.Page):
 
     def init(self):
         super().init()
-        self.paper.env.touch_handler.add_slide_y((0, 296, 35, 128), self.slide_co)
+        self.env.touch_handler.add_slide_y((0, 296, 35, 128), self.slide_co)
 
     def recover(self):
         super().recover()
-        self.paper.env.touch_handler.add_slide_y((0, 296, 35, 128), self.slide_co)
+        self.env.touch_handler.add_slide_y((0, 296, 35, 128), self.slide_co)
 
     def exit(self):
         super().exit()
@@ -155,7 +155,7 @@ class ListPage(_graphics.Page):
 class ApplistPage(ListPage):
     def open_app_by_index(self, index):
         if index >= 0:
-            self.paper.env.open_app(list(self.paper.env.apps.keys())[index])
+            self.env.open_app(list(self.env.apps.keys())[index])
 
     def back_to_main_page(self):
         self.paper.change_page("mainPage")
@@ -163,7 +163,7 @@ class ApplistPage(ListPage):
     def show(self, content=None, listTitle="", closeEvent=None):  # TODO:此处原本出现签名不一致问题，临时改正
         app_list = []
 
-        for appName, appContent in self.paper.env.apps.items():
+        for appName, appContent in self.env.apps.items():
             app_list.append([appName, appContent[1][1], self.open_app_by_index])
 
         super().show(app_list, "应用列表", self.back_to_main_page)

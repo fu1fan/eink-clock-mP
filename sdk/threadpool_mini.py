@@ -2,6 +2,7 @@ import ctypes
 import inspect
 import queue
 import threading
+import time
 import traceback
 from queue import Queue
 
@@ -48,6 +49,7 @@ class ThreadPool:
                                        self.handler,
                                        self.__thread_start_work,
                                        self.__thread_finish_work))
+            time.sleep(0.01)
 
     @staticmethod
     def __error_handler(_):
@@ -116,12 +118,12 @@ class ThreadPool:
     def stop(self):
         self.running = False
 
-    def stop_mandatory(self):   # 不稳定，不建议使用！
+    def stop_mandatory(self):  # 不稳定，不建议使用！
         self.running = False
         for i in self.threads:
             try:
                 stop_thread(i)
-            except (ValueError, SystemError):   # 这行代码有点危
+            except (ValueError, SystemError):  # 这行代码有点危
                 self.handler(traceback.format_exc())
 
     def task_qsize(self):
@@ -134,7 +136,7 @@ class ThreadPool:
         return self.__running_num
 
     def clear(self):
-        self.tasks.queue.clear()    # TODO:未测试
+        self.tasks.queue.clear()  # TODO:未测试
 
     def wait(self, timeout=-1):
         self.__lock_wait.acquire(timeout=timeout)

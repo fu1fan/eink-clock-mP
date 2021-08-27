@@ -87,6 +87,7 @@ class Page(list):  # page是对list的重写，本质为添加一个构造器
     def __init__(self, paper, name):
         super().__init__()
         self.paper = paper
+        self.env = paper.env
         self.name = name
         self.inited = False
 
