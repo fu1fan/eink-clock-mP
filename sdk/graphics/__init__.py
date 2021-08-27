@@ -163,7 +163,7 @@ class PaperDynamic(Paper):
         if self.active:
             element.init()
 
-    def change_page(self, name, refresh=None, to_stack=False):
+    def change_page(self, name, refresh=None, to_stack=True):
         if name in self.pages.keys():
             if name == self.nowPage:
                 return
