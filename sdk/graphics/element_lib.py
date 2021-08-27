@@ -62,12 +62,12 @@ class TextElement(Element):
         self.need_update = True
         self.paper.update(self.page.name)
 
-    def setxy(self, xy: tuple[int, int]):
+    def set_xy(self, xy: tuple):
         self.xy = xy
         self.need_update = True
         self.paper.update(self.page.name)
 
-    def set_size(self, size: tuple[int, int]):
+    def set_size(self, size: tuple):
         self.size = size
         self.need_update = True
         self.paper.update(self.page.name)

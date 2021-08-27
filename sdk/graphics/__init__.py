@@ -26,7 +26,7 @@ class Paper(BasicGraphicControl):
         self.background_image = background_image
         self.epd = env.epd_driver
         self.image_old = self.background_image
-        self.update_lock = threading.RLock()
+        self.update_lock = threading.Lock()
 
     def __del__(self):
         if self.active:

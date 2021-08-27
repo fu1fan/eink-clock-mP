@@ -167,9 +167,9 @@ class PaperApp(PaperDynamic):
             new_image.paste(self.bar_image, (0, 0))
             if not self.more_event:
                 new_image.paste(self.more_cover, (246, 3))
-            new_image.paste(self.icon, (3, 3))
+            new_image.paste(self.icon, (4, 4))
             image_draw = ImageDraw.ImageDraw(new_image)
-            image_draw.text((30, 4), self.title, fill="black", font=self.title_font)
+            image_draw.text((30, 5), self.title, fill="black", font=self.title_font)
             image_draw.text((150, 7), time.strftime("%H : %M", time.localtime()), fill="black", font=self.clock_font)
         return new_image
 
