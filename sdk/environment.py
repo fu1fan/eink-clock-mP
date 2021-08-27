@@ -2,9 +2,9 @@ import os
 import threading
 import time
 
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image, ImageTk, ImageFont, ImageDraw
 
-from sdk import logger, icnt86, epd2in9_V2
+from sdk import logger
 from sdk import touchpad
 from sdk import graphics
 from sdk import timing_task
@@ -12,10 +12,91 @@ from sdk import threadpool_mini
 from queue import LifoQueue
 from pathlib import Path
 
-config = icnt86.config
+import tkinter
 
 
-class EpdController(epd2in9_V2.Epd2in9V2):
+class Simulator:
+    def __init__(self):
+        self.touch_recoder_new = None
+        self.touch_recoder_old = None
+        self.lastX = None
+        self.lastY = None
+        self.env = None
+        self.window = None
+        self.space_label = None
+        self.display = None
+
+    @staticmethod
+    def sim_touch(x, y, ICNT_Dev: touchpad.TouchRecoder, ICNT_Old: touchpad.TouchRecoder):
+        ICNT_Old.Touch = ICNT_Dev.Touch
+        ICNT_Old.TouchGestureId = ICNT_Dev.TouchGestureId
+        ICNT_Old.TouchCount = ICNT_Dev.TouchCount
+        ICNT_Old.TouchEvenId = ICNT_Dev.TouchEvenId
+        ICNT_Old.X = ICNT_Dev.X.copy()
+        ICNT_Old.Y = ICNT_Dev.Y.copy()
+        ICNT_Old.P = ICNT_Dev.P.copy()
+        if x is None or y is None:
+            ICNT_Dev.Touch = 0
+        else:
+            ICNT_Dev.Touch = 1
+            ICNT_Dev.X[0] = x
+            ICNT_Dev.Y[0] = y
+
+    def click_release_handler(self, event):
+        if self.lastX == event.x and self.lastY == event.y:
+            print("点击：(%d, %d)" % (event.x, event.y))  # 点击事件
+            self.sim_touch(None, None, self.touch_recoder_new, self.touch_recoder_old)  # 触摸终止
+            self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
+
+        else:
+            print("滑动：(%d, %d) -> (%d, %d)" % (self.lastX, self.lastY, event.x, event.y))  # 滑动事件
+            self.sim_touch(event.x, event.y, self.touch_recoder_new, self.touch_recoder_old)
+            self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
+
+            self.sim_touch(None, None, self.touch_recoder_new, self.touch_recoder_old)  # 触摸终止
+            self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
+
+    def click_press_handler(self, event):
+        self.lastX = event.x
+        self.lastY = event.y
+        self.sim_touch(event.x, event.y, self.touch_recoder_new, self.touch_recoder_old)
+        self.env.touch_handler.handle(self.touch_recoder_new, self.touch_recoder_old)
+
+    def open(self, env) -> None:
+
+        self.env = env
+
+        self.touch_recoder_new = touchpad.TouchRecoder()  # 触摸
+        self.touch_recoder_old = touchpad.TouchRecoder()
+
+        self.window = tkinter.Tk()
+
+        self.window.title('水墨屏模拟器 by xuanzhi33')
+
+        self.window.geometry('390x178')
+
+        self.window.configure(background="black")
+
+        pil_image = Image.new("RGBA", (296, 128), "white")
+        tk_image = ImageTk.PhotoImage(image=pil_image)
+
+        self.space_label = tkinter.Label(self.window, background="black")
+        self.space_label.pack()
+
+        self.display = tkinter.Label(self.window, image=tk_image, relief=tkinter.GROOVE)
+        self.display.bind("<ButtonPress-1>", self.click_press_handler)
+        self.display.bind("<ButtonRelease-1>", self.click_release_handler)
+        self.display.pack()
+
+        self.window.mainloop()
+
+    def update_image(self, PILImg):
+        tk_image = ImageTk.PhotoImage(image=PILImg)
+        self.display.configure(image=tk_image)
+        self.display.image = tk_image
+
+
+class EpdController:    # TODO:此部分改动可能导导致继承关系错误，合并时必须手动处理！！！切记切记
     """
     用这个类来显示图片可能会被阻塞（当多个线程尝试访问屏幕时）
     """
@@ -23,6 +104,7 @@ class EpdController(epd2in9_V2.Epd2in9V2):
     def __init__(self, env, init=True, auto_sleep_time=30, refresh_time=3600, refresh_interval=20):
         super().__init__()
         self.env = env
+        self.simulator = env.simulator
         self.last_update = time.time()
         self.partial_time = 0
         self.refresh_time = refresh_time
@@ -61,17 +143,18 @@ class EpdController(epd2in9_V2.Epd2in9V2):
             self.lock.release()
 
     def init(self):
-        super().init()
         try:
             self.sleep_status.release()
         except RuntimeError:
             pass
         self.logger_.debug("屏幕初始化")
 
-    def display(self, image, timeout=-1):
+    def display(self, image: Image.Image, timeout=-1):
         if not self.lock.acquire(timeout=timeout):
             raise TimeoutError
-        super().display(image)
+
+        self.simulator.update_image(image)
+
         self.lock.release()
         self.last_update = time.time()
         self.partial_time = 0
@@ -79,7 +162,9 @@ class EpdController(epd2in9_V2.Epd2in9V2):
     def display_base(self, image, timeout=-1):
         if not self.lock.acquire(timeout=timeout):
             raise TimeoutError
-        super().display_base(image)
+
+        self.simulator.update_image(image)
+
         self.lock.release()
         self.last_update = time.time()
         self.partial_time = 0
@@ -87,7 +172,9 @@ class EpdController(epd2in9_V2.Epd2in9V2):
     def display_partial(self, image, timeout=-1):
         if not self.lock.acquire(timeout=timeout):
             raise TimeoutError
-        super().display_partial(image)
+
+        self.simulator.update_image(image)
+
         self.lock.release()
         self.last_update = time.time()
         self.partial_time += 1
@@ -104,7 +191,9 @@ class EpdController(epd2in9_V2.Epd2in9V2):
     def display_partial_wait(self, image, timeout=-1):
         if not self.lock.acquire(timeout=timeout):
             raise TimeoutError
-        super().display_partial_wait(image)
+
+        self.simulator.update_image(image)
+
         self.lock.release()
         self.last_update = time.time()
         self.partial_time += 1
@@ -112,7 +201,7 @@ class EpdController(epd2in9_V2.Epd2in9V2):
     def clear(self, color, timeout=-1):
         if not self.lock.acquire(timeout=timeout):
             raise TimeoutError
-        super().clear(color)
+        pass
         self.lock.release()
         self.last_update = time.time()
         self.partial_time = 0
@@ -120,11 +209,9 @@ class EpdController(epd2in9_V2.Epd2in9V2):
     def exit(self):
         self.tk.stop()
         self.sleep()
-        super().exit()
 
     def sleep(self):
         if self.sleep_status.acquire(blocking=False):
-            super().sleep()
             self.logger_.debug("屏幕休眠")
 
     def render(self, image: Image.Image):
@@ -134,7 +221,7 @@ class EpdController(epd2in9_V2.Epd2in9V2):
         if popup_img:
             image.paste(popup_img, (60, 25))
         self.env.system_event.render(image)
-        return super().get_buffer(image)
+        return image
 
     def acquire(self, timeout=-1):
         return self.lock.acquire(timeout=timeout)
@@ -145,27 +232,32 @@ class EpdController(epd2in9_V2.Epd2in9V2):
     def set_upside_down(self, value: bool):
         self.upside_down = value
 
+    @staticmethod
+    def is_busy():
+        return False
 
-class TouchDriver(icnt86.ICNT86):
+
+class TouchDriver:
     def __init__(self, logger_touch: logger):
-        super().__init__()
         self.logger_touch = logger_touch
 
     def icnt_reset(self):
-        super().icnt_reset()
         self.logger_touch.debug("触摸屏重置")
 
     def icnt_read_version(self):
-        buf = self.icnt_read(0x000a, 4)
-        self.logger_touch.debug("触摸屏的版本为:" + str(buf))
+        self.logger_touch.debug("触摸屏的版本为:" + "调试器模式")
 
     def icnt_init(self):
-        super().icnt_init()
         self.logger_touch.debug("触摸屏初始化")
 
-    def icnt_scan(self, ICNT_Dev: touchpad.TouchRecoder, ICNT_Old: touchpad.TouchRecoder):
-        mask = 0x00
-
+    @staticmethod
+    def icnt_scan(ICNT_Dev: touchpad.TouchRecoder, ICNT_Old: touchpad.TouchRecoder):
+        try:
+            x = int(input("x:"))
+            y = int(input("y:"))
+        except ValueError:
+            x = None
+            y = None
         ICNT_Old.Touch = ICNT_Dev.Touch
         ICNT_Old.TouchGestureId = ICNT_Dev.TouchGestureId
         ICNT_Old.TouchCount = ICNT_Dev.TouchCount
@@ -173,45 +265,12 @@ class TouchDriver(icnt86.ICNT86):
         ICNT_Old.X = ICNT_Dev.X.copy()
         ICNT_Old.Y = ICNT_Dev.Y.copy()
         ICNT_Old.P = ICNT_Dev.P.copy()
-
-        n = None
-        for _ in range(100):
-            n = self.digital_read(self.INT)
-            if n == 0:
-                break
-            time.sleep(0.001)
-
-        if n == 0:  # 检测屏幕是否被点击，不是每次都能扫描出来
-            ICNT_Dev.Touch = 1
-            buf = self.icnt_read(0x1001, 1)
-
-            if buf[0] == 0x00:
-                self.icnt_write(0x1001, mask)
-                config.delay_ms(1)
-                self.logger_touch.warn("touchpad buffers status is 0!")
-                return
-            else:
-                ICNT_Dev.TouchCount = buf[0]
-
-                if ICNT_Dev.TouchCount > 5 or ICNT_Dev.TouchCount < 1:
-                    self.icnt_write(0x1001, mask)
-                    ICNT_Dev.TouchCount = 0
-                    self.logger_touch.warn("TouchCount number is wrong!")
-                    return
-
-                buf = self.icnt_read(0x1002, ICNT_Dev.TouchCount * 7)
-                self.icnt_write(0x1001, mask)
-
-                for i in range(0, ICNT_Dev.TouchCount, 1):
-                    ICNT_Dev.TouchEvenId[i] = buf[6 + 7 * i]
-                    ICNT_Dev.X[i] = 295 - ((buf[2 + 7 * i] << 8) + buf[1 + 7 * i])
-                    ICNT_Dev.Y[i] = 127 - ((buf[4 + 7 * i] << 8) + buf[3 + 7 * i])
-                    ICNT_Dev.P[i] = buf[5 + 7 * i]
-
-                return
-        else:
+        if x is None or y is None:
             ICNT_Dev.Touch = 0
-            return
+        else:
+            ICNT_Dev.Touch = 1
+            ICNT_Dev.X[0] = x
+            ICNT_Dev.Y[0] = y
 
 
 class Popup(graphics.BasicGraphicControl):
@@ -393,18 +452,11 @@ class FasterFonts:
 
 
 class Env:
-    def __init__(self, configs, logger_env: logger.Logger):
+    def __init__(self, configs, logger_env: logger.Logger, simulator):
         # TODO:优化启动顺序
+        self.simulator = simulator
+
         self.logger_env = logger_env
-        self.epd_lock = threading.RLock()
-        self.epd_driver = EpdController(self,
-                                        True,
-                                        configs["auto_sleep_time"],
-                                        configs["refresh_time"],
-                                        configs["refresh_interval"])
-        if self.epd_driver.is_busy():
-            self.logger_env.error("The screen is busy!")
-            raise RuntimeError("The screen is busy!")
 
         self.fonts = FasterFonts()
         self.paper = None

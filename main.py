@@ -23,7 +23,6 @@ from pathlib import Path
 # TODO(功能):插件管理
 # TODO(功能):线程池扩容功能
 # TODO(功能):添加文字居中的功能
-# TODO(优化):重新打开lispage后内容还是之前的内容的bug
 
 
 example_config = {
@@ -188,10 +187,6 @@ def main_thread():  # 主线程：UI管理（如果有模拟器就不是主线�
         # 主程序开始
         env.init(theme[0].build(env), plugins, apps)
 
-        while 1:  # 据说 while 1 的效率比 while True 高
-            env.touchpad_driver.icnt_scan(touch_recoder_new, touch_recoder_old)
-            env.touch_handler.handle(touch_recoder_new, touch_recoder_old)
-
     except KeyboardInterrupt:
         print("ctrl+c")
     except:  # ⚠️只在生产环境使用 会影响调试结果！！！
@@ -205,7 +200,10 @@ if __name__ == "__main__":
     configurator_main.check(example_config, True)
     configurator_main.change_path("/main")
 
+    simulator = environment.Simulator()  # 我是一个模拟器
     env = environment.Env(configurator_main.read(
-        "env_configs"), logger_main)
+        "env_configs"), logger_main, simulator)  # 有模拟器的env
+    mainThrd = threading.Thread(target=main_thread, daemon=True)  # 因为模拟器必须得是主线程
+    mainThrd.start()  # 原来的主线程就得让位了~
 
-    main_thread()
+    simulator.open(env)  # 打开模拟器
