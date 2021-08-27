@@ -12,33 +12,30 @@ class PaperTheme(PaperDynamic):
         self.__docker_active = False
         self.inited = False
         self.pages["appList"] = page_lib.ApplistPage(self, "appList")
-        self.suspended_touchpad = None
 
     def appbox_click_handler(self):
         if self.__docker_active:
-            self.suspended_touchpad = None
             self.__docker_active = False
             self.change_page("appList", to_stack=True)
             self.pages["appList"].show()
 
     def settings_click_handler(self):
         if self.__docker_active:
-            self.suspended_touchpad = None
             self.__docker_active = False
             self.env.open_app("系统选项")
 
     def close_docker(self):
         if self.__docker_active:
-            if self.suspended_touchpad:
-                self.env.touch_handler.recover(self.suspended_touchpad)
-                self.suspended_touchpad = None
+            self.env.touch_handler.remove_a_clicked(self.appbox_click_handler)
+            self.env.touch_handler.remove_a_clicked(self.settings_click_handler)
+            self.env.touch_handler.remove_a_clicked(self.close_docker)
             self.__docker_active = False
             self.update_anyway()
 
     def docker_clicked_handler(self):
         if (self.nowPage != "mainPage") or self.__docker_active or (not self.inited):
             return
-        self.suspended_touchpad = self.env.touch_handler.suspend()
+        # self.suspended_touchpad = self.env.touch_handler.suspend()
         self.env.touch_handler.add_clicked(
             (60, 100, 0, 30), self.appbox_click_handler)
         self.env.touch_handler.add_clicked(
@@ -52,9 +49,9 @@ class PaperTheme(PaperDynamic):
             if not self.__docker_active:
                 return
         self.__docker_active = False
-        if self.suspended_touchpad:
-            self.env.touch_handler.recover(self.suspended_touchpad)
-            self.suspended_touchpad = None
+        self.env.touch_handler.remove_a_clicked(self.appbox_click_handler)
+        self.env.touch_handler.remove_a_clicked(self.settings_click_handler)
+        self.env.touch_handler.remove_a_clicked(self.close_docker)
         self.update_anyway()
 
     def init(self):
@@ -92,7 +89,7 @@ class PaperApp(PaperDynamic):
         self.more_list = None
         self.args = []
         self.kwargs = {}
-        self.suspended_touched = None
+        # self.suspended_touched = None
         self.name = app_name
         self.clock_font = self.env.fonts.get_heiti(18)
         self.title_font = self.env.fonts.get_heiti(19)
@@ -120,22 +117,21 @@ class PaperApp(PaperDynamic):
     def close_bar(self):
         if self.__bar_active:
             self.__bar_active = False
-            if self.suspended_touched:
-                self.env.touch_handler.recover(self.suspended_touched)
-                self.suspended_touched = None
+            self.env.touch_handler.remove_a_clicked(self.close_bar)
+            self.env.touch_handler.remove_a_clicked_with_time(self.close_click_handler)
+            self.env.touch_handler.remove_a_clicked(self.more_click_handler)
             self.update_anyway()
 
     def bar_clicked_handler(self):
         if self.__bar_active or (not self.inited):
             return
-        self.suspended_touched = self.env.touch_handler.suspend()
+        # self.suspended_touched = self.env.touch_handler.suspend()
         self.env.touch_handler.add_clicked(
             (0, 296, 30, 128), self.close_bar)
         self.env.touch_handler.add_clicked_with_time(
             (266, 296, 0, 30), self.close_click_handler)
         self.env.touch_handler.add_clicked(
-            (236, 266, 0, 30), self.more_click_handler
-        )
+            (236, 266, 0, 30), self.more_click_handler)
         self.__bar_active = True
         self.update_anyway()
         for _ in range(5):
@@ -143,9 +139,9 @@ class PaperApp(PaperDynamic):
             if not self.__bar_active:
                 return
         self.__bar_active = False
-        if self.suspended_touched:
-            self.env.touch_handler.recover(self.suspended_touched)
-            self.suspended_touched = None
+        self.env.touch_handler.remove_a_clicked(self.close_bar)
+        self.env.touch_handler.remove_a_clicked_with_time(self.close_click_handler)
+        self.env.touch_handler.remove_a_clicked(self.more_click_handler)
         self.update_anyway()
 
     def init(self):
