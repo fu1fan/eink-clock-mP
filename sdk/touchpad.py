@@ -367,8 +367,8 @@ class TouchHandler:
                             self.pool.add(i[2], *i[3], **i[4])  # 如果没有被点击，且标记为True，则执行func2
                             i[-1] = False
 
-                for i in ReIter(self.clicked_with_time):
-                    if i[-1]:
+                for i in ReIter(self.clicked):
+                    if i[-1] and len(i) == 3:
                         if not (i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]):
                             i[-1] = None
 
