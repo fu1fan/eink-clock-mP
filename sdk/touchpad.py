@@ -38,7 +38,6 @@ class TouchHandler:
         self.pool = env.pool
         self.clicked = []  # 当对象被点击并松开后调用指定函数                      ((x1, x2, y1, y2), func, args, kwargs)
         self.system_clicked = []
-        self.clicked_with_time = []  # 当对象被点击并松开且从未中后调用指定函数并返回触摸时间（float） ((x1, x2, y1, y2), func)
         self.touched = []  # 当对象被按下后调用指定函数，直到松开后再次调用另一指定函数 ((x1, x2, y1, y2), func1, func2, args, kwargs)
         self.slide_x = []  # 当屏幕从指定区域被横向滑动后调用指定函数               ((x1, x2, y1, y2), func, args, kwargs)
         self.slide_y = []  # 当屏幕从指定区域被纵向滑动后调用指定函数               ((x1, x2, y1, y2), func, args, kwargs)
@@ -78,16 +77,16 @@ class TouchHandler:
             counter += 1
         self.data_lock.release()
 
-    def remove_a_clicked_quickly(self, func):
+    def remove_a_clicked(self, func):
         self.data_lock.acquire()
-        counter = 0
+        counter = len(self.clicked)
         for i in ReIter(self.clicked):
-            if i[1] == func:
-                break
-            if counter == len(self.clicked):
+            counter -= 1
+            if counter == -1:
                 self.data_lock.release()
                 return
-            counter += 1
+            if i[1] == func:
+                break
         del self.clicked[counter]
         self.data_lock.release()
 
@@ -122,16 +121,16 @@ class TouchHandler:
         self.data_lock.release()
         return True
 
-    def remove_a_system_clicked_quickly(self, func):
+    def remove_a_system_clicked(self, func):
         self.data_lock.acquire()
-        counter = 0
+        counter = len(self.system_clicked)
         for i in ReIter(self.system_clicked):
-            if i[1] == func:
-                break
-            if counter == len(self.system_clicked):
+            counter -= 1
+            if counter == -1:
                 self.data_lock.release()
                 return
-            counter += 1
+            if i[1] == func:
+                break
         del self.system_clicked[counter]
         self.data_lock.release()
 
@@ -149,7 +148,7 @@ class TouchHandler:
 
     def add_clicked_with_time(self, area, func):
         """
-        添加一个触摸元件，⚠️：所有的回调函数必须能接收 *args, **kwargs
+        添加一个触摸元件，回调函数必须接受一个float型的参数
         :param func: 回调函数
         :param area: (x1, x2, y1, y2)
         :return: None
@@ -157,45 +156,17 @@ class TouchHandler:
         if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
             raise ValueError("Area out of range!")
         self.data_lock.acquire()
-        self.clicked_with_time.append([area, func, None])
+        self.clicked.append([area, func, None])
         self.data_lock.release()
 
     def remove_clicked_with_time(self, func) -> bool:  # 未测试
-        self.data_lock.acquire()
-        counter = 0
-        remove_list = []
-        for i in self.clicked_with_time:
-            if i[1] == func:
-                remove_list.append(counter)
-            counter += 1
-        counter = 0
-        if len(remove_list) == 0:
-            self.data_lock.release()
-            return False
-        for i in remove_list:
-            del self.clicked_with_time[i - counter]
-            counter += 1
-        self.data_lock.release()
-        return True
+        return self.remove_clicked(func)
 
-    def remove_a_clicked_with_time_quickly(self, func):
-        self.data_lock.acquire()
-        counter = 0
-        for i in ReIter(self.clicked_with_time):
-            if i[1] == func:
-                break
-            if counter == len(self.clicked_with_time):
-                self.data_lock.release()
-                return
-            counter += 1
-        del self.clicked_with_time[counter]
-        self.data_lock.release()
+    def remove_a_clicked_with_time(self, func):
+        return self.remove_clicked(func)
 
     def set_clicked_with_time(self, content: list):
-        self.data_lock.acquire()
-        self.clicked_with_time = content
-        self.data_lock.release()
-        return True
+        return self.set_clicked(content)
 
     def add_touched(self, area, func1, func2, *args, **kwargs):
         if area[0] > area[1] or area[2] > area[3] or area[0] < 0 or area[1] > 296 or area[2] < 0 or area[3] > 128:
@@ -222,16 +193,16 @@ class TouchHandler:
         self.data_lock.release()
         return True
 
-    def remove_a_touched_quickly(self, func):
+    def remove_a_touched(self, func):
         self.data_lock.acquire()
-        counter = 0
+        counter = len(self.touched)
         for i in ReIter(self.touched):
-            if i[1] == func:
-                break
-            if counter == len(self.touched):
+            counter -= 1
+            if counter == -1:
                 self.data_lock.release()
                 return
-            counter += 1
+            if i[1] == func:
+                break
         del self.touched[counter]
         self.data_lock.release()
 
@@ -266,17 +237,17 @@ class TouchHandler:
         self.data_lock.release()
         return True
 
-    def remove_a_slide_x_quickly(self, func):
+    def remove_a_slide_x(self, func):
         self.data_lock.acquire()
-        counter = 0
+        counter = len(self.slide_x)
         for i in ReIter(self.slide_x):
-            if i[1] == func:
-                break
-            if counter == len(self.slide_x):
+            counter -= 1
+            if counter == -1:
                 self.data_lock.release()
                 return
-            counter += 1
-        del self.clicked[counter]
+            if i[1] == func:
+                break
+        del self.slide_x[counter]
         self.data_lock.release()
 
     def set_slide_x(self, content: list):
@@ -310,17 +281,17 @@ class TouchHandler:
         self.data_lock.release()
         return True
 
-    def remove_a_slide_y_quickly(self, func):
+    def remove_a_slide_y(self, func):
         self.data_lock.acquire()
-        counter = 0
+        counter = len(self.slide_y)
         for i in ReIter(self.slide_y):
-            if i[1] == func:
-                break
-            if counter == len(self.slide_y):
+            counter -= 1
+            if counter == -1:
                 self.data_lock.release()
                 return
-            counter += 1
-        del self.clicked[counter]
+            if i[1] == func:
+                break
+        del self.slide_y[counter]
         self.data_lock.release()
 
     def set_slide_y(self, content: list):
@@ -352,8 +323,6 @@ class TouchHandler:
         suspended = list()
         suspended.append(self.clicked.copy())
         self.clicked = []
-        suspended.append(self.clicked_with_time.copy())
-        self.clicked_with_time = []
         suspended.append(self.touched.copy())
         self.touched = []
         suspended.append(self.slide_x.copy())
@@ -367,10 +336,9 @@ class TouchHandler:
         self.data_lock.acquire()
 
         self.clicked = content[0]
-        self.clicked_with_time = content[1]
-        self.touched = content[2]
-        self.slide_x = content[3]
-        self.slide_y = content[4]
+        self.touched = content[1]
+        self.slide_x = content[2]
+        self.slide_y = content[3]
 
         self.data_lock.release()
 
@@ -438,15 +406,14 @@ class TouchHandler:
 
             for i in ReIter(self.clicked):
                 if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
-                    i[-1] = True
-                    self.data_lock.release()
-                    return
-
-            for i in ReIter(self.clicked_with_time):
-                if i[0][0] <= ICNT_Dev.X[0] <= i[0][1] and i[0][2] <= ICNT_Dev.Y[0] <= i[0][3]:
-                    i[-1] = time.time()
-                    self.data_lock.release()
-                    return
+                    if len(i) == 5:
+                        i[-1] = True
+                        self.data_lock.release()
+                        return
+                    elif len(i) == 3:
+                        i[-1] = time.time()
+                        self.data_lock.release()
+                        return
 
         elif (not ICNT_Dev.Touch) and ICNT_Old.Touch:  # 如果停止触摸
             # self.logger_touch.debug("触摸事件终止：[%s, %s]" % (ICNT_Dev.X[0], ICNT_Dev.Y[0]))
@@ -514,14 +481,13 @@ class TouchHandler:
 
                     for i in ReIter(self.clicked):
                         if i[-1]:
-                            if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
-                                self.pool.add(i[1], *i[2], **i[3])
-                            i[-1] = False
-
-                    for i in ReIter(self.clicked_with_time):
-                        if i[-1]:
-                            if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
-                                self.pool.add(i[1], time.time() - i[-1])
-                            i[-1] = None
+                            if len(i) == 5:
+                                if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
+                                    self.pool.add(i[1], *i[2], **i[3])
+                                i[-1] = False
+                            elif len(i) == 3:
+                                if i[0][0] <= ICNT_Old.X[0] <= i[0][1] and i[0][2] <= ICNT_Old.Y[0] <= i[0][3]:
+                                    self.pool.add(i[1], time.time() - i[-1])
+                                i[-1] = None
 
         self.data_lock.release()
