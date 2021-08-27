@@ -41,8 +41,7 @@ class TextElement(Element):
         self.size = size
         self.args = args
         self.kwargs = kwargs
-        self.font = ImageFont.truetype(
-            "resources/fonts/STHeiti_Light.ttc", fontSize)
+        self.font = self.paper.env.fonts.get_heiti(fontSize)
         self.textColor = textColor
         self.background_image = Image.new("RGBA", size, bgcolor)
         self.need_update = True
