@@ -9,6 +9,9 @@ from sdk.graphics import Element, PaperDynamic
 class ImageElement(Element):
     def __init__(self, xy: tuple, paper: PaperDynamic, image: any):
         super().__init__(xy, paper)
+        self._set_image(image)
+
+    def _set_image(self, image: any):
         if isinstance(image, Image.Image):
             self.image = image
             self.size = (image.size[0], image.size[1])
@@ -20,8 +23,8 @@ class ImageElement(Element):
                 self.image = None
                 self.paper.env.logger_env.error(traceback.format_exc())
 
-    def set_image(self, new_image_path):
-        self._set_image(new_image_path)
+    def set_image(self, image: any):
+        self._set_image(image)
         self.paper.update(self.page.name)
 
     def get_image(self) -> Image:
