@@ -23,6 +23,7 @@ from pathlib import Path
 # TODO(功能):插件管理
 # TODO(功能):线程池扩容功能
 # TODO(功能):添加文字居中的功能
+# TODO(优化):重新打开lispage后内容还是之前的内容的bug
 
 
 example_config = {
