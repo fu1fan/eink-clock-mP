@@ -1,5 +1,3 @@
-import threading
-from math import ceil
 from pathlib import Path
 import traceback
 
@@ -9,17 +7,18 @@ from sdk.graphics import Element, PaperDynamic
 
 
 class ImageElement(Element):
-    def __init__(self, xy: tuple, paper: PaperDynamic, image_path: str):
+    def __init__(self, xy: tuple, paper: PaperDynamic, image: any):
         super().__init__(xy, paper)
-        self._set_image(image_path)
-
-    def _set_image(self, image_path):
-        try:
-            self.image = Image.open(Path(image_path)).convert("RGBA")
-            self.size = (self.image.size[0], self.image.size[1])
-        except:
-            self.image = None
-            self.paper.env.logger_env.error(traceback.format_exc())
+        if isinstance(image, Image.Image):
+            self.image = image
+            self.size = (image.size[0], image.size[1])
+        elif isinstance(image, str):
+            try:
+                self.image = Image.open(Path(image)).convert("RGBA")
+                self.size = (self.image.size[0], self.image.size[1])
+            except:
+                self.image = None
+                self.paper.env.logger_env.error(traceback.format_exc())
 
     def set_image(self, new_image_path):
         self._set_image(new_image_path)
@@ -146,6 +145,10 @@ class Label(TextElement):
 
 
 class LabelWithMultipleLines(TextElement):
+    def __init__(self, xy, paper: PaperDynamic, text, *args, **kwargs):
+        super().__init__(xy, paper, text, *args, **kwargs)
+        self.width = None
+        self.duanluo, self.note_height, self.line_height = None, None, None
 
     def build(self) -> Image:
         if self.inited and self._visible:
