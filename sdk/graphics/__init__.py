@@ -121,12 +121,13 @@ class PaperDynamic(Paper):
         super().__init__(env, background_image)
         # 实例化各种定时器
         # self.pool = env.pool
+        self.env = env
+        self.back_stack = LifoQueue()
         self.pages = {"mainPage": Page(self, "mainPage")}
         # TODO:为Handler页面添加内容
         self.nowPage = "mainPage"
         # self.touch_handler = env.touch_handler
-        self.env = env
-        self.back_stack = LifoQueue()
+
 
     def exit(self):
         for page in self.pages.values():
