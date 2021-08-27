@@ -22,6 +22,8 @@ class ImageElement(Element):
             except:
                 self.image = None
                 self.paper.env.logger_env.error(traceback.format_exc())
+        else:
+            raise
 
     def set_image(self, image: any):
         self._set_image(image)
