@@ -6,7 +6,17 @@ from sdk.graphics import element_lib as _element_lib
 
 
 class ListPage(_graphics.Page):
+    """
+    A page to show a list.
+    """
     def __init__(self, paper, name):
+        """
+        ListPage is a page to show a list.
+
+        Args:
+            paper: Current paper.
+            name (str): The name of current paper.
+        """
         super().__init__(paper, name)
 
         self.add_element(_element_lib.ImageElement(
@@ -153,6 +163,9 @@ class ListPage(_graphics.Page):
 
 
 class ApplistPage(ListPage):
+    """
+    A page to show apps.
+    """
     def open_app_by_index(self, index):
         if index >= 0:
             self.env.open_app(list(self.env.apps.keys())[index])
@@ -171,6 +184,9 @@ class ApplistPage(ListPage):
 
 # keyboardPage 还未完成哦
 class Keyboardpage(_graphics.Page):
+    """
+    A page to input text. (unfinished)
+    """
     def __init__(self, paper, textHandler, pageName="keyboardPage"):
         super().__init__(paper, pageName)
         self.keyboardList = [["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
