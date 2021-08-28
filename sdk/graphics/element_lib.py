@@ -7,7 +7,18 @@ from sdk.graphics import Element, PaperDynamic
 
 
 class ImageElement(Element):
+    """
+    图片
+    """
     def __init__(self, xy: tuple, paper: PaperDynamic, image: any):
+        """
+        定义一个图片元素
+
+        Args:
+            xy (tuple): 图片左上角坐标
+            paper (PaperDynamic): 当前paper
+            image (any): 图片或图片链接
+        """
         super().__init__(xy, paper)
         self._set_image(image)
 
@@ -36,9 +47,23 @@ class ImageElement(Element):
         return self.image
 
 
-class TextElement(Element):
+class _TextElement(Element):
+    """所有文字元素的父类"""
+
     def __init__(self, xy, paper: PaperDynamic, text, size=(50, 30), bgcolor="white", textColor="black", fontSize=20,
                  *args, **kwargs):
+        """
+        `_TextElement` is the base class of text elements.
+
+        Args:
+            xy (tuple): 元素左上角的坐标
+            paper (PaperDynamic): 当前paper
+            text (str): 元素文字
+            size (tuple): 元素大小
+            bgcolor (str): 背景颜色
+            textColor (str): 文字颜色
+            fontSize (int): 字体大小
+        """
         super().__init__(xy, paper, size)
         self.text = text
         self._visible = True
@@ -93,9 +118,27 @@ class TextElement(Element):
             return None
 
 
-class Button(TextElement):
+class Button(_TextElement):
+    """
+    按钮
+    """
     def __init__(self, xy, paper: PaperDynamic, text, onclick, size=(50, 30), bgcolor="white", textColor="black",
                  fontSize=20, outline="black", *args, **kwargs):
+        """
+        The `Button` class is used to define a button.
+
+        Args:
+            xy (tuple): 按钮左上角的坐标
+            paper (PaperDynamic): 当前paper
+            text (str): 按钮文字
+            onclick (function): 按钮点击事件
+            size (tuple): 按钮大小
+            bgcolor (str): 背景颜色
+            textColor (str): 文字颜色
+            fontSize (int): 字体大小
+            outline (str): 按钮边框
+        """
+
         super().__init__(xy, paper, text, size, bgcolor,
                          textColor, fontSize, *args, **kwargs)
         self.on_clicked = onclick
@@ -142,16 +185,47 @@ class Button(TextElement):
             return None
 
 
-class Label(TextElement):
+class Label(_TextElement):
+    """
+    文本标签
+    """
     def __init__(self, xy, paper: PaperDynamic, text, size=(50, 30), bgcolor="white", textColor="black", fontSize=20,
                  *args, **kwargs):
+        """
+        定义一个文本标签
+
+        Args:
+            xy (tuple): 标签左上角的坐标
+            paper (PaperDynamic): 当前paper
+            text (str): 标签文字
+            size (tuple): 标签大小
+            bgcolor (str): 背景颜色
+            textColor (str): 标签文字颜色
+            fontSize (int): 字体大小
+        """
         super().__init__(xy, paper, text, size=size, bgcolor=bgcolor, textColor=textColor, fontSize=fontSize,
                          *args, **kwargs)
 
 
-class LabelWithMultipleLines(TextElement):
+class LabelWithMultipleLines(_TextElement):
+    """
+    多行文本标签
+    """
     def __init__(self, xy, paper: PaperDynamic, text, *args, **kwargs):
+        """
+        定义一个多行文本标签
+
+        Args:
+            xy (tuple): 标签左上角的坐标
+            paper (PaperDynamic): 当前paper
+            text (str): 标签文字
+            size (tuple): 标签大小
+            bgcolor (str): 背景颜色
+            textColor (str): 标签文字颜色
+            fontSize (int): 字体大小
+        """
         super().__init__(xy, paper, text, *args, **kwargs)
+
         self.width = None
         self.duanluo, self.note_height, self.line_height = None, None, None
 
